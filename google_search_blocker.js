@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Google Search Block
+// @name         Google Search Blocker
 // @namespace    http://tampermonkey.net/
 // @version      0.9.8
 // @description  block KUSO sites from google search results!
@@ -8,12 +8,10 @@
 // @match https://www.google.com/*
 // @match https://www.bing.com/*
 // @match https://search.yahoo.co.jp/*
-// @updateURL https://www.dropbox.com/s/9m9ewftcnc3y8gi/google_search_block.js?dl=1
-// @downloadURL https://www.dropbox.com/s/9m9ewftcnc3y8gi/google_search_block.js?dl=1
-// @resource block_sites https://www.dropbox.com/s/e79sm2ysjr5tnsq/block_sites.txt?dl=1
+// @updateURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.js
+// @downloadURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.js
 // @grant GM_setValue
 // @grant GM_getValue
-// @grant GM_getResourceText
 // ==/UserScript==
 
 (function () {
