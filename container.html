@@ -1,0 +1,91 @@
+<style>
+    .google_search_block_container {
+        box-shadow: none;
+        border: 1px solid #dfe1e5;
+        border-radius: 8px;
+        margin-left: -20px;
+        margin-right: -20px;
+        position: relative;
+        padding: 10px;
+        background: rgb(255, 255, 255);
+        margin-bottom: 20px;
+        margin-top: 10px;
+    }
+
+    #google_search_block_header {
+        margin: 10px;
+        font-size: medium;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .google_search_block_button {
+        white-space: nowrap;
+        display: inline-block;
+        background-color: #fff;
+        text-align: center;
+        font-size: 14px;
+        color: #202124;
+        border-radius: 10px;
+        border: 1px solid #DFE1E5;
+        padding: 7px 10px;
+        cursor: pointer;
+        margin: 5px
+    }
+
+    #google_search_block_buttons {
+        display: flex;
+        justify-content: flex-end;
+        padding: 0 10px 10px
+    }
+
+    .google_search_block_domain {
+        margin: 10px;
+        cursor: pointer
+    }
+
+    .google_search_block_hr {
+        border-top: #DFE1E5 1px solid;
+        margin: 10px 0
+    }
+
+    #google_search_block_domains {
+        margin: 10px
+    }
+
+    #google_search_block_textarea_domains {
+        resize: vertical;
+        height: 200px;
+        width: 100%;
+        font-family: monospace;
+        font-size: medium;
+    }
+</style>
+<div class="google_search_block_container" id="google_search_block">
+    <div id="google_search_block_header">
+        <div>
+            <b>検索結果から</b>
+            <b id="google_search_block_count">0</b>
+            <b>件除外しました</b>
+        </div>
+        <code id="google_search_block_info"></code>
+    </div>
+    <div class="google_search_block_hr"></div>
+    <div id="google_search_block_contents" style="display: none;">
+        <div id="google_search_block_blocked">
+        </div>
+        <div class="google_search_block_hr"></div>
+        <textarea id="google_search_block_textarea_domains" spellcheck="false"></textarea>
+        <div id="google_search_block_buttons">
+            <button class="google_search_block_button" id="google_search_block_button_complete">完了</button>
+            <button class="google_search_block_button" id="google_search_block_button_edit">編集</button>
+        </div>
+        <div class="google_search_block_hr"></div>
+    </div>
+    <div id="google_search_block_buttons">
+        <button class="google_search_block_button" id="google_search_block_button_show">再表示</button>
+        <button class="google_search_block_button" id="google_search_block_button_reblock" style="display: none;">ブロック</button>
+        <button class="google_search_block_button" id="google_search_block_button_hidelist" style="display: none;">リストを隠す</button>
+        <button class="google_search_block_button" id="google_search_block_button_showlist" style="display: block;">除外リスト</button>
+    </div>
+</div>

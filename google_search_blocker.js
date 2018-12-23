@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         Google Search Blocker
 // @namespace    http://tampermonkey.net/
-// @version      0.9.8
+// @version      0.9.9
 // @description  block KUSO sites from google search results!
 // @author       ShoSato
 // @match https://www.google.co.jp/*
 // @match https://www.google.com/*
 // @match https://www.bing.com/*
 // @match https://search.yahoo.co.jp/*
+// @resource label https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/container.html
 // @updateURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.js
 // @downloadURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.js
 // @grant GM_setValue
@@ -16,6 +17,19 @@
 
 (function () {
     'use strict';
+    var google_search_block_label;
+    var google_search_block_button_showlist;
+    var google_search_block_count;
+    var google_search_block_button_reblock;
+    var google_search_block_button_show;
+    var google_search_block_button_hidelist;
+    var google_search_block_button_complete;
+    var google_search_block_button_edit;
+    var google_search_block_contents;
+    var google_search_block_textarea_domains;
+    var google_search_block_blocked;
+    var google_search_block_info;
+
     class DOMBuilder {
         static build(dom = {
             tag: '',
@@ -146,187 +160,65 @@
     }
 
     function showLabel() {
-        result_container.appendChild(DOMBuilder.build({
-            tag: 'style',
-            text: '.google_search_block_container{box-shadow:none;border:1px solid #dfe1e5;border-radius:8px;margin-left:-20px;margin-right:-20px;position:relative}#google_search_block_header{margin:10px;font-size:medium;}.google_search_block_button{white-space:nowrap;display:inline-block;background-color:#fff;text-align:center;font-size:14px;color:#202124;border-radius:10px;border:1px solid #DFE1E5;padding:7px 10px;cursor:pointer;margin:5px}#google_search_block_buttons{display:flex;justify-content:flex-end;padding:0 10px 10px}.google_search_block_domain{margin:10px;cursor:pointer}.google_search_block_hr{border-top:#DFE1E5 1px solid;margin:10px 0}#google_search_block_domains{margin:10px}'
-        }));
-        result_container.appendChild(DOMBuilder.build({
-            tag: 'div',
-            class: selector.container_class,
-            id: 'google_search_block',
-            style: {
-                'padding': '10px',
-                'background': '#fff',
-                'margin-bottom': '20px',
-                'margin-top': '10px',
-            },
-            child: [{
-                    tag: 'div',
-                    id: 'google_search_block_header',
-                    style: {
-                        display: 'flex',
-                        'justify-content': 'space-between',
-                    },
-                    child: [{
-                        tag: 'div',
-                        child: [{
-                            tag: 'b',
-                            text: '検索結果から'
-                        }, {
-                            tag: 'b',
-                            id: 'google_search_block_count',
-                            text: 0
-                        }, {
-                            tag: 'b',
-                            text: '件除外しました'
-                        }, ]
-                    }, {
-                        tag: 'code',
-                        id: 'google_search_block_info'
-                    }, ]
-                }, {
-                    tag: 'div',
-                    class: 'google_search_block_hr'
-                }, {
-                    tag: 'div',
-                    id: 'google_search_block_contents',
-                    child: [{
-                            tag: 'div',
-                            text: '',
-                            id: 'google_search_block_blocked'
-                        }, {
-                            tag: 'div',
-                            class: 'google_search_block_hr'
-                        }, {
-                            tag: 'textarea',
-                            id: 'google_search_block_textarea_domains',
-                            style: {
-                                resize: 'vertical',
-                                height: '200px',
-                                width: '100%',
-                                'font-family': 'monospace',
-                                'font-size': 'medium'
-                            },
-                            attrs: {
-                                'spellcheck': false,
-                            },
-                            props: {
-                                'disabled': true,
-                            }
-                        }, {
-                            tag: 'div',
-                            id: 'google_search_block_buttons',
-                            child: [{
-                                    tag: 'button',
-                                    id: 'google_search_block_button_complete',
-                                    class: 'google_search_block_button',
-                                    text: '完了',
-                                    events: {
-                                        'click': function () {
-                                            google_search_block_textarea_domains.disabled = true;
-                                            let list = orderBy(distinct(google_search_block_textarea_domains.value.split('\n').map(e => e.trim()).filter(e => e)).map(e => {
-                                                if (e.startsWith('#')) return {
-                                                    v: e,
-                                                    l: 1000
-                                                }
-                                                else return {
-                                                    v: e,
-                                                    l: e.length
-                                                }
-                                            }), e => e.l).map(e => e.v);
-                                            setDomains(list);
-                                            block = getDomains();
-                                            google_search_block();
-                                        }
-                                    },
-                                },
-                                {
-                                    tag: 'button',
-                                    id: 'google_search_block_button_edit',
-                                    class: 'google_search_block_button',
-                                    text: '編集',
-                                    events: {
-                                        'click': function () {
-                                            google_search_block_textarea_domains.disabled = false;
-                                        }
-                                    },
-                                }
-                            ]
-                        },
-                        {
-                            tag: 'div',
-                            class: 'google_search_block_hr'
-                        }
-                    ],
-                    style: {
-                        'display': 'none'
-                    }
-                },
-                {
-                    tag: 'div',
-                    id: 'google_search_block_buttons',
-                    child: [{
-                        tag: 'button',
-                        id: 'google_search_block_button_show',
-                        class: 'google_search_block_button',
-                        text: '再表示',
-                        events: {
-                            'click': function () {
-                                document.querySelectorAll(selector.first).forEach(e => e.style.display = 'block');
-                                google_search_block_button_reblock.style.display = 'block';
-                                google_search_block_button_show.style.display = 'none';
-                            }
-                        }
-                    }, {
-                        tag: 'button',
-                        id: 'google_search_block_button_reblock',
-                        class: 'google_search_block_button',
-                        text: 'ブロック',
-                        style: {
-                            'display': 'none',
-                        },
-                        events: {
-                            'click': function () {
-                                google_search_block();
-                                google_search_block_button_reblock.style.display = 'none';
-                                google_search_block_button_show.style.display = 'block';
-                            }
-                        }
-                    }, {
-                        tag: 'button',
-                        id: 'google_search_block_button_hidelist',
-                        class: 'google_search_block_button',
-                        text: 'リストを隠す',
-                        style: {
-                            'display': 'none'
-                        },
-                        events: {
-                            'click': function () {
-                                google_search_block_button_showlist.style.display = 'block';
-                                google_search_block_button_hidelist.style.display = 'none';
-                                google_search_block_contents.style.display = 'none';
-                            }
-                        }
-                    }, {
-                        tag: 'button',
-                        id: 'google_search_block_button_showlist',
-                        class: 'google_search_block_button',
-                        text: '除外リスト',
-                        style: {
-                            'display': 'block'
-                        },
-                        events: {
-                            'click': function () {
-                                google_search_block_button_showlist.style.display = 'none';
-                                google_search_block_button_hidelist.style.display = 'block';
-                                google_search_block_contents.style.display = 'block';
-                                showList(getDomains());
-                            }
-                        }
-                    }]
+        const html = GM_getResourceText("label");
+        const e = document.createElement('div');
+        e.innerHTML = html;
+        result_container.appendChild(e);
+
+        google_search_block_label = document.querySelector('#google_search_block');
+        google_search_block_button_showlist = google_search_block_label.querySelector('#google_search_block_button_showlist');
+        google_search_block_count = google_search_block_label.querySelector('#google_search_block_count');
+        google_search_block_button_reblock = google_search_block_label.querySelector('#google_search_block_button_reblock');
+        google_search_block_button_show = google_search_block_label.querySelector('#google_search_block_button_show');
+        google_search_block_button_hidelist = google_search_block_label.querySelector('#google_search_block_button_hidelist');
+        google_search_block_button_complete = google_search_block_label.querySelector('#google_search_block_button_complete');
+        google_search_block_button_edit = google_search_block_label.querySelector('#google_search_block_button_edit');
+        google_search_block_contents = google_search_block_label.querySelector('#google_search_block_contents');
+        google_search_block_textarea_domains = google_search_block_label.querySelector('#google_search_block_textarea_domains');
+        google_search_block_blocked = google_search_block_label.querySelector('#google_search_block_blocked');
+        google_search_block_info = google_search_block_label.querySelector('#google_search_block_info');
+
+        google_search_block_label.className = selector.container_class;
+        google_search_block_button_complete.addEventListener('click', function () {
+            google_search_block_textarea_domains.disabled = true;
+            let list = orderBy(distinct(google_search_block_textarea_domains.value.split('\n').map(e => e.trim()).filter(e => e)).map(e => {
+                if (e.startsWith('#')) return {
+                    v: e,
+                    l: 1000
                 }
-            ]
-        }));
+                else return {
+                    v: e,
+                    l: e.length
+                }
+            }), e => e.l).map(e => e.v);
+            setDomains(list);
+            block = getDomains();
+            google_search_block();
+        });
+        google_search_block_button_edit.addEventListener('click', function () {
+            google_search_block_textarea_domains.disabled = false;
+        });
+        google_search_block_button_show.addEventListener('click', function () {
+            document.querySelectorAll(selector.first).forEach(e => e.style.display = 'block');
+            google_search_block_button_reblock.style.display = 'block';
+            google_search_block_button_show.style.display = 'none';
+        });
+        google_search_block_button_reblock.addEventListener('click', function () {
+            google_search_block();
+            google_search_block_button_reblock.style.display = 'none';
+            google_search_block_button_show.style.display = 'block';
+        });
+        google_search_block_button_hidelist.addEventListener('click', function () {
+            google_search_block_button_showlist.style.display = 'block';
+            google_search_block_button_hidelist.style.display = 'none';
+            google_search_block_contents.style.display = 'none';
+        });
+        google_search_block_button_showlist.addEventListener('click', function () {
+            google_search_block_button_showlist.style.display = 'none';
+            google_search_block_button_hidelist.style.display = 'block';
+            google_search_block_contents.style.display = 'block';
+            showList(getDomains());
+        });
     }
 
     function showList(list) {
@@ -398,22 +290,6 @@
                     'overflow-scrolling': 'touch',
                     'webkit-overflow-scrolling': 'touch'
                 },
-                // child: [{
-                //     tag: 'span',
-                //     class: 'google_search_block_button',
-                //     style: {
-                //         display: 'inline',
-                //     },
-                //     child: [{
-                //         tag: 'code',
-                //         text: '閉じる'
-                //     }],
-                //     events: {
-                //         click: function () {
-                //             ui.remove();
-                //         }
-                //     }
-                // }]
             }]
         });
         getCandidate(target_url).forEach(e => {
@@ -641,16 +517,6 @@
         });
     }
     showLabel();
-    const google_search_block_label = document.querySelector('#google_search_block');
-    const google_search_block_button_showlist = google_search_block_label.querySelector('#google_search_block_button_showlist');
-    const google_search_block_count = google_search_block_label.querySelector('#google_search_block_count');
-    const google_search_block_button_reblock = google_search_block_label.querySelector('#google_search_block_button_reblock');
-    const google_search_block_button_show = google_search_block_label.querySelector('#google_search_block_button_show');
-    const google_search_block_button_hidelist = google_search_block_label.querySelector('#google_search_block_button_hidelist');
-    const google_search_block_contents = google_search_block_label.querySelector('#google_search_block_contents');
-    const google_search_block_textarea_domains = google_search_block_label.querySelector('#google_search_block_textarea_domains');
-    const google_search_block_blocked = google_search_block_label.querySelector('#google_search_block_blocked');
-    const google_search_block_info = google_search_block_label.querySelector('#google_search_block_info');
     google_search_block();
     console.log(Date.now() - start);
 })();
