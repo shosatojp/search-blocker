@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search Blocker
 // @namespace    http://tampermonkey.net/
-// @version      0.9.10
+// @version      0.9.11
 // @description  block KUSO sites from google search results!
 // @author       ShoSato
 // @match https://www.google.co.jp/*
@@ -9,6 +9,7 @@
 // @match https://www.bing.com/*
 // @match https://search.yahoo.co.jp/*
 // @resource label https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/container.html
+// @resource buttons https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/buttons.html
 // @updateURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.js
 // @downloadURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.js
 // @grant GM_setValue
@@ -271,6 +272,7 @@
     function showBlockUI(parent, target_url) {
         let a = parent.querySelector('.google_search_block_blockui');
         if (a) a.remove();
+
         let ui = DOMBuilder.build({
             tag: 'div',
             class: 'google_search_block_blockui',
@@ -320,55 +322,71 @@
     }
 
     function showButton(parent, target_url) {
-        var label = parent.querySelector('.google_search_block_buttons');
+        var label = parent.querySelector('.google_search_block_buttons_container');
         if (!label) {
-            const e = DOMBuilder.build({
-                tag: 'div',
-                style: {
-                    'display': 'flex',
-                    'justifyContent': 'flex-end'
-                },
-                class: 'google_search_block_buttons',
-                child: [{
-                    tag: 'a',
-                    text: '除外',
-                    attrs: {
-                        'url': target_url,
-                    },
-                    class: 'google_search_block_button_openui',
-                    events: {
-                        'click': function () {
-                            let url = this.getAttribute('url');
-                            showBlockUI(parent, url);
-                            this.style.display = 'none';
-                            parent.querySelector('.google_search_block_button_closeui').style.display = 'block';
-                        }
-                    },
-                    style: {
-                        'marginRight': '10px',
-                        'marginBottom': '5px',
-                        'cursor': 'pointer',
-                    }
-                }, {
-                    tag: 'a',
-                    text: '閉じる',
-                    class: 'google_search_block_button_closeui',
-                    events: {
-                        'click': function () {
-                            parent.querySelector('.google_search_block_button_openui').style.display = 'block';
-                            this.style.display = 'none';
-                            parent.querySelector('.google_search_block_blockui').remove();
-                        }
-                    },
-                    style: {
-                        'marginRight': '10px',
-                        'marginBottom': '5px',
-                        'cursor': 'pointer',
-                        'display': 'none'
-                    }
-                }]
+            let container = document.createElement('div');
+            container.className = 'google_search_block_buttons_container';
+            container.innerHTML = GM_getResourceText('buttons');
+            parent.appendChild(container);
+            container.querySelector('.google_search_block_button_openui').setAttribute('url',target_url);
+            container.querySelector('.google_search_block_button_openui').addEventListener('click', function () {
+                let url = this.getAttribute('url');
+                showBlockUI(parent, url);
+                this.style.display = 'none';
+                parent.querySelector('.google_search_block_button_closeui').style.display = 'block';
             });
-            parent.appendChild(e);
+            container.querySelector('.google_search_block_button_closeui').addEventListener('click', function () {
+                parent.querySelector('.google_search_block_button_openui').style.display = 'block';
+                this.style.display = 'none';
+                parent.querySelector('.google_search_block_blockui').remove();
+            });
+            // const e = DOMBuilder.build({
+            //     tag: 'div',
+            //     style: {
+            //         'display': 'flex',
+            //         'justifyContent': 'flex-end'
+            //     },
+            //     class: 'google_search_block_buttons',
+            //     child: [{
+            //         tag: 'a',
+            //         text: '除外',
+            //         attrs: {
+            //             'url': target_url,
+            //         },
+            //         class: 'google_search_block_button_openui',
+            //         events: {
+            //             'click': function () {
+            //                 let url = this.getAttribute('url');
+            //                 showBlockUI(parent, url);
+            //                 this.style.display = 'none';
+            //                 parent.querySelector('.google_search_block_button_closeui').style.display = 'block';
+            //             }
+            //         },
+            //         style: {
+            //             'marginRight': '10px',
+            //             'marginBottom': '5px',
+            //             'cursor': 'pointer',
+            //         }
+            //     }, {
+            //         tag: 'a',
+            //         text: '閉じる',
+            //         class: 'google_search_block_button_closeui',
+            //         events: {
+            //             'click': function () {
+            //                 parent.querySelector('.google_search_block_button_openui').style.display = 'block';
+            //                 this.style.display = 'none';
+            //                 parent.querySelector('.google_search_block_blockui').remove();
+            //             }
+            //         },
+            //         style: {
+            //             'marginRight': '10px',
+            //             'marginBottom': '5px',
+            //             'cursor': 'pointer',
+            //             'display': 'none'
+            //         }
+            //     }]
+            // });
+            // parent.appendChild(e);
         }
     }
 
