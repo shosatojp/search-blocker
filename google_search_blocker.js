@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search Blocker
 // @namespace    http://tampermonkey.net/
-// @version      0.9.9
+// @version      0.9.10
 // @description  block KUSO sites from google search results!
 // @author       ShoSato
 // @match https://www.google.co.jp/*
