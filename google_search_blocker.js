@@ -13,6 +13,7 @@
 // @downloadURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.js
 // @grant GM_setValue
 // @grant GM_getValue
+// @grant GM_getResourceText
 // ==/UserScript==
 
 (function () {
