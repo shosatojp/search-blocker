@@ -39,16 +39,21 @@
         window.navigator.userLanguage ||
         window.navigator.browserLanguage;
 
+    var resource = {};
+
     function getResource(name) {
-        let src = GM_getResourceText(name);
-        let obj = JSON.parse(GM_getResourceText('languages'))
-            .filter(x => ~x.language.indexOf(language))[0].ui;
-        for (const key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                src = src.replace('${' + key + '}', obj[key]);
+        if (!(name in resource)) {
+            let src = GM_getResourceText(name);
+            let obj = JSON.parse(GM_getResourceText('languages'))
+                .filter(x => ~x.language.indexOf(language) || ~x.language.indexOf('en'))[0].ui; //english must be last.
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    src = src.replace('${' + key + '}', obj[key]);
+                }
             }
+            resource[name] = src;
         }
-        return src;
+        return resource[name];
     }
 
     function parseURL(url) {
@@ -100,12 +105,6 @@
         changeui && google_search_block();
     }
 
-    function removeAllDomain() {
-        GM_setValue('url', '');
-        block = getDomains()
-        google_search_block();
-    }
-
     function updateLabel(count, list) {
         google_search_block_count.textContent = count;
         showList(list);
@@ -114,7 +113,9 @@
     function showLabel() {
         const html = getResource("label");
         const e = document.createElement('div');
+        const s = Date.now();
         e.innerHTML = html;
+        console.log('showlabel', Date.now() - s);
         result_container.appendChild(e);
 
         google_search_block_label = document.querySelector('#google_search_block');
@@ -240,7 +241,6 @@
             const code = document.createElement('code');
             code.textContent = e.alias;
             span.appendChild(code);
-            console.log(div);
             div.querySelector('.google_search_block_blockui_contents').appendChild(span);
         });
 
@@ -310,7 +310,7 @@
             google_search_block_blocked.appendChild(span);
         });
         updateLabel(count, getDomains());
-        google_search_block_info.textContent = `${Math.floor((performance.now() - start)*10)/10}ms ${block.length}個`;
+        google_search_block_info.textContent = `${Math.floor((performance.now() - start)*10)/10}ms ${block.length}`;
     }
 
     function distinct(list, f = e => e) {
@@ -357,19 +357,19 @@
     if (!result_container) return;
 
     if (environment === 'mobile') {
-        document.querySelectorAll('h3>a').forEach(e => {
-            e.addEventListener('click', function () {
-                count = 0;
-                for (let i = 1; i <= 10; i++) {
-                    setTimeout(() => {
-                        let len = document.querySelectorAll('.xpd');
-                        if (len != xpdcount) {
-                            xpdcount = len;
-                            google_search_block();
-                        }
-                    }, i * 500);
-                }
-            });
+        const observer = new MutationObserver(function (records, mo) {
+            if (records.filter(x => {
+                    return (x instanceof Element) && x.target.getAttribute('data-graft-type') === 'insert';
+                }).length) {
+                google_search_block();
+            }
+        });
+        observer.observe(document.querySelector('#main'), {
+            attributes: true,
+            childList: true,
+            characterData: true,
+            attributeFilter: [],
+            subtree: true
         });
     }
     showLabel();
