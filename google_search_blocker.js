@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search Blocker
 // @namespace    http://tampermonkey.net/
-// @version      0.9.11
+// @version      0.9.12
 // @description  block KUSO sites from google search results!
 // @author       ShoSato
 // @match https://www.google.co.jp/*
@@ -10,6 +10,8 @@
 // @match https://search.yahoo.co.jp/*
 // @resource label https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/container.html
 // @resource buttons https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/buttons.html
+// @resource selectors https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/selectors.html
+// @resource environments https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/environments.json
 // @updateURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.js
 // @downloadURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.js
 // @grant GM_setValue
@@ -31,75 +33,6 @@
     var google_search_block_textarea_domains;
     var google_search_block_blocked;
     var google_search_block_info;
-
-    class DOMBuilder {
-        static build(dom = {
-            tag: '',
-            text: '',
-            class: '',
-            id: '',
-            style: {},
-            events: {},
-            attrs: [{
-                name: '',
-                value: '',
-            }],
-            child: [],
-            props: {},
-        }) {
-            var top;
-            if (typeof dom === 'string' || dom instanceof String) {
-                top = document.createTextNode(dom);
-            } else {
-                if (dom.tag === 'text') {
-                    top = document.createTextNode(dom.text);
-                } else {
-                    top = document.createElement(dom.tag);
-                }
-                if (dom.class)
-                    top.className = dom.class;
-                if (dom.id)
-                    top.id = dom.id;
-                if (dom.attrs)
-                    for (const key in dom.attrs) {
-                        if (dom.attrs.hasOwnProperty(key)) {
-                            top.setAttribute(key, dom.attrs[key]);
-                        }
-                    }
-                if (dom.events) {
-                    for (const key in dom.events) {
-                        if (dom.events.hasOwnProperty(key)) {
-                            top.addEventListener(key, dom.events[key]);
-                        }
-                    }
-                }
-                if (dom.style) {
-                    for (const key in dom.style) {
-                        if (dom.style.hasOwnProperty(key)) {
-                            top.style[key] = dom.style[key];
-                        }
-                    }
-                }
-                if (dom.props) {
-                    for (const key in dom.props) {
-                        if (dom.props.hasOwnProperty(key)) {
-                            top[key] = dom.props[key];
-                        }
-                    }
-                }
-                if (dom.text) {
-                    var text = document.createTextNode(dom.text);
-                    top.appendChild(text);
-                }
-                if (dom.child) {
-                    dom.child.forEach(e => {
-                        top.appendChild(DOMBuilder.build(e));
-                    });
-                }
-            }
-            return top;
-        }
-    }
 
     function parseURL(url) {
         var parser = document.createElement('a'),
@@ -270,53 +203,27 @@
 
 
     function showBlockUI(parent, target_url) {
-        let a = parent.querySelector('.google_search_block_blockui');
+        let a = parent.querySelector('.google_search_block_blockui_container');
         if (a) a.remove();
 
-        let ui = DOMBuilder.build({
-            tag: 'div',
-            class: 'google_search_block_blockui',
-            style: {
-                width: '100%',
-            },
-            child: [{
-                tag: 'div',
-                class: 'google_search_block_hr'
-            }, {
-                tag: 'div',
-                id: 'google_search_block_blockui_contents',
-                style: {
-                    margin: '10px',
-                    padding: '10px',
-                    'overflow-x': 'auto',
-                    display: 'flex',
-                    'overflow-scrolling': 'touch',
-                    'webkit-overflow-scrolling': 'touch'
-                },
-            }]
-        });
+        const div = document.createElement('div');
+        div.className = 'google_search_block_blockui_container';
+        div.innerHTML = GM_getResourceText('selectors');
+
         getCandidate(target_url).forEach(e => {
-            ui.querySelector('#google_search_block_blockui_contents').appendChild(DOMBuilder.build({
-                tag: 'span',
-                class: 'google_search_block_button',
-                attrs: {
-                    url: e.regex,
-                },
-                child: [{
-                    tag: 'code',
-                    text: e.alias
-                }],
-                style: {
-                    display: 'inline',
-                },
-                events: {
-                    click: function () {
-                        const url = this.getAttribute('url');
-                        addDomain(url, false);
-                        ui.remove();
-                    }
-                }
-            }))
+            const span = document.createElement('span');
+            span.className = 'google_search_block_button';
+            span.setAttribute('url', e.regex);
+            span.addEventListener('click', function () {
+                const url = this.getAttribute('url');
+                addDomain(url, false);
+                div.remove();
+            });
+            span.style.display = 'inline';
+            const code = document.createElement('code');
+            code.textContent = e.alias;
+            span.appendChild(code);
+            div.querySelector('#google_search_block_blockui_contents').appendChild(span);
         });
         parent.appendChild(ui);
     }
@@ -328,7 +235,7 @@
             container.className = 'google_search_block_buttons_container';
             container.innerHTML = GM_getResourceText('buttons');
             parent.appendChild(container);
-            container.querySelector('.google_search_block_button_openui').setAttribute('url',target_url);
+            container.querySelector('.google_search_block_button_openui').setAttribute('url', target_url);
             container.querySelector('.google_search_block_button_openui').addEventListener('click', function () {
                 let url = this.getAttribute('url');
                 showBlockUI(parent, url);
@@ -340,53 +247,6 @@
                 this.style.display = 'none';
                 parent.querySelector('.google_search_block_blockui').remove();
             });
-            // const e = DOMBuilder.build({
-            //     tag: 'div',
-            //     style: {
-            //         'display': 'flex',
-            //         'justifyContent': 'flex-end'
-            //     },
-            //     class: 'google_search_block_buttons',
-            //     child: [{
-            //         tag: 'a',
-            //         text: '除外',
-            //         attrs: {
-            //             'url': target_url,
-            //         },
-            //         class: 'google_search_block_button_openui',
-            //         events: {
-            //             'click': function () {
-            //                 let url = this.getAttribute('url');
-            //                 showBlockUI(parent, url);
-            //                 this.style.display = 'none';
-            //                 parent.querySelector('.google_search_block_button_closeui').style.display = 'block';
-            //             }
-            //         },
-            //         style: {
-            //             'marginRight': '10px',
-            //             'marginBottom': '5px',
-            //             'cursor': 'pointer',
-            //         }
-            //     }, {
-            //         tag: 'a',
-            //         text: '閉じる',
-            //         class: 'google_search_block_button_closeui',
-            //         events: {
-            //             'click': function () {
-            //                 parent.querySelector('.google_search_block_button_openui').style.display = 'block';
-            //                 this.style.display = 'none';
-            //                 parent.querySelector('.google_search_block_blockui').remove();
-            //             }
-            //         },
-            //         style: {
-            //             'marginRight': '10px',
-            //             'marginBottom': '5px',
-            //             'cursor': 'pointer',
-            //             'display': 'none'
-            //         }
-            //     }]
-            // });
-            // parent.appendChild(e);
         }
     }
 
@@ -418,23 +278,17 @@
         });
         while (google_search_block_blocked.firstChild) google_search_block_blocked.removeChild(google_search_block_blocked.firstChild);
         distinct(blocked).sort().forEach(e => {
-            google_search_block_blocked.appendChild(DOMBuilder.build({
-                tag: 'span',
-                class: 'google_search_block_button',
-                attrs: {
-                    domain: e,
-                },
-                child: [{
-                    tag: 'code',
-                    text: e
-                }],
-                events: {
-                    click: function () {
-                        var domain = this.getAttribute('domain');
-                        removeDomain(domain);
-                    }
-                }
-            }));
+            const span = document.createElement('span');
+            span.addEventListener('click', function () {
+                var domain = this.getAttribute('domain');
+                removeDomain(domain);
+            });
+            span.className = 'google_search_block_button';
+            span.setAttribute('domain', e);
+            const code = document.createElement('code');
+            code.textContent = e;
+            span.appendChild(code);
+            google_search_block_blocked.appendChild(span);
         });
         updateLabel(count, getDomains());
         google_search_block_info.textContent = `${Math.floor((performance.now() - start)*10)/10}ms ${block.length}個`;
@@ -473,43 +327,7 @@
     }
     console.log(environment);
     let xpdcount = 0;
-    const settings = [{
-        "environment": "pc",
-        "first": "#search .g",
-        "second": ".r>a",
-        "container_class": "google_search_block_container",
-        "result_container": '#search'
-    }, {
-        "environment": "mobile",
-        "first": ".xpd",
-        "second": "a",
-        "container_class": "mnr-c",
-        "result_container": '#main'
-    }, {
-        "environment": "bing_pc",
-        "first": ".b_algo",
-        "second": "a",
-        "container_class": "google_search_block_container",
-        "result_container": '#b_results'
-    }, {
-        "environment": "bing_mobile",
-        "first": ".b_algo",
-        "second": "a",
-        "container_class": "b_algo",
-        "result_container": '#b_results'
-    }, {
-        "environment": "yahoo_pc",
-        "first": ".w",
-        "second": "a",
-        "container_class": "google_search_block_container",
-        "result_container": '#WS2m'
-    }, {
-        "environment": "yahoo_mobile",
-        "first": ".sw-CardBase",
-        "second": "a",
-        "container_class": "sw-CardBase",
-        "result_container": '#contentsInner'
-    }];
+    const settings = JSON.parse(GM_getResourceText('environments'));
     var selector;
     settings.forEach(e => {
         if (e.environment === environment) {

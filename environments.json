@@ -1,0 +1,37 @@
+[{
+    "environment": "pc",
+    "first": "#search .g",
+    "second": ".r>a",
+    "container_class": "google_search_block_container",
+    "result_container": "#search"
+}, {
+    "environment": "mobile",
+    "first": ".xpd",
+    "second": "a",
+    "container_class": "mnr-c",
+    "result_container": "#main"
+}, {
+    "environment": "bing_pc",
+    "first": ".b_algo",
+    "second": "a",
+    "container_class": "google_search_block_container",
+    "result_container": "#b_results"
+}, {
+    "environment": "bing_mobile",
+    "first": ".b_algo",
+    "second": "a",
+    "container_class": "b_algo",
+    "result_container": "#b_results"
+}, {
+    "environment": "yahoo_pc",
+    "first": ".w",
+    "second": "a",
+    "container_class": "google_search_block_container",
+    "result_container": "#WS2m"
+}, {
+    "environment": "yahoo_mobile",
+    "first": ".sw-CardBase",
+    "second": "a",
+    "container_class": "sw-CardBase",
+    "result_container": "#contentsInner"
+}]
