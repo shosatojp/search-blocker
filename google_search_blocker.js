@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search Blocker
 // @namespace    http://tampermonkey.net/
-// @version      0.9.13
+// @version      0.9.14
 // @description  block KUSO sites from google search results!
 // @author       ShoSato
 // @match https://www.google.co.jp/*
@@ -210,7 +210,6 @@
         const div = document.createElement('div');
         div.className = 'google_search_block_blockui_container';
         div.innerHTML = GM_getResourceText('selectors');
-
         getCandidate(target_url).forEach(e => {
             const span = document.createElement('span');
             span.className = 'google_search_block_button';
