@@ -223,9 +223,10 @@
             const code = document.createElement('code');
             code.textContent = e.alias;
             span.appendChild(code);
+            console.log(div);
             div.querySelector('#google_search_block_blockui_contents').appendChild(span);
         });
-        
+
         parent.appendChild(div);
     }
 
