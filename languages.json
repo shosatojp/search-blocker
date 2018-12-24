@@ -15,15 +15,15 @@
 },{
     "language":["en","en-us"],
     "ui":{
-        "before_count":"deleted ",
+        "before_count":"Blocked ",
         "after_count":" item(s)",
-        "complete":"complete",
-        "edit":"edit",
-        "redisplay":"redisplay",
-        "reblock":"reblock",
-        "hide_list":"hide list",
-        "show_list":"show list",
-        "expand":"expand",
-        "collapse":"collapse"
+        "complete":"Complete",
+        "edit":"Edit",
+        "redisplay":"Redisplay",
+        "reblock":"Reblock",
+        "hide_list":"Hide list",
+        "show_list":"Show list",
+        "expand":"Expand",
+        "collapse":"Collapse"
     }
 }]
