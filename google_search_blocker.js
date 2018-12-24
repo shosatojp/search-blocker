@@ -39,6 +39,12 @@
         window.navigator.userLanguage ||
         window.navigator.browserLanguage;
 
+    function timer(f, msg = '') {
+        const s = Date.now();
+        f();
+        console.log(msg, Date.now() - s);
+    }
+
     var resource = {};
 
     function getResource(name) {
@@ -243,11 +249,11 @@
             span.appendChild(code);
             div.querySelector('.google_search_block_blockui_contents').appendChild(span);
         });
-
         parent.appendChild(div);
     }
 
     function showButton(parent, target_url) {
+
         var label = parent.querySelector('.google_search_block_buttons_container');
         if (!label) {
             let container = document.createElement('div');
@@ -273,28 +279,31 @@
         const start = performance.now();
         count = 0;
         let blocked = [];
-        document.querySelectorAll(selector.first).forEach(e => {
-            const link = e.querySelector(selector.second);
-            if (link) {
-                e.style['background-color'] = '';
-                let removed = false;
-                var url = link.getAttribute('href');
-                const host = parseURL(url).host;
-                for (let i = 0, len = block.length; i < len; i++) {
-                    const b = block[i];
-                    if (b.charAt(0) === '#' ? url.match(new RegExp(b.substr(1), 'g')) : host.endsWith(b)) {
-                        e.style.display = 'none';
-                        e.style['background-color'] = 'rgba(248, 195, 199, 0.884)';
-                        removed = true;
-                        blocked.push(b);
-                        count++;
-                        break;
+        timer(() => {
+            document.querySelectorAll(selector.first).forEach(e => {
+                const link = e.querySelector(selector.second);
+                if (link) {
+                    e.style['background-color'] = '';
+                    let removed = false;
+                    var url = link.getAttribute('href');
+                    const host = parseURL(url).host;
+                    for (let i = 0, len = block.length; i < len; i++) {
+                        const b = block[i];
+                        if (b.charAt(0) === '#' ? url.match(new RegExp(b.substr(1), 'g')) : host.endsWith(b)) {
+                            e.style.display = 'none';
+                            e.style['background-color'] = 'rgba(248, 195, 199, 0.884)';
+                            removed = true;
+                            blocked.push(b);
+                            count++;
+                            break;
+                        }
                     }
+                    if (!removed) e.style.display = 'block';
+                    showButton(e, url);
                 }
-                if (!removed) e.style.display = 'block';
-                showButton(e, url);
-            }
-        });
+            });
+        }, '1');
+
         while (google_search_block_blocked.firstChild) google_search_block_blocked.removeChild(google_search_block_blocked.firstChild);
         distinct(blocked).sort().forEach(e => {
             const span = document.createElement('span');
