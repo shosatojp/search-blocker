@@ -33,6 +33,10 @@
     var google_search_block_textarea_domains;
     var google_search_block_blocked;
     var google_search_block_info;
+    var language = (window.navigator.languages && window.navigator.languages[0]) ||
+            window.navigator.language ||
+            window.navigator.userLanguage ||
+            window.navigator.browserLanguage;
 
     function parseURL(url) {
         var parser = document.createElement('a'),
@@ -224,7 +228,7 @@
             code.textContent = e.alias;
             span.appendChild(code);
             console.log(div);
-            div.querySelector('#google_search_block_blockui_contents').appendChild(span);
+            div.querySelector('.google_search_block_blockui_contents').appendChild(span);
         });
 
         parent.appendChild(div);

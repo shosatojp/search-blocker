@@ -1,0 +1,25 @@
+[{
+    "language":"ja",
+    "ui":{
+        "before_count":"検索結果から",
+        "after_count":"件除外しました",
+        "complete":"完了",
+        "edit":"編集",
+        "redisplay":"再表示",
+        "reblock":"ブロック",
+        "hide_list":"リストを隠す",
+        "show_list":"除外リスト"
+    }
+},{
+    "language":"en",
+    "ui":{
+        "before_count":"deleted ",
+        "after_count":" item(s)",
+        "complete":"complete",
+        "edit":"edit",
+        "redisplay":"redisplay",
+        "reblock":"reblock",
+        "hide_list":"hide list",
+        "show_list":"show list"
+    }
+}]
