@@ -209,7 +209,6 @@
         const div = document.createElement('div');
         div.className = 'google_search_block_blockui_container';
         div.innerHTML = GM_getResourceText('selectors');
-        parent.appendChild(div);
 
         getCandidate(target_url).forEach(e => {
             const span = document.createElement('span');
@@ -226,6 +225,8 @@
             span.appendChild(code);
             div.querySelector('#google_search_block_blockui_contents').appendChild(span);
         });
+        
+        parent.appendChild(div);
     }
 
     function showButton(parent, target_url) {
