@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search Blocker
 // @namespace    http://tampermonkey.net/
-// @version      0.9.14
+// @version      0.9.15
 // @description  block KUSO sites from google search results!
 // @author       ShoSato
 // @match https://www.google.co.jp/*
@@ -12,6 +12,7 @@
 // @resource buttons https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/buttons.html
 // @resource selectors https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/selectors.html
 // @resource environments https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/environments.json
+// @resource languages https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/languages.json
 // @updateURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.js
 // @downloadURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.js
 // @grant GM_setValue
@@ -34,9 +35,21 @@
     var google_search_block_blocked;
     var google_search_block_info;
     var language = (window.navigator.languages && window.navigator.languages[0]) ||
-            window.navigator.language ||
-            window.navigator.userLanguage ||
-            window.navigator.browserLanguage;
+        window.navigator.language ||
+        window.navigator.userLanguage ||
+        window.navigator.browserLanguage;
+
+    function getResource(name) {
+        let src = GM_getResourceText(name);
+        let obj = JSON.parse(GM_getResourceText('languages'))
+            .filter(x => ~x.language.indexOf(language))[0].ui;
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                src = src.replace('${' + key + '}', obj[key]);
+            }
+        }
+        return src;
+    }
 
     function parseURL(url) {
         var parser = document.createElement('a'),
@@ -99,7 +112,7 @@
     }
 
     function showLabel() {
-        const html = GM_getResourceText("label");
+        const html = getResource("label");
         const e = document.createElement('div');
         e.innerHTML = html;
         result_container.appendChild(e);
@@ -213,7 +226,7 @@
 
         const div = document.createElement('div');
         div.className = 'google_search_block_blockui_container';
-        div.innerHTML = GM_getResourceText('selectors');
+        div.innerHTML = getResource('selectors');
         getCandidate(target_url).forEach(e => {
             const span = document.createElement('span');
             span.className = 'google_search_block_button';
@@ -239,7 +252,7 @@
         if (!label) {
             let container = document.createElement('div');
             container.className = 'google_search_block_buttons_container';
-            container.innerHTML = GM_getResourceText('buttons');
+            container.innerHTML = getResource('buttons');
             parent.appendChild(container);
             container.querySelector('.google_search_block_button_openui').setAttribute('url', target_url);
             container.querySelector('.google_search_block_button_openui').addEventListener('click', function () {

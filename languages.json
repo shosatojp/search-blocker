@@ -1,5 +1,5 @@
 [{
-    "language":"ja",
+    "language":["ja"],
     "ui":{
         "before_count":"検索結果から",
         "after_count":"件除外しました",
@@ -8,10 +8,12 @@
         "redisplay":"再表示",
         "reblock":"ブロック",
         "hide_list":"リストを隠す",
-        "show_list":"除外リスト"
+        "show_list":"除外リスト",
+        "expand":"除外",
+        "collapse":"閉じる"
     }
 },{
-    "language":"en",
+    "language":["en","en-us"],
     "ui":{
         "before_count":"deleted ",
         "after_count":" item(s)",
@@ -20,6 +22,8 @@
         "redisplay":"redisplay",
         "reblock":"reblock",
         "hide_list":"hide list",
-        "show_list":"show list"
+        "show_list":"show list",
+        "expand":"expand",
+        "collapse":"collapse"
     }
 }]

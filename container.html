@@ -64,9 +64,9 @@
 <div class="google_search_block_container" id="google_search_block">
     <div id="google_search_block_header">
         <div>
-            <b>検索結果から</b>
+            <b>${before_count}</b>
             <b id="google_search_block_count">0</b>
-            <b>件除外しました</b>
+            <b>${after_count}</b>
         </div>
         <code id="google_search_block_info"></code>
     </div>
@@ -77,15 +77,15 @@
         <div class="google_search_block_hr"></div>
         <textarea id="google_search_block_textarea_domains" spellcheck="false"></textarea>
         <div id="google_search_block_buttons">
-            <button class="google_search_block_button" id="google_search_block_button_complete">完了</button>
-            <button class="google_search_block_button" id="google_search_block_button_edit">編集</button>
+            <button class="google_search_block_button" id="google_search_block_button_complete">${complete}</button>
+            <button class="google_search_block_button" id="google_search_block_button_edit">${edit}</button>
         </div>
         <div class="google_search_block_hr"></div>
     </div>
     <div id="google_search_block_buttons">
-        <button class="google_search_block_button" id="google_search_block_button_show">再表示</button>
-        <button class="google_search_block_button" id="google_search_block_button_reblock" style="display: none;">ブロック</button>
-        <button class="google_search_block_button" id="google_search_block_button_hidelist" style="display: none;">リストを隠す</button>
-        <button class="google_search_block_button" id="google_search_block_button_showlist" style="display: block;">除外リスト</button>
+        <button class="google_search_block_button" id="google_search_block_button_show">${redisplay}</button>
+        <button class="google_search_block_button" id="google_search_block_button_reblock" style="display: none;">${reblock}</button>
+        <button class="google_search_block_button" id="google_search_block_button_hidelist" style="display: none;">${hide_list}</button>
+        <button class="google_search_block_button" id="google_search_block_button_showlist" style="display: block;">${show_list}</button>
     </div>
 </div>
