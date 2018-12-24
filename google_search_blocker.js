@@ -154,6 +154,7 @@
             google_search_block_contents.style.display = 'block';
             showList(getDomains());
         });
+        google_search_block_textarea_domains.disabled = true;
     }
 
     function showList(list) {
