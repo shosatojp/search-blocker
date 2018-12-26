@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search Blocker
 // @namespace    http://tampermonkey.net/
-// @version      0.9.16
+// @version      0.9.17
 // @description  block KUSO sites from google search results!
 // @author       ShoSato
 // @match https://www.google.co.jp/*
@@ -137,7 +137,7 @@
         google_search_block_blocked = google_search_block_label.querySelector('#google_search_block_blocked');
         google_search_block_info = google_search_block_label.querySelector('#google_search_block_info');
 
-        google_search_block_label.className = selector.container_class;
+        google_search_block_label.classList.add(selector.container_class);
         google_search_block_button_complete.addEventListener('click', function () {
             google_search_block_textarea_domains.disabled = true;
             let list = orderBy(distinct(google_search_block_textarea_domains.value.split('\n').map(e => e.trim()).filter(e => e)).map(e => {
@@ -368,7 +368,7 @@
     if (environment === 'mobile') {
         const observer = new MutationObserver(function (records, mo) {
             if (records.filter(x => {
-                    return (x instanceof Element) && x.target.getAttribute('data-graft-type') === 'insert';
+                return ('getAttribute' in x.target) && x.target.getAttribute('data-graft-type') === 'insert';
                 }).length) {
                 google_search_block();
             }

@@ -6,7 +6,7 @@
     "result_container": "#search"
 }, {
     "environment": "mobile",
-    "first": ".xpd",
+    "first": ".srg .xpd",
     "second": "a",
     "container_class": "mnr-c",
     "result_container": "#main"
