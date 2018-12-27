@@ -51,7 +51,7 @@
         if (!(name in resource)) {
             let src = GM_getResourceText(name);
             let obj = JSON.parse(GM_getResourceText('languages'))
-                .filter(x => (x = x.toLowerCase(), ~x.language.indexOf(language) || ~x.language.indexOf('en')))[0].ui; //english must be last.
+                .filter(x => ~x.language.indexOf(language.toLowerCase()) || ~x.language.indexOf('en'))[0].ui; //english must be last.
             for (const key in obj) {
                 if (obj.hasOwnProperty(key)) {
                     src = src.replace('${' + key + '}', obj[key]);
