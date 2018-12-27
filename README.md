@@ -12,9 +12,9 @@ https://addons.mozilla.org/ja/firefox/addon/tampermonkey/
 https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.user.js
 
 ## Edit Quickly On Google Search Result Page
-![](https://github.com/ShoSatoJp/google_search_blocker/raw/master/README/label.png)  
+![](https://github.com/ShoSatoJp/google_search_blocker/raw/master/README/label2.png)  
 You can use original domain or regex with prefix '#'.
 
 ## Auto Block Level Selector
-![](https://github.com/ShoSatoJp/google_search_blocker/raw/master/README/block.png)  
+![](https://github.com/ShoSatoJp/google_search_blocker/raw/master/README/block2.png)  
 You only need to click button to block domain.
