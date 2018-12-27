@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search Blocker
 // @namespace    https://github.com/ShoSatoJp/
-// @version      0.9.19
+// @version      0.9.20
 // @description  block undesired sites from google search results!
 // @author       ShoSato
 // @match https://www.google.co.jp/*
