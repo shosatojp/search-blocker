@@ -51,7 +51,7 @@
         if (!(name in resource)) {
             let src = GM_getResourceText(name);
             let obj = JSON.parse(GM_getResourceText('languages'))
-                .filter(x => ~x.language.indexOf(language) || ~x.language.indexOf('en'))[0].ui; //english must be last.
+                .filter(x => x = x.toLowerCase(), ~x.language.indexOf(language) || ~x.language.indexOf('en'))[0].ui; //english must be last.
             for (const key in obj) {
                 if (obj.hasOwnProperty(key)) {
                     src = src.replace('${' + key + '}', obj[key]);
@@ -368,7 +368,7 @@
     if (environment === 'mobile') {
         const observer = new MutationObserver(function (records, mo) {
             if (records.filter(x => {
-                return ('getAttribute' in x.target) && x.target.getAttribute('data-graft-type') === 'insert';
+                    return ('getAttribute' in x.target) && x.target.getAttribute('data-graft-type') === 'insert';
                 }).length) {
                 google_search_block();
             }

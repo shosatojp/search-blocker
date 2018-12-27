@@ -8,7 +8,7 @@ Chrome:
 https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo  
 Firefox:
 https://addons.mozilla.org/ja/firefox/addon/tampermonkey/
-### 3.Click this URL to install script.
+### 2.Click this URL to install script.
 https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.user.js
 
 ## Edit Quickly On Google Search Result Page

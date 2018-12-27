@@ -1,5 +1,5 @@
 [{
-    "language":["ja"],
+    "language":["ja","ja-jp"],
     "ui":{
         "before_count":"検索結果から",
         "after_count":"件除外しました",
