@@ -4,8 +4,8 @@
 // @version      0.9.21
 // @description  block undesired sites from google search results!
 // @author       ShoSato
-// @match https://www.google.co.jp/*
-// @match https://www.google.com/*
+// @match https://www.google.co.jp/search?*
+// @match https://www.google.com/search?*
 // @match https://www.bing.com/*
 // @match https://search.yahoo.co.jp/*
 // @resource label https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/container.html
