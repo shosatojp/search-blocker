@@ -20,18 +20,18 @@
     "environment": "bing_mobile",
     "first": ".b_algo",
     "second": "a",
-    "container_class": "b_algo",
+    "container_class": "b_algo container_bing_mobile",
     "result_container": "#b_results"
 }, {
     "environment": "yahoo_pc",
     "first": ".w",
     "second": "a",
-    "container_class": "google_search_block_container container_yahoo_pc",
+    "container_class": "google_search_block_container container_yahoo",
     "result_container": "#WS2m"
 }, {
     "environment": "yahoo_mobile",
     "first": ".sw-CardBase",
     "second": "a",
-    "container_class": "sw-CardBase",
+    "container_class": "sw-CardBase container_yahoo",
     "result_container": "#contentsInner"
 }]

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search Blocker
 // @namespace    https://github.com/ShoSatoJp/
-// @version      0.9.21
+// @version      0.9.22
 // @description  block undesired sites from google search results!
 // @author       ShoSato
 // @match https://www.google.co.jp/search?*
@@ -137,7 +137,7 @@
         google_search_block_blocked = google_search_block_label.querySelector('#google_search_block_blocked');
         google_search_block_info = google_search_block_label.querySelector('#google_search_block_info');
 
-        google_search_block_label.classList.add(SETTINGS.container_class.split(' '));
+        google_search_block_label.classList.add(...SETTINGS.container_class.split(' '));
         google_search_block_button_complete.addEventListener('click', function () {
             google_search_block_textarea_domains.disabled = true;
             let list = orderBy(distinct(google_search_block_textarea_domains.value.split('\n').map(e => e.trim()).filter(e => e)).map(e => {
