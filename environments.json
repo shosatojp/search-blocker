@@ -26,12 +26,12 @@
     "environment": "yahoo_pc",
     "first": ".w",
     "second": "a",
-    "container_class": "google_search_block_container container_yahoo",
+    "container_class": "google_search_block_container container_yahoo_pc",
     "result_container": "#WS2m"
 }, {
     "environment": "yahoo_mobile",
     "first": ".sw-CardBase",
     "second": "a",
-    "container_class": "sw-CardBase container_yahoo",
+    "container_class": "sw-CardBase container_yahoo_mobile",
     "result_container": "#contentsInner"
 }]
