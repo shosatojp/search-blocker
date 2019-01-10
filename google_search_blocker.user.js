@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search Blocker
 // @namespace    https://github.com/ShoSatoJp/
-// @version      0.9.20
+// @version      0.9.21
 // @description  block undesired sites from google search results!
 // @author       ShoSato
 // @match https://www.google.co.jp/*
@@ -137,7 +137,7 @@
         google_search_block_blocked = google_search_block_label.querySelector('#google_search_block_blocked');
         google_search_block_info = google_search_block_label.querySelector('#google_search_block_info');
 
-        google_search_block_label.classList.add(selector.container_class);
+        google_search_block_label.classList.add(SETTINGS.container_class.split(' '));
         google_search_block_button_complete.addEventListener('click', function () {
             google_search_block_textarea_domains.disabled = true;
             let list = orderBy(distinct(google_search_block_textarea_domains.value.split('\n').map(e => e.trim()).filter(e => e)).map(e => {
@@ -158,7 +158,7 @@
             google_search_block_textarea_domains.disabled = false;
         });
         google_search_block_button_show.addEventListener('click', function () {
-            document.querySelectorAll(selector.first).forEach(e => e.style.display = 'block');
+            document.querySelectorAll(SETTINGS.first).forEach(e => e.style.display = 'block');
             google_search_block_button_reblock.style.display = 'block';
             google_search_block_button_show.style.display = 'none';
         });
@@ -280,8 +280,8 @@
         count = 0;
         let blocked = [];
         timer(() => {
-            document.querySelectorAll(selector.first).forEach(e => {
-                const link = e.querySelector(selector.second);
+            document.querySelectorAll(SETTINGS.first).forEach(e => {
+                const link = e.querySelector(SETTINGS.second);
                 if (link) {
                     e.style['background-color'] = '';
                     let removed = false;
@@ -356,13 +356,13 @@
     console.log(environment);
     let xpdcount = 0;
     const settings = JSON.parse(GM_getResourceText('environments'));
-    var selector;
+    var SETTINGS;
     settings.forEach(e => {
         if (e.environment === environment) {
-            selector = e;
+            SETTINGS = e;
         }
     });
-    const result_container = document.querySelector(selector.result_container);
+    const result_container = document.querySelector(SETTINGS.result_container);
     if (!result_container) return;
 
     if (environment === 'mobile') {
