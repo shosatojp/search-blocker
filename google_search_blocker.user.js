@@ -8,13 +8,13 @@
 // @match https://www.google.com/search?*
 // @match https://www.bing.com/*
 // @match https://search.yahoo.co.jp/*
-// @resource label https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/container.html
-// @resource buttons https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/buttons.html
-// @resource selectors https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/selectors.html
-// @resource environments https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/environments.json
-// @resource languages https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/languages.json
-// @updateURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.user.js
-// @downloadURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.user.js
+// @resource label https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/container.html?
+// @resource buttons https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/buttons.html?
+// @resource selectors https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/selectors.html?
+// @resource environments https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/environments.json?
+// @resource languages https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/languages.json?
+// @updateURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.user.js?
+// @downloadURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.user.js?
 // @grant GM_setValue
 // @grant GM_getValue
 // @grant GM_getResourceText
