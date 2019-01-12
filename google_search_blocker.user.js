@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search Blocker
 // @namespace    https://github.com/ShoSatoJp/
-// @version      0.9.23
+// @version      0.9.24
 // @description  block undesired sites from google search results!
 // @author       ShoSato
 // @match https://www.google.co.jp/search?*
@@ -373,7 +373,7 @@
                 google_search_block();
             }
         });
-        observer.observe(document.querySelector('#main'), {
+        observer.observe(document.querySelector('#pag'), {
             attributes: true,
             childList: true,
             characterData: true,
