@@ -9,7 +9,7 @@
     "first": ".srg .xpd",
     "second": "a",
     "container_class": "mnr-c",
-    "result_container": "#main-ip"
+    "result_container": "#main"
 }, {
     "environment": "bing_pc",
     "first": ".b_algo",
