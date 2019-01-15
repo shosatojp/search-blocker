@@ -373,7 +373,7 @@
                 google_search_block();
             }
         });
-        observer.observe(document.querySelector('#botstuff'), {
+        observer.observe(document.querySelector(SETTINGS.observer_target), {
             attributes: true,
             childList: true,
             characterData: true,
