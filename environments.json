@@ -17,7 +17,8 @@
     "first": ".b_algo",
     "second": "a",
     "container_class": "google_search_block_container",
-    "result_container": "#b_results"
+    "result_container": "#b_results",
+    "result_box_style_class": "pc_result_box"
 }, {
     "environment": "bing_mobile",
     "first": ".b_algo",
