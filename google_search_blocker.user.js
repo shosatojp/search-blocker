@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search Blocker
 // @namespace    https://github.com/ShoSatoJp/
-// @version      0.9.26
+// @version      0.9.27
 // @description  block undesired sites from google search results!
 // @author       ShoSato
 // @match https://www.google.co.jp/search?*
@@ -242,6 +242,9 @@
                 const url = this.getAttribute('url');
                 addDomain(url, false);
                 div.remove();
+                if (SETTINGS.result_box_style_class) {
+                    parent.classList.remove(SETTINGS.result_box_style_class);
+                }
             });
             span.style.display = 'inline';
             const code = document.createElement('code');
@@ -266,11 +269,17 @@
                 showBlockUI(parent, url);
                 this.style.display = 'none';
                 parent.querySelector('.google_search_block_button_closeui').style.display = 'block';
+                if (SETTINGS.result_box_style_class) {
+                    parent.classList.add(SETTINGS.result_box_style_class);
+                }
             });
             container.querySelector('.google_search_block_button_closeui').addEventListener('click', function () {
                 parent.querySelector('.google_search_block_button_openui').style.display = 'block';
                 this.style.display = 'none';
                 parent.querySelector('.google_search_block_blockui').remove();
+                if (SETTINGS.result_box_style_class) {
+                    parent.classList.remove(SETTINGS.result_box_style_class);
+                }
             });
         }
     }

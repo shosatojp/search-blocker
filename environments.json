@@ -3,14 +3,15 @@
     "first": "#search .g",
     "second": ".r>a",
     "container_class": "google_search_block_container",
-    "result_container": "#search"
+    "result_container": "#search",
+    "result_box_style_class": "pc_result_box"
 }, {
     "environment": "mobile",
     "first": ".srg .xpd",
     "second": "a",
     "container_class": "mnr-c",
     "result_container": "#main",
-    "observer_target":"#botstuff"
+    "observer_target": "#botstuff"
 }, {
     "environment": "bing_pc",
     "first": ".b_algo",
