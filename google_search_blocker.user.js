@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search Blocker
 // @namespace    https://github.com/ShoSatoJp/
-// @version      0.9.31
+// @version      0.9.32
 // @description  block undesired sites from google search results!
 // @author       ShoSato
 // @match https://www.google.co.jp/search?*
@@ -35,6 +35,7 @@
     var google_search_block_blocked;
     var google_search_block_info;
     var google_search_block_do_sync;
+    var google_search_block_button_auth;
     var language = (window.navigator.languages && window.navigator.languages[0]) ||
         window.navigator.language ||
         window.navigator.userLanguage ||
@@ -138,9 +139,10 @@
         google_search_block_blocked = google_search_block_label.querySelector('#google_search_block_blocked');
         google_search_block_info = google_search_block_label.querySelector('#google_search_block_info');
         google_search_block_do_sync = google_search_block_label.querySelector('#google_search_block_do_sync');
+        google_search_block_button_auth = google_search_block_label.querySelector('#google_search_block_button_auth');
         google_search_block_do_sync.addEventListener('input', function (e) {
-            GM_setValue('do_sync', (+this.target.checked).toString());
-            if (this.target.checked) {
+            GM_setValue('do_sync', (+e.target.checked).toString());
+            if (e.target.checked) {
                 initSync();
                 doUpdateListFile();
             }
@@ -559,7 +561,11 @@
                 gapi.auth2.getAuthInstance().isSignedIn.listen(function (e) {
                     if (e) {
                         loadClient();
-                        console.log('signedIn')
+                        console.log('signedIn');
+                        google_search_block_button_auth.style.displey = 'none';
+                    } else {
+                        google_search_block_button_auth.style.displey = 'block';
+                        google_search_block_button_auth.addEventListener('click', authenticate);
                     }
                 });
             });

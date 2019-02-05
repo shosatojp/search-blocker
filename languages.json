@@ -11,7 +11,8 @@
         "show_list":"除外リスト",
         "expand":"除外",
         "collapse":"閉じる",
-        "do_sync":"同期"
+        "do_sync":"同期",
+        "auth":"ログイン"
     }
 },{
     "language":["en","en-us"],
@@ -26,6 +27,7 @@
         "show_list":"Show list",
         "expand":"Expand",
         "collapse":"Collapse",
-        "do_sync":"Sync"
+        "do_sync":"Sync",
+        "auth":"Login"
     }
 }]
