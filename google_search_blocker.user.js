@@ -23,7 +23,6 @@
 
 (function () {
     'use strict';
-    eval(GM_getResourceText('drive_sync'));
     const CLIENT_ID = '531665009269-96fvecl3pj4717mj2e6if6oaph7eu8ar.apps.googleusercontent.com';
     const LIST_FILE_NAME = 'GoogleSearchBlocker.txt';
 

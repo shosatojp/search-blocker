@@ -1,4 +1,4 @@
-window.DriveSync = DriveSync || (function () {
+window.DriveSync = (function () {
     const DriveSync = function (client_id, filename,setModifiedTime,getModifiedTime) {
         this.CLIENT_ID = client_id;
         this.FILE_NAME = filename;
