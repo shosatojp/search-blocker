@@ -4,164 +4,22 @@
 <head>
     <title>Drive API Quickstart</title>
     <meta charset="utf-8" />
+    <script src="drive_sync.js"></script>
 </head>
 
 <body>
     <script>
+
         const CLIENT_ID = '531665009269-96fvecl3pj4717mj2e6if6oaph7eu8ar.apps.googleusercontent.com';
         const LIST_FILE_NAME = 'GoogleSearchBlocker.txt';
 
-        function authenticate() {
-            return gapi.auth2.getAuthInstance()
-                .signIn({
-                    scope: "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file"
-                })
-                .then(function () {
-                        console.log("Sign-in successful");
-                    },
-                    function (err) {
-                        console.error("Error signing in", err);
-                    });
-        }
-
-        function loadClient() {
-            return gapi.client.load("https://content.googleapis.com/discovery/v1/apis/drive/v3/rest")
-                .then(function () {
-                        console.log("GAPI client loaded for API");
-                    },
-                    function (err) {
-                        console.error("Error loading GAPI client for API", err);
-                    });
-        }
-
-        async function createFile(name) {
-            return gapi.client.drive.files.create({
-                "resource": {
-                    "name": name
-                }
-            }).then(function (response) {
-                // console.log('created', response.result)
-                return response.result;
-            }, function (err) {
-                console.error("Execute error", err);
-                return null;
-            });
-        }
-
-        async function findFile(name) {
-            return gapi.client.drive.files.list({
-                "q": `name='${name}'`
-            }).then(function (response) {
-                return response.result.files[0];
-            }, function (err) {
-                console.log(err);
-                return null;
-            });
-        }
-
-        async function updateFileContent(id, content) {
-            return new Promise((res, rej) => {
-                const auth_token = gapi.auth.getToken().access_token;
-                const boundary = "-------314159265358979323846";
-                const delimiter = "\r\n--" + boundary + "\r\n";
-                const close_delim = "\r\n--" + boundary + "--";
-
-                const metadata = {
-                    mimeType: "text/plain"
-                };
-
-                const multipartRequestBody =
-                    delimiter +
-                    "Content-Type: application/json\r\n\r\n" +
-                    JSON.stringify(metadata) +
-                    delimiter +
-                    "Content-Type: application/json\r\n\r\n" +
-                    content +
-                    close_delim;
-
-                gapi.client
-                    .request({
-                        path: "/upload/drive/v3/files/" + id,
-                        method: "PATCH",
-                        params: {
-                            fileId: id,
-                            uploadType: "multipart"
-                        },
-                        headers: {
-                            "Content-Type": 'multipart/form-data; boundary="' + boundary + '"',
-                            Authorization: "Bearer " + auth_token
-                        },
-                        body: multipartRequestBody
-                    })
-                    .execute(function (file) {
-                        res(file);
-                    });
-            });
-        }
-
-        async function getFileContent(id) {
-            return gapi.client.drive.files.get({
-                fileId: id,
-                alt: "media"
-            }).then(response => {
-                // console.log('body', response);
-                return response.body;
-            }).catch(reason => {
-                return null;
-            });
-        }
-
-        async function getMetadata(id) {
-            return gapi.client.drive.files.get({
-                fileId: id,
-                fields: 'modifiedTime',
-            }).then(response => {
-                // console.log('metadata', response);
-                return response.result;
-            }).catch(reason => {
-                return null;
-            });
-        }
-
-        async function updateListFile(localModifiedTime, list_str, ondownload, onupload) {
-            var listFile;
-            if (!(listFile = await findFile(LIST_FILE_NAME))) {
-                listFile = await createFile(LIST_FILE_NAME);
-            }
-
-            if (listFile) {
-                if (localModifiedTime < new Date((await getMetadata(listFile.id)).modifiedTime).getTime()) {
-                    ondownload && ondownload(await getFileContent(listFile.id));
-                } else {
-                    await updateFileContent(listFile.id, list_str);
-                    onupload && onupload();
-                }
-            } else {
-                console.error('cannot sync file');
-            }
-        }
-
-        (function initSync() {
-            const script = document.createElement('script');
-            script.setAttribute('src', 'https://apis.google.com/js/api.js');
-            document.body.appendChild(script);
-            script.addEventListener('load', () => {
-                gapi.load("client:auth2", function () {
-                    gapi.auth2.init({
-                        client_id: CLIENT_ID
-                    });
-                    gapi.auth2.getAuthInstance().isSignedIn.listen(function (e) {
-                        if (e) {
-                            loadClient();
-                            console.log('signedIn')
-                        }
-                    });
-                });
-            });
-        })();
+        const sync=new DriveSync(CLIENT_ID,LIST_FILE_NAME);
+        sync.initSync(e=>console.log('signin'),e=>console.log('signout')).then(e=>{
+            sync.updateListFile(0,v=>console.log('downloaded',v),v=>{return 'hogera';})
+        });
     </script>
-    <button onclick="authenticate()">authorize</button>
-    <button onclick="updateListFile(9999999999999999999999999,'listlist',v=>console.log('downloaded',v),v=>console.log('uploaded'))">find</button>
+    <button onclick="sync.authenticate()">authorize</button>
+    <button onclick="">find</button>
 </body>
 
 </html>
