@@ -22,8 +22,6 @@
 
 (function () {
     'use strict';
-    const CLIENT_ID = '531665009269-96fvecl3pj4717mj2e6if6oaph7eu8ar.apps.googleusercontent.com';
-    const LIST_FILE_NAME = 'GoogleSearchBlocker.txt';
 
     var google_search_block_label;
     var google_search_block_button_showlist;
@@ -37,8 +35,6 @@
     var google_search_block_textarea_domains;
     var google_search_block_blocked;
     var google_search_block_info;
-    var google_search_block_do_sync;
-    var google_search_block_button_auth;
     var language = (window.navigator.languages && window.navigator.languages[0]) ||
         window.navigator.language ||
         window.navigator.userLanguage ||
@@ -95,7 +91,6 @@
 
     function setDomains(domains) {
         GM_setValue('url', domains.join(';'));
-        GM_setValue('modifiedTime', Date.now().toString());
     }
 
     function addDomain(url, isurl = true) {
@@ -142,21 +137,6 @@
         google_search_block_textarea_domains = google_search_block_label.querySelector('#google_search_block_textarea_domains');
         google_search_block_blocked = google_search_block_label.querySelector('#google_search_block_blocked');
         google_search_block_info = google_search_block_label.querySelector('#google_search_block_info');
-        google_search_block_do_sync = google_search_block_label.querySelector('#google_search_block_do_sync');
-        google_search_block_button_auth = google_search_block_label.querySelector('#google_search_block_button_auth');
-        google_search_block_do_sync.addEventListener('input', function (e) {
-            GM_setValue('do_sync', (+e.target.checked).toString());
-            if (e.target.checked) {
-                initSync(doUpdateListFile);
-            }
-        });
-
-        if (!!parseInt(GM_getValue('do_sync', '0'))) {
-            google_search_block_do_sync.checked = true;
-            console.log('do_sync')
-            initSync(doUpdateListFile);
-        }
-
         google_search_block_label.classList.add(...SETTINGS.container_class.split(' '));
         google_search_block_button_complete.addEventListener('click', function () {
             google_search_block_textarea_domains.disabled = true;
@@ -173,9 +153,6 @@
             setDomains(list);
             block = getDomains();
             google_search_block();
-            if (!!parseInt(GM_getValue('do_sync', '0'))) {
-                doUpdateListFile();
-            }
         });
         google_search_block_button_edit.addEventListener('click', function () {
             google_search_block_textarea_domains.disabled = false;
@@ -416,194 +393,4 @@
     showLabel();
     google_search_block();
     console.log(Date.now() - start);
-
-
-    // sync
-
-
-    function authenticate() {
-        return gapi.auth2.getAuthInstance()
-            .signIn({
-                scope: "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file"
-            })
-            .then(function () {
-                    console.log("Sign-in successful");
-                },
-                function (err) {
-                    console.error("Error signing in", err);
-                });
-    }
-
-    function loadClient() {
-        return gapi.client.load("https://content.googleapis.com/discovery/v1/apis/drive/v3/rest")
-            // .then(function () {
-            //         console.log("GAPI client loaded for API");
-            //     },
-            //     function (err) {
-            //         console.error("Error loading GAPI client for API", err);
-            //     });
-    }
-
-    async function createFile(name) {
-        return gapi.client.drive.files.create({
-            "resource": {
-                "name": name
-            }
-        }).then(function (response) {
-            // console.log('created', response.result)
-            return response.result;
-        }, function (err) {
-            console.error("Execute error", err);
-            return null;
-        });
-    }
-
-    async function findFile(name) {
-        return gapi.client.drive.files.list({
-            "q": `name='${name}'`
-        }).then(function (response) {
-            return response.result.files[0];
-        }, function (err) {
-            console.log(err);
-            return null;
-        });
-    }
-
-    async function updateFileContent(id, content) {
-        return new Promise((res, rej) => {
-            const auth_token = gapi.auth.getToken().access_token;
-            const boundary = "-------314159265358979323846";
-            const delimiter = "\r\n--" + boundary + "\r\n";
-            const close_delim = "\r\n--" + boundary + "--";
-
-            const metadata = {
-                mimeType: "text/plain"
-            };
-
-            const multipartRequestBody =
-                delimiter +
-                "Content-Type: application/json\r\n\r\n" +
-                JSON.stringify(metadata) +
-                delimiter +
-                "Content-Type: application/json\r\n\r\n" +
-                content +
-                close_delim;
-
-            gapi.client
-                .request({
-                    path: "/upload/drive/v3/files/" + id,
-                    method: "PATCH",
-                    params: {
-                        fileId: id,
-                        uploadType: "multipart"
-                    },
-                    headers: {
-                        "Content-Type": 'multipart/form-data; boundary="' + boundary + '"',
-                        Authorization: "Bearer " + auth_token
-                    },
-                    body: multipartRequestBody
-                })
-                .execute(function (file) {
-                    res(file);
-                });
-        });
-    }
-
-    async function getFileContent(id) {
-        return gapi.client.drive.files.get({
-            fileId: id,
-            alt: "media"
-        }).then(response => {
-            // console.log('body', response);
-            return response.body;
-        }).catch(reason => {
-            return null;
-        });
-    }
-
-    async function getMetadata(id) {
-        return gapi.client.drive.files.get({
-            fileId: id,
-            fields: 'modifiedTime',
-        }).then(response => {
-            // console.log('metadata', response);
-            return response.result;
-        }).catch(reason => {
-            return null;
-        });
-    }
-
-    async function updateListFile(localModifiedTime, ondownload, onupload) {
-        var listFile;
-        if (!(listFile = await findFile(LIST_FILE_NAME))) {
-            listFile = await createFile(LIST_FILE_NAME);
-        }
-
-        if (listFile) {
-            const body = await getFileContent(listFile.id);
-            if ((localModifiedTime < new Date((await getMetadata(listFile.id)).modifiedTime).getTime()) && body.length) {
-                ondownload(body);
-                console.log('downloaded');
-            } else {
-                await updateFileContent(listFile.id, onupload());
-                console.log('uploaded');
-            }
-        } else {
-            console.error('cannot sync file');
-        }
-    }
-
-    function initSync(callback) {
-        if (gapi && gapi.auth2) {
-            callback();
-        } else {
-            const script = document.createElement('script');
-            script.setAttribute('src', 'https://apis.google.com/js/api.js');
-            document.body.appendChild(script);
-            script.addEventListener('load', () => {
-                console.log('gapi.auth2', gapi.auth2)
-                gapi.load("client:auth2", function () {
-                    gapi.auth2.init({
-                        client_id: CLIENT_ID
-                    });
-                    gapi.auth2.getAuthInstance().isSignedIn.listen(function (e) {
-                        if (e) {
-                            console.log('signedIn');
-                            loadClient().then(()=>{
-                                google_search_block_button_auth.style.display = 'none';
-                                callback();
-                            });
-                        } else {
-                            google_search_block_button_auth.style.display = 'block';
-                            google_search_block_button_auth.addEventListener('click', authenticate);
-                        }
-                    });
-                });
-                document.body.removeChild(script);
-            });
-        }
-    }
-
-    // async function checkSync() {
-    //     return new Promise((res) => {
-    //         if (!(gapi && gapi.auth2)) {
-    //             await initSync();
-    //         }
-    //         res();
-    //     })
-    // }
-
-
-    function doUpdateListFile() {
-        updateListFile(parseInt(GM_getValue('modifiedTime', '0')), list_str => {
-            setDomains(list_str.split('\n'));
-            block = getDomains();
-            GM_setValue('modifiedTime', Date.now().toString());
-        }, () => {
-            return getDomains().join('\n');
-        });
-    }
-
-    // end sync
-
 })();
