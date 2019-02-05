@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         Google Search Blocker
-// @namespace    https://github.com/ShoSatoJp/
+// @name         Google Search Blocker (Sync Beta)
+// @namespace    https://github.com/ShoSatoJp/sync
 // @version      0.9.34
 // @description  block undesired sites from google search results!
 // @author       ShoSato
@@ -8,13 +8,14 @@
 // @match https://www.google.com/search?*
 // @match https://www.bing.com/*
 // @match https://search.yahoo.co.jp/*
-// @resource label https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/container.html?
-// @resource buttons https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/buttons.html?
-// @resource selectors https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/selectors.html?
-// @resource environments https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/environments.json?
-// @resource languages https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/languages.json?
-// @updateURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.user.js?
-// @downloadURL https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.user.js?
+// @resource label https://github.com/shosatojp/google_search_blocker/raw/sync/container.html?
+// @resource buttons https://github.com/shosatojp/google_search_blocker/raw/sync/buttons.html?
+// @resource selectors https://github.com/shosatojp/google_search_blocker/raw/sync/selectors.html?
+// @resource environments https://github.com/shosatojp/google_search_blocker/raw/sync/environments.json?
+// @resource languages https://github.com/shosatojp/google_search_blocker/raw/sync/languages.json?
+// @resource drive_sync https://github.com/shosatojp/google_search_blocker/raw/sync/drive_sync.js?
+// @updateURL https://github.com/shosatojp/google_search_blocker/raw/sync/google_search_blocker.user.js?
+// @downloadURL 	https://github.com/shosatojp/google_search_blocker/raw/sync/google_search_blocker.user.js?
 // @grant GM_setValue
 // @grant GM_getValue
 // @grant GM_getResourceText
@@ -22,6 +23,7 @@
 
 (function () {
     'use strict';
+    eval(GM_getResourceText('drive_sync'));
 
     var google_search_block_label;
     var google_search_block_button_showlist;

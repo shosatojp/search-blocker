@@ -1,7 +1,9 @@
-var DriveSync = DriveSync || (function () {
-    const DriveSync = function (client_id, filename) {
+window.DriveSync = DriveSync || (function () {
+    const DriveSync = function (client_id, filename,setModifiedTime,getModifiedTime) {
         this.CLIENT_ID = client_id;
         this.FILE_NAME = filename;
+        this.setModifiedTime=setModifiedTime;
+        this.getModifiedTime=getModifiedTime;
     };
 
     class RequestError extends Error {
@@ -67,15 +69,17 @@ var DriveSync = DriveSync || (function () {
         })).body;
     }
 
-    DriveSync.prototype.updateListFile = async function (localModifiedTime, onDownload, getData) {
+    DriveSync.prototype.compare = async function (onDownload, getData) {
         var file;
         if (!(file = await findFile(this.FILE_NAME))) {
             file = await createFile(this.FILE_NAME);
         }
 
         if (file) {
-            if (localModifiedTime < new Date(file.modifiedTime).getTime()) {
-                onDownload(await getFileContent(file.id)); //ondownloadで今の時間を保存する。
+            const serverModifiedTime = new Date(file.modifiedTime).getTime()
+            if (this.getModifiedTime() < serverModifiedTime) {
+                onDownload(await getFileContent(file.id), serverModifiedTime); //ondownloadで今の時間を保存する。
+                this.setModifiedTime(serverModifiedTime);
             } else {
                 await updateFileContent(file.id, getData());
             }
@@ -83,6 +87,19 @@ var DriveSync = DriveSync || (function () {
             console.error('cannot sync file');
         }
     }
+
+    DriveSync.prototype.marge = function () {
+
+    }
+
+    DriveSync.prototype.pull = function () {
+
+    }
+
+    DriveSync.prototype.push = function () {
+
+    }
+
 
     DriveSync.prototype.signIn = function (onsignin) {
         return new Promise((res, rej) => {
@@ -137,19 +154,3 @@ var DriveSync = DriveSync || (function () {
 
     return DriveSync;
 })();
-
-class TamperDriveSync extends DriveSync{
-    constructor(client_id,filename){
-        super(client_id,filename);
-    }
-    
-}
-
-// var TamperDriveSync = TamperDriveSync || (function () {
-//     const TamperDriveSync = function () {
-
-//     };
-
-
-//     return TamperDriveSync;
-// })();
