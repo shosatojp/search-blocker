@@ -24,6 +24,15 @@
 (function () {
     'use strict';
     eval(GM_getResourceText('drive_sync'));
+    const CLIENT_ID = '531665009269-96fvecl3pj4717mj2e6if6oaph7eu8ar.apps.googleusercontent.com';
+    const LIST_FILE_NAME = 'GoogleSearchBlocker.txt';
+
+    const sync = new DriveSync(CLIENT_ID, LIST_FILE_NAME, (time) => {
+        GM_setValue('modified', time.toString());
+    }, () => {
+        return parseInt(GM_getValue('modified', '0'));
+    });
+    sync.initSync();
 
     var google_search_block_label;
     var google_search_block_button_showlist;
