@@ -95,6 +95,7 @@
 
     function setDomains(domains) {
         GM_setValue('url', domains.join(';'));
+        GM_setValue('modifiedTime', Date.now().toString());
     }
 
     function addDomain(url, isurl = true) {
@@ -146,15 +147,14 @@
         google_search_block_do_sync.addEventListener('input', function (e) {
             GM_setValue('do_sync', (+e.target.checked).toString());
             if (e.target.checked) {
-                initSync();
-                doUpdateListFile();
+                initSync(doUpdateListFile);
             }
         });
 
         if (!!parseInt(GM_getValue('do_sync', '0'))) {
             google_search_block_do_sync.checked = true;
-            initSync();
-            doUpdateListFile();
+            console.log('do_sync')
+            initSync(doUpdateListFile);
         }
 
         google_search_block_label.classList.add(...SETTINGS.container_class.split(' '));
@@ -436,12 +436,12 @@
 
     function loadClient() {
         return gapi.client.load("https://content.googleapis.com/discovery/v1/apis/drive/v3/rest")
-            .then(function () {
-                    console.log("GAPI client loaded for API");
-                },
-                function (err) {
-                    console.error("Error loading GAPI client for API", err);
-                });
+            // .then(function () {
+            //         console.log("GAPI client loaded for API");
+            //     },
+            //     function (err) {
+            //         console.error("Error loading GAPI client for API", err);
+            //     });
     }
 
     async function createFile(name) {
@@ -540,38 +540,59 @@
         }
 
         if (listFile) {
-            if (localModifiedTime < new Date((await getMetadata(listFile.id)).modifiedTime).getTime()) {
-                ondownload(await getFileContent(listFile.id));
+            const body = await getFileContent(listFile.id);
+            if ((localModifiedTime < new Date((await getMetadata(listFile.id)).modifiedTime).getTime()) && body.length) {
+                ondownload(body);
+                console.log('downloaded');
             } else {
                 await updateFileContent(listFile.id, onupload());
+                console.log('uploaded');
             }
         } else {
             console.error('cannot sync file');
         }
     }
 
-    function initSync() {
-        const script = document.createElement('script');
-        script.setAttribute('src', 'https://apis.google.com/js/api.js');
-        document.body.appendChild(script);
-        script.addEventListener('load', () => {
-            gapi.load("client:auth2", function () {
-                gapi.auth2.init({
-                    client_id: CLIENT_ID
+    function initSync(callback) {
+        if (gapi && gapi.auth2) {
+            callback();
+        } else {
+            const script = document.createElement('script');
+            script.setAttribute('src', 'https://apis.google.com/js/api.js');
+            document.body.appendChild(script);
+            script.addEventListener('load', () => {
+                console.log('gapi.auth2', gapi.auth2)
+                gapi.load("client:auth2", function () {
+                    gapi.auth2.init({
+                        client_id: CLIENT_ID
+                    });
+                    gapi.auth2.getAuthInstance().isSignedIn.listen(function (e) {
+                        if (e) {
+                            console.log('signedIn');
+                            loadClient().then(()=>{
+                                google_search_block_button_auth.style.display = 'none';
+                                callback();
+                            });
+                        } else {
+                            google_search_block_button_auth.style.display = 'block';
+                            google_search_block_button_auth.addEventListener('click', authenticate);
+                        }
+                    });
                 });
-                gapi.auth2.getAuthInstance().isSignedIn.listen(function (e) {
-                    if (e) {
-                        loadClient();
-                        console.log('signedIn');
-                        google_search_block_button_auth.style.displey = 'none';
-                    } else {
-                        google_search_block_button_auth.style.displey = 'block';
-                        google_search_block_button_auth.addEventListener('click', authenticate);
-                    }
-                });
+                document.body.removeChild(script);
             });
-        });
+        }
     }
+
+    // async function checkSync() {
+    //     return new Promise((res) => {
+    //         if (!(gapi && gapi.auth2)) {
+    //             await initSync();
+    //         }
+    //         res();
+    //     })
+    // }
+
 
     function doUpdateListFile() {
         updateListFile(parseInt(GM_getValue('modifiedTime', '0')), list_str => {
@@ -579,7 +600,7 @@
             block = getDomains();
             GM_setValue('modifiedTime', Date.now().toString());
         }, () => {
-            return getDomains();
+            return getDomains().join('\n');
         });
     }
 
