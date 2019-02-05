@@ -10,7 +10,8 @@
         "hide_list":"リストを隠す",
         "show_list":"除外リスト",
         "expand":"除外",
-        "collapse":"閉じる"
+        "collapse":"閉じる",
+        "do_sync":"同期"
     }
 },{
     "language":["en","en-us"],
@@ -24,6 +25,7 @@
         "hide_list":"Hide list",
         "show_list":"Show list",
         "expand":"Expand",
-        "collapse":"Collapse"
+        "collapse":"Collapse",
+        "do_sync":"Sync"
     }
 }]
