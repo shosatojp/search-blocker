@@ -76,7 +76,7 @@ window.DriveSync = (function () {
         }
 
         if (file) {
-            const serverModifiedTime = new Date(file.modifiedTime).getTime()
+            const serverModifiedTime = (new Date(file.modifiedTime)).getTime();
             if (this.getModifiedTime() < serverModifiedTime) {
                 onDownload(await getFileContent(file.id), serverModifiedTime); //ondownloadで今の時間を保存する。
                 this.setModifiedTime(serverModifiedTime);

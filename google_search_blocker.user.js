@@ -99,7 +99,7 @@
         DriveSync.prototype.compare = async function (presetModifiedTime = false, onDownload, getData) {
             onDownload = onDownload || this.defaultOnDownload;
             getData = getData || this.defaultGetData;
-            if(presetModifiedTime){
+            if (presetModifiedTime) {
                 this.setModifiedTime(Date.now());
             }
             var file;
@@ -195,17 +195,15 @@
     }, () => {
         return parseInt(GM_getValue('modified', '0'));
     }, data => {
-        console.log('download', data);
+        console.log('download', data.split('\n'));
         setDomains(data.split('\n'));
         block = getDomains();
         google_search_block();
     }, () => {
-        console.log('upload', getDomains().join('\n'));
+        console.log('upload', getDomains());
         return getDomains().join('\n');
     });
-    sync.initSync().then(() => {
-        sync.compare();
-    });
+    sync.initSync().then(() => sync.compare());
 
     var google_search_block_label;
     var google_search_block_button_showlist;
@@ -337,9 +335,7 @@
             setDomains(list);
             block = getDomains();
             google_search_block();
-            sync.initSync().then(() => {
-                sync.compare(true);
-            });
+            sync.initSync().then(() => sync.compare(true));
         });
         google_search_block_button_edit.addEventListener('click', function () {
             google_search_block_textarea_domains.disabled = false;
@@ -552,7 +548,7 @@
         environment = document.querySelector('#WS2m') ? "yahoo_pc" : 'yahoo_mobile';
     }
     console.log(environment);
-    let xpdcount = 0;
+    // let xpdcount = 0;
     const settings = JSON.parse(GM_getResourceText('environments'));
     var SETTINGS;
     settings.forEach(e => {

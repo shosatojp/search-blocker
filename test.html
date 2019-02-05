@@ -11,11 +11,15 @@
     <script>
 
         const CLIENT_ID = '531665009269-96fvecl3pj4717mj2e6if6oaph7eu8ar.apps.googleusercontent.com';
-        const LIST_FILE_NAME = 'GoogleSearchBlocker.txt';
+        const LIST_FILE_NAME = 'GoogleSearchBlocker2.txt';
 
         const sync=new DriveSync(CLIENT_ID,LIST_FILE_NAME);
-        sync.initSync(e=>console.log('signin'),e=>console.log('signout')).then(e=>{
-            sync.updateListFile(0,v=>console.log('downloaded',v),v=>{return 'hogera';})
+        sync.initSync(e=>console.log('signin'),e=>console.log('signout'),()=>{
+
+        },()=>{
+            return 0;
+        }).then(e=>{
+            sync.compare(0,v=>console.log('downloaded',v),v=>{return 'hogera';})
         });
     </script>
     <button onclick="sync.authenticate()">authorize</button>
