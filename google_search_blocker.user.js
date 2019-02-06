@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         Google Search Blocker (Sync Beta)
 // @namespace    https://github.com/ShoSatoJp/sync
-// @version      0.9.36
+// @version      0.10.0
 // @description  block undesired sites from google search results!
 // @author       ShoSato
 // @match https://www.google.co.jp/search?*
 // @match https://www.google.com/search?*
 // @match https://www.bing.com/*
 // @match https://search.yahoo.co.jp/*
+// @match https://m.yahoo.co.jp/*
 // @resource label https://github.com/shosatojp/google_search_blocker/raw/sync/container.html?
 // @resource buttons https://github.com/shosatojp/google_search_blocker/raw/sync/buttons.html?
 // @resource selectors https://github.com/shosatojp/google_search_blocker/raw/sync/selectors.html?
@@ -39,7 +40,7 @@
             }
         }
 
-        async function request(e) {
+        DriveSync.prototype.request = async function (e) {
             try {
                 return await gapi.client.request(e);
             } catch (error) {
@@ -54,8 +55,8 @@
                 });
         }
 
-        async function createFile(name) {
-            return (await request({
+        DriveSync.prototype.createFile = async function (name) {
+            return (await this.request({
                 path: '/drive/v3/files',
                 method: 'POST',
                 body: {
@@ -64,8 +65,8 @@
             })).result;
         }
 
-        async function findFile(name) {
-            return (await request({
+        DriveSync.prototype.findFile = async function (name) {
+            return (await this.request({
                 path: '/drive/v3/files',
                 method: 'GET',
                 params: {
@@ -75,19 +76,20 @@
             })).result.files[0];
         }
 
-        async function updateFileContent(id, content) {
-            return (await request({
+        DriveSync.prototype.updateFileContent = async function (id, content) {
+            await this.request({
                 path: `/upload/drive/v3/files/${id}`,
                 method: 'PATCH',
                 params: {
                     uploadType: 'media'
                 },
                 body: content
-            })).result;
+            });
+            return new Date((await this.findFile(this.FILE_NAME)).modifiedTime).getTime();
         }
 
-        async function getFileContent(id) {
-            return (await request({
+        DriveSync.prototype.getFileContent = async function (id) {
+            return (await this.request({
                 path: `/drive/v3/files/${id}`,
                 method: 'GET',
                 params: {
@@ -103,8 +105,8 @@
                 this.setModifiedTime(Date.now());
             }
             var file;
-            if (!(file = await findFile(this.FILE_NAME))) {
-                file = await createFile(this.FILE_NAME);
+            if (!(file = await this.findFile(this.FILE_NAME))) {
+                file = await this.createFile(this.FILE_NAME);
             }
 
             if (file) {
@@ -112,10 +114,10 @@
                 const localModifiedTime = this.getModifiedTime();
                 console.log('server:', serverModifiedTime, ' local:', localModifiedTime);
                 if (localModifiedTime < serverModifiedTime) {
-                    onDownload(await getFileContent(file.id), serverModifiedTime); //ondownloadで今の時間を保存する。
+                    onDownload(await this.getFileContent(file.id), serverModifiedTime);
                     this.setModifiedTime(serverModifiedTime);
                 } else if (localModifiedTime > serverModifiedTime) {
-                    await updateFileContent(file.id, getData());
+                    this.setModifiedTime(await this.updateFileContent(file.id, getData()));
                 } else {
                     console.log('nothing to do.');
                 }
@@ -280,11 +282,213 @@
             escapes.split('').forEach(e => src = src.replace(new RegExp(`\\${e}`, 'gi'), `\\${e}`));
             return src;
         };
+        Util.getCandidate = function (url) {
+            let c = new URL(url);
+            let result = [];
+            var split = c.host.split('.').reverse();
+            var temp = split.shift();
+            result.push({
+                regex: temp,
+                alias: temp
+            });
+            split.forEach(e => {
+                temp = e + '.' + temp;
+                result.push({
+                    regex: temp,
+                    alias: temp
+                });
+            });
+            result.shift();
+            const exclude = ['co.jp', 'ne.jp'];
+            result = result.filter(e => !~exclude.indexOf(e.regex));
+
+            var split = c.pathname.substr(1).split('/').filter(e => e);
+            var temp = '#https?://' + Util.regex_escape(c.host);
+            var temp_alias = c.host;
+            split.pop();
+            split.slice(0, 2).forEach(e => {
+                temp += '/' + Util.regex_escape(e);
+                temp_alias += '/' + e;
+                result.push({
+                    regex: temp,
+                    alias: temp_alias
+                });
+            });
+            return result;
+        }
+        Util.isMobileDevice = function () {
+            return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+        };
         return Util;
     })();
 
+    const Controller = (function () {
+        const Controller = function (parent, target_url) {
+            this.parent = parent;
+            this.target_url = target_url;
+            this.open_button_ = undefined;
+            this.close_button_ = undefined;
+        };
 
-    function showLabel() {
+        Controller.prototype.createButton = function () {
+            if (!this.parent.querySelector('.google_search_block_buttons_container')) {
+                const container_ = document.createElement('div');
+                container_.className = 'google_search_block_buttons_container';
+                container_.innerHTML = TextResource.get('buttons');
+
+                this.open_button_ = container_.querySelector('.google_search_block_button_openui');
+                this.close_button_ = container_.querySelector('.google_search_block_button_closeui');
+
+                this.open_button_.addEventListener('click', this.openButton.bind(this));
+                this.close_button_.addEventListener('click', this.closeButton.bind(this));
+
+                this.parent.appendChild(container_);
+            }
+        }
+
+        Controller.prototype.openButton = function () {
+            // createController(this.parent, this.target_url);
+            this.create();
+            this.open_button_.style.display = 'none';
+            this.close_button_.style.display = 'block';
+            if (SETTINGS.result_box_style_class) {
+                this.parent.classList.add(SETTINGS.result_box_style_class);
+            }
+        };
+
+        Controller.prototype.closeButton = function () {
+            this.open_button_.style.display = 'block';
+            this.close_button_.style.display = 'none';
+            this.parent.querySelector('.google_search_block_blockui').remove();
+            if (SETTINGS.result_box_style_class) {
+                this.parent.classList.remove(SETTINGS.result_box_style_class);
+            }
+        };
+
+        Controller.prototype.create = function () {
+            const self = this;
+            const class_name = 'google_search_block_blockui_container';
+            //remove if already exists the controller
+            let old_ = self.parent.querySelector('.' + class_name);
+            if (old_) old_.remove();
+
+            //wrapper
+            const div = document.createElement('div');
+            div.className = class_name;
+            div.innerHTML = TextResource.get('selectors');
+            const contents_ = div.querySelector('.google_search_block_blockui_contents');
+
+            //candidate list
+            Util.getCandidate(self.target_url).forEach(e => {
+                const code = document.createElement('code');
+                code.textContent = e.alias;
+
+                const span = document.createElement('span');
+                span.className = 'google_search_block_button';
+                span.setAttribute('url', e.regex);
+                span.addEventListener('click', function () {
+                    Patterns.add(this.getAttribute('url'));
+                    BLOCK = Patterns.get();
+                    div.remove();
+                    if (SETTINGS.result_box_style_class) {
+                        self.parent.classList.remove(SETTINGS.result_box_style_class);
+                    }
+                    GoogleSearchBlock.all();
+                    SYNC.initSync(() => SYNC.compare(true));
+                });
+                span.appendChild(code);
+
+                contents_.appendChild(span);
+            });
+            self.parent.appendChild(div);
+        }
+
+        return Controller;
+    })();
+
+    const GoogleSearchBlock = (function () {
+        const GoogleSearchBlock = {};
+
+        let blocked_patterns_ = [];
+        let time = 0;
+
+        GoogleSearchBlock.one = function (e) {
+            const start_ = performance.now();
+            const link_ = e.querySelector(SETTINGS.second);
+            let removed_ = false;
+            if (link_) {
+                e.style['background-color'] = '';
+                const url_ = link_.getAttribute('href');
+                if (!url_.startsWith('http')) return;
+                const host_ = new URL(url_).host;
+                for (let i = 0, len = BLOCK.length; i < len; i++) {
+                    const block_pattern_ = BLOCK[i];
+                    if (block_pattern_.charAt(0) === '#' ? url_.match(new RegExp(block_pattern_.substr(1), 'g')) : host_.endsWith(block_pattern_)) {
+                        e.style.display = 'none';
+                        e.style['background-color'] = 'rgba(248, 195, 199, 0.884)';
+                        removed_ = true;
+                        if (!~blocked_patterns_.indexOf(block_pattern_)) {
+                            blocked_patterns_.push(block_pattern_);
+                            if (R.blocked) GoogleSearchBlock.createButton(block_pattern_);
+                        }
+                        COUNT++;
+                        if (R.count) R.count.textContent = COUNT;
+                        break;
+                    }
+                }
+                if (!removed_) e.style.display = 'block';
+                new Controller(e, url_).createButton();
+            }
+            time += performance.now() - start_;
+            return removed_;
+        };
+
+        GoogleSearchBlock.all = function () {
+            const start_ = performance.now();
+            COUNT = 0;
+            blocked_patterns_ = [];
+            document.querySelectorAll(SETTINGS.first).forEach(e => {
+                GoogleSearchBlock.one(e);
+            });
+            time = performance.now() - start_;
+            GoogleSearchBlock.aggregate();
+        };
+
+        GoogleSearchBlock.aggregate = function () {
+            while (R.blocked.firstChild) R.blocked.removeChild(R.blocked.firstChild);
+
+            //blocked buttons
+            Util.distinct(blocked_patterns_).sort().forEach(e => {
+                GoogleSearchBlock.createButton(e);
+            });
+
+            R.count.textContent = COUNT;
+            R.textarea_domains.value = Patterns.get().sort().join('\n');
+            R.info.textContent = `${Math.floor(time*10)/10}ms ${BLOCK.length}`;
+        };
+
+        GoogleSearchBlock.createButton = function (pattern) {
+            const code = document.createElement('code');
+            code.textContent = pattern;
+
+            const span = document.createElement('span');
+            span.className = 'google_search_block_button';
+            span.setAttribute('domain', pattern);
+            span.addEventListener('click', function () {
+                var domain = this.getAttribute('domain');
+                Patterns.remove(domain);
+                BLOCK = Patterns.get();
+                GoogleSearchBlock.all();
+                SYNC.initSync(() => SYNC.compare(true));
+            });
+            span.appendChild(code);
+
+            R.blocked.appendChild(span);
+        };
+        return GoogleSearchBlock;
+    })();
+
+    function initializeForm() {
         const e = document.createElement('div');
         e.innerHTML = TextResource.get('label');
         R.result_container.appendChild(e);
@@ -309,8 +513,8 @@
             const list_ = Util.distinct(R.textarea_domains.value.split('\n').map(e => e.trim()).filter(e => e));
             Patterns.set(list_);
             BLOCK = list_;
-            google_search_block();
-            sync.initSync().then(() => sync.compare(true));
+            GoogleSearchBlock.all();
+            SYNC.initSync().then(() => SYNC.compare(true));
         });
         R.button_edit.addEventListener('click', function () {
             R.textarea_domains.disabled = false;
@@ -321,7 +525,7 @@
             R.button_show.style.display = 'none';
         });
         R.button_reblock.addEventListener('click', function () {
-            google_search_block();
+            GoogleSearchBlock.all();
             R.button_reblock.style.display = 'none';
             R.button_show.style.display = 'block';
         });
@@ -339,188 +543,115 @@
         R.textarea_domains.disabled = true;
     }
 
-    function getCandidate(url) {
-        let c = new URL(url);
-        let result = [];
-        var split = c.host.split('.').reverse();
-        var temp = split.shift();
-        result.push({
-            regex: temp,
-            alias: temp
-        });
-        split.forEach(e => {
-            temp = e + '.' + temp;
-            result.push({
-                regex: temp,
-                alias: temp
-            });
-        });
-        result.shift();
-        const exclude = ['co.jp', 'ne.jp'];
-        result = result.filter(e => !~exclude.indexOf(e.regex));
-
-        var split = c.pathname.substr(1).split('/').filter(e => e);
-        var temp = '#https?://' + Util.regex_escape(c.host);
-        var temp_alias = c.host;
-        split.pop();
-        split.slice(0, 2).forEach(e => {
-            temp += '/' + Util.regex_escape(e);
-            temp_alias += '/' + e;
-            result.push({
-                regex: temp,
-                alias: temp_alias
-            });
-        });
-        return result;
-    }
-
-
-    function showBlockUI(parent, target_url) {
-        let a = parent.querySelector('.google_search_block_blockui_container');
-        if (a) a.remove();
-
-        const div = document.createElement('div');
-        div.className = 'google_search_block_blockui_container';
-        div.innerHTML = TextResource.get('selectors');
-        const contents_ = div.querySelector('.google_search_block_blockui_contents');
-
-        //candidate list
-        getCandidate(target_url).forEach(e => {
-            const code = document.createElement('code');
-            code.textContent = e.alias;
-
-            const span = document.createElement('span');
-            span.className = 'google_search_block_button';
-            span.setAttribute('url', e.regex);
-            span.addEventListener('click', function () {
-                Patterns.add(this.getAttribute('url'));
-                BLOCK = Patterns.get();
-                div.remove();
-                if (SETTINGS.result_box_style_class) {
-                    parent.classList.remove(SETTINGS.result_box_style_class);
-                }
-                google_search_block();
-                sync.initSync(() => sync.compare(true));
-            });
-            span.appendChild(code);
-
-            contents_.appendChild(span);
-        });
-        parent.appendChild(div);
-    }
-
-    function showButton(parent, target_url) {
-        var label = parent.querySelector('.google_search_block_buttons_container');
-        if (!label) {
-            let container = document.createElement('div');
-            container.className = 'google_search_block_buttons_container';
-            container.innerHTML = TextResource.get('buttons');
-            parent.appendChild(container);
-            container.querySelector('.google_search_block_button_openui').setAttribute('url', target_url);
-            container.querySelector('.google_search_block_button_openui').addEventListener('click', function () {
-                let url = this.getAttribute('url');
-                showBlockUI(parent, url);
-                this.style.display = 'none';
-                parent.querySelector('.google_search_block_button_closeui').style.display = 'block';
-                if (SETTINGS.result_box_style_class) {
-                    parent.classList.add(SETTINGS.result_box_style_class);
-                }
-            });
-            container.querySelector('.google_search_block_button_closeui').addEventListener('click', function () {
-                parent.querySelector('.google_search_block_button_openui').style.display = 'block';
-                this.style.display = 'none';
-                parent.querySelector('.google_search_block_blockui').remove();
-                if (SETTINGS.result_box_style_class) {
-                    parent.classList.remove(SETTINGS.result_box_style_class);
-                }
-            });
+    function getObserverFunction(environment) {
+        var fn;
+        switch (environment) {
+            case 'pc':
+                fn = (function (records, callback) {
+                    records = records.filter(x => {
+                        return x.target.className === 'g' && x.addedNodes.length;
+                    });
+                    records.forEach(x => {
+                        x.addedNodes.forEach(b => {
+                            if (b.tagName === 'DIV') {
+                                callback(x.target);
+                            }
+                        });
+                    });
+                });
+                break;
+            case 'mobile':
+                fn = (function (records, callback) {
+                    records = records.filter(x => {
+                        return x.target && x.target.classList && x.target.classList.contains('xpd'); // && x.addedNodes.length;
+                    });
+                    records.forEach(x => {
+                        x.addedNodes.forEach(b => {
+                            if (b.tagName === 'DIV') {
+                                callback(x.target);
+                            }
+                        });
+                    });
+                });
+                break;
+            case 'bing_pc':
+                fn = (function (records, callback) {
+                    records = records.filter(x => {
+                        return x.target.className === 'b_algo';
+                    });
+                    records.forEach(x => {
+                        callback(x.target);
+                    });
+                });
+                break;
+            case 'bing_mobile':
+                fn = (function (records, callback) {
+                    records = records.filter(x => {
+                        return x.target.className === 'b_algo';
+                    });
+                    records.forEach(x => {
+                        callback(x.target);
+                    });
+                });
+                break;
+            case 'yahoo_pc':
+                fn = (function (records, callback) {
+                    records = records.filter(x => {
+                        return x.target.className === 'w';
+                    });
+                    records.forEach(x => {
+                        callback(x.target);
+                    });
+                });
+                break;
+            case 'yahoo_mobile':
+                fn = (function (records, callback) {
+                    records = records.filter(x => {
+                        return x.target.className === 'sw-CardBase';
+                    });
+                    records.forEach(x => {
+                        callback(x.target);
+                    });
+                });
+                break;
         }
+        return fn;
     }
-
-    function google_search_block() {
-        const start_ = performance.now();
-        COUNT = 0;
-        let blocked_ = [];
-        document.querySelectorAll(SETTINGS.first).forEach(e => {
-            const link_ = e.querySelector(SETTINGS.second);
-            if (link_) {
-                e.style['background-color'] = '';
-                let removed_ = false;
-                const url_ = link_.getAttribute('href');
-                const host_ = new URL(url_).host;
-                for (let i = 0, len = BLOCK.length; i < len; i++) {
-                    const block_query_ = BLOCK[i];
-                    if (block_query_.charAt(0) === '#' ? url_.match(new RegExp(block_query_.substr(1), 'g')) : host_.endsWith(block_query_)) {
-                        e.style.display = 'none';
-                        e.style['background-color'] = 'rgba(248, 195, 199, 0.884)';
-                        removed_ = true;
-                        blocked_.push(block_query_);
-                        COUNT++;
-                        break;
-                    }
-                }
-                if (!removed_) e.style.display = 'block';
-                showButton(e, url_);
-            }
-        });
-
-        while (R.blocked.firstChild) R.blocked.removeChild(R.blocked.firstChild);
-
-        //blocked buttons
-        Util.distinct(blocked_).sort().forEach(e => {
-            const code = document.createElement('code');
-            code.textContent = e;
-
-            const span = document.createElement('span');
-            span.className = 'google_search_block_button';
-            span.setAttribute('domain', e);
-            span.addEventListener('click', function () {
-                var domain = this.getAttribute('domain');
-                Patterns.remove(domain);
-                BLOCK = Patterns.get();
-                google_search_block();
-                sync.initSync(() => sync.compare(true));
-            });
-            span.appendChild(code);
-
-            R.blocked.appendChild(span);
-        });
-
-        google_search_block_count.textContent = COUNT;
-        R.textarea_domains.value = Patterns.get().sort().join('\n');
-        R.info.textContent = `${Math.floor((performance.now() - start_)*10)/10}ms ${BLOCK.length}`;
-    }
-
 
     function init() {
-        //detect environment
         let environment_ = null;
-        if (location.host === 'www.google.com' || location.host === 'www.google.co.jp') {
-            environment_ = document.querySelector('#search') ? 'pc' : 'mobile';
-        } else if (location.host === 'www.bing.com') {
-            environment_ = document.querySelector('[name="mobileoptimized"]') ? "bing_mobile" : 'bing_pc';
-        } else if (location.host === 'search.yahoo.co.jp') {
-            environment_ = document.querySelector('#WS2m') ? "yahoo_pc" : 'yahoo_mobile';
-        }
-        console.log(environment_);
-        //load settings
-        JSON.parse(TextResource.get('environments')).forEach(e => {
-            if (e.environment === environment_) {
-                SETTINGS = e;
-            }
-        });
-        if (!(R.result_container = document.querySelector(SETTINGS.result_container)))
-            throw new Error('result container not found.');
 
-        if (environment_ === 'mobile') {
-            const observer_ = new MutationObserver(function (records, mo) {
-                if (records.filter(x => {
-                        return ('getAttribute' in x.target) && x.target.getAttribute('data-graft-type') === 'insert';
-                    }).length) {
-                    google_search_block();
+        { //detect environment
+            const isMobile_ = Util.isMobileDevice();
+            if (location.host === 'www.google.com' || location.host === 'www.google.co.jp') {
+                environment_ = isMobile_ ? 'mobile' : 'pc';
+            } else if (location.host === 'www.bing.com') {
+                environment_ = isMobile_ ? "bing_mobile" : 'bing_pc';
+            } else if (location.host === 'search.yahoo.co.jp') {
+                environment_ = isMobile_ ? 'yahoo_mobile' : "yahoo_pc";
+            }
+            console.log(environment_);
+        }
+
+        { //load settings
+            JSON.parse(TextResource.get('environments')).forEach(e => {
+                if (e.environment === environment_) {
+                    SETTINGS = e;
                 }
             });
-            observer_.observe(document.querySelector(SETTINGS.observer_target), {
+        }
+
+        { //最初からMutationObserver;
+            const mutation_processed_ = [];
+            const observer_ = new MutationObserver(function (records) {
+                getObserverFunction(environment_)(records, (element) => {
+                    if (!~mutation_processed_.indexOf(element)) {
+                        GoogleSearchBlock.one(element);
+                        mutation_processed_.push(element);
+                    }
+                });
+            });
+            observer_.observe(document, {
                 attributes: true,
                 childList: true,
                 characterData: true,
@@ -528,33 +659,61 @@
                 subtree: true
             });
         }
-    }
 
+        window.onload = function () {
+            console.log('loaded');
+            if (!(R.result_container = document.querySelector(SETTINGS.result_container))) {
+                console.error('result container not found.');
+                return;
+            }
+
+            (SYNC = new DriveSync(CLIENT_ID, LIST_FILE_NAME, (time) => {
+                GM_setValue('modified', time.toString());
+            }, () => {
+                return parseInt(GM_getValue('modified', '0'));
+            }, data => {
+                console.log('download', data.split('\n').length);
+                Patterns.set(data.split('\n'));
+                BLOCK = Patterns.get();
+                GoogleSearchBlock.all();
+            }, () => {
+                console.log('upload', Patterns.get().length);
+                return Patterns.get().join('\n');
+            })).initSync().then(() => SYNC.compare());
+
+
+            initializeForm();
+            GoogleSearchBlock.aggregate();
+
+            //google mobile ajax load.
+            if (environment_ === 'mobile') {
+                const observer_ = new MutationObserver(function (records, mo) {
+                    if (records.filter(x => {
+                            return ('getAttribute' in x.target) && x.target.getAttribute('data-graft-type') === 'insert';
+                        }).length) {
+                        GoogleSearchBlock.all();
+                    }
+                });
+                observer_.observe(document.querySelector(SETTINGS.observer_target), {
+                    attributes: true,
+                    childList: true,
+                    characterData: true,
+                    attributeFilter: [],
+                    subtree: true
+                });
+            }
+        }
+    }
 
     let BLOCK = Util.distinct(Patterns.get());
     let COUNT = 0;
     let SETTINGS = null;
+    let SYNC = null;
 
     const CLIENT_ID = '531665009269-96fvecl3pj4717mj2e6if6oaph7eu8ar.apps.googleusercontent.com';
     const LIST_FILE_NAME = 'GoogleSearchBlocker.txt';
 
-    const sync = new DriveSync(CLIENT_ID, LIST_FILE_NAME, (time) => {
-        GM_setValue('modified', time.toString());
-    }, () => {
-        return parseInt(GM_getValue('modified', '0'));
-    }, data => {
-        console.log('download', data.split('\n'));
-        Patterns.set(data.split('\n'));
-        BLOCK = Patterns.get();
-        google_search_block();
-    }, () => {
-        console.log('upload', Patterns.get());
-        return Patterns.get().join('\n');
-    });
-    sync.initSync().then(() => sync.compare());
 
 
     init();
-    showLabel();
-    google_search_block();
 })();
