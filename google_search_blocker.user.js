@@ -148,17 +148,15 @@
         }
 
 
-        DriveSync.prototype.signIn = function (onsignin) {
+        DriveSync.prototype.signIn = function () {
             return new Promise((res, rej) => {
                 if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
                     console.log('already signed in');
-                    onsignin && onsignin();
                     this.onsignin();
                     res();
                 } else {
                     this.authenticate().then(() => {
                         console.log('signed in');
-                        onsignin && onsignin();
                         this.onsignin();
                         res();
                     }, () => {
@@ -170,32 +168,27 @@
             });
         }
 
-        DriveSync.prototype.initSync = function (onsignin, onsignout) {
+        DriveSync.prototype.initSync = function () {
             const self = this;
             return new Promise(((res, rej) => {
                 if (!this.usesync()) {
-                    this.onsignout();
                     rej();
+                    return;
                 }
                 if (!('gapi' in window)) {
                     const script = document.createElement('script');
                     script.setAttribute('src', 'https://apis.google.com/js/api.js');
                     document.body.appendChild(script);
-                    // Element_prototype_appendChild.call(document.body, script);
                     script.addEventListener('load', () => {
                         gapi.load("client:auth2", async function () {
                             await gapi.auth2.init({
                                 client_id: CLIENT_ID
                             });
-                            gapi.auth2.getAuthInstance().isSignedIn.listen(e => {
-                                if (e) {
-                                    onsignin && onsignin();
-                                } else {
-                                    onsignout && onsignout();
-                                }
-                            });
-                            self.signIn(onsignin).then(res, rej);
+                            self.signIn().then(res, rej);
                         });
+                    });
+                    script.addEventListener('error',function(){
+                        rej();
                     });
                 } else {
                     self.signIn().then(res, rej);
@@ -422,7 +415,11 @@
                         self.parent.classList.remove(SETTINGS.result_box_style_class);
                     }
                     GoogleSearchBlock.all();
-                    SYNC.initSync(() => SYNC.compare(true));
+                    self.open_button_.style.display = 'block';
+                    self.close_button_.style.display = 'none';
+                    SYNC.initSync().then(() => SYNC.compare(true)).catch(()=>{
+                        SYNC.setModifiedTime(Date.now());
+                    });
                 });
                 span.appendChild(code);
 
@@ -508,7 +505,9 @@
                 Patterns.remove(domain);
                 BLOCK = Patterns.get();
                 GoogleSearchBlock.all();
-                SYNC.initSync(() => SYNC.compare(true));
+                SYNC.initSync().then(() => SYNC.compare(true)).catch(()=>{
+                    SYNC.setModifiedTime(Date.now());
+                });
             });
             span.appendChild(code);
 
@@ -547,7 +546,9 @@
             Patterns.set(list_);
             BLOCK = list_;
             GoogleSearchBlock.all();
-            SYNC.initSync().then(() => SYNC.compare(true));
+            SYNC.initSync().then(() => SYNC.compare(true)).catch(()=>{
+                SYNC.setModifiedTime(Date.now());
+            });
         });
         R.button_edit.addEventListener('click', function () {
             R.textarea_domains.disabled = false;
@@ -597,7 +598,7 @@
             case 'pc':
                 fn = (function (records, callback) {
                     records = records.filter(x => {
-                        return x.target.className === 'g' && x.addedNodes.length;
+                        return x.target.className === 'g' && x.target.parentElement.className == 'srg' && x.addedNodes.length;
                     });
                     records.forEach(x => {
                         x.addedNodes.forEach(b => {

@@ -86,6 +86,19 @@
         font-family: monospace;
         font-size: medium;
     }
+
+    #google_search_block_button_syncinfo {
+        font-size: small;
+        align-self: center;
+        margin: 0 10px;
+    }
+
+    .google_search_block_button_openui,
+    .google_search_block_button_closeui {
+        margin-right: 10px;
+        margin-bottom: 5px;
+        cursor: pointer;
+    }
 </style>
 <div class="google_search_block_container" id="google_search_block">
     <div id="google_search_block_header">
@@ -109,7 +122,7 @@
         <div class="google_search_block_hr"></div>
     </div>
     <div id="google_search_block_buttons">
-        <div id="google_search_block_button_syncinfo" style="font-size: small"></div>
+        <div id="google_search_block_button_syncinfo"></div>
         <button class="google_search_block_button" id="google_search_block_button_signin">${signin}</button>
         <button class="google_search_block_button" id="google_search_block_button_signout" style="display: none;">${signout}</button>
         <button class="google_search_block_button" id="google_search_block_button_show">${redisplay}</button>
