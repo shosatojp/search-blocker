@@ -472,7 +472,7 @@
                             if (R.blocked) GoogleSearchBlock.createButton(block_pattern_);
                         }
                         COUNT++;
-                        // console.log('one',COUNT);
+                        console.log('one',COUNT);
                         // if (R.count) R.count.textContent = COUNT;
                         break;
                     }
