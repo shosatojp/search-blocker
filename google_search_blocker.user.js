@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         Google Search Blocker (Sync Beta)
-// @namespace    https://github.com/ShoSatoJp/sync
-// @version      0.10.3
+// @namespace    https://github.com/shosatojp/google_search_blocker/tree/sync
+// @version      0.10.4
 // @description  block undesired sites from google search results!
-// @author       ShoSato
+// @author       Sho Sato
 // @match https://www.google.co.jp/search?*
 // @match https://www.google.com/search?*
 // @match https://www.bing.com/*
@@ -30,7 +30,7 @@
 
     //Sync library for google drive.
     const DriveSync = (function () {
-        const DriveSync = function (client_id, filename, setModifiedTime, getModifiedTime, defaultOnDownload, defaultGetData, usesync, setUseSync) {
+        const DriveSync = function (client_id, filename, setModifiedTime, getModifiedTime, defaultOnDownload, defaultGetData, usesync, setUseSync, onsignin, onsignout) {
             this.CLIENT_ID = client_id;
             this.FILE_NAME = filename;
             this.setModifiedTime = setModifiedTime;
@@ -39,6 +39,8 @@
             this.defaultGetData = defaultGetData;
             this.usesync = usesync;
             this.setUseSync = setUseSync;
+            this.onsignin = onsignin;
+            this.onsignout = onsignout;
         };
 
         class RequestError extends Error {
@@ -151,14 +153,17 @@
                 if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
                     console.log('already signed in');
                     onsignin && onsignin();
+                    this.onsignin();
                     res();
                 } else {
                     this.authenticate().then(() => {
                         console.log('signed in');
                         onsignin && onsignin();
+                        this.onsignin();
                         res();
                     }, () => {
                         console.log('signed in failed');
+                        this.onsignout();
                         rej();
                     });
                 }
@@ -168,7 +173,10 @@
         DriveSync.prototype.initSync = function (onsignin, onsignout) {
             const self = this;
             return new Promise(((res, rej) => {
-                if (!this.usesync()) rej();
+                if (!this.usesync()) {
+                    this.onsignout();
+                    rej();
+                }
                 if (!('gapi' in window)) {
                     const script = document.createElement('script');
                     script.setAttribute('src', 'https://apis.google.com/js/api.js');
@@ -196,7 +204,8 @@
         }
 
         DriveSync.prototype.signOut = function () {
-            return gapi.auth2.getAuthInstance().signOut();
+            gapi.auth2.getAuthInstance().signOut();
+            this.onsignout();
         }
 
         return DriveSync;
@@ -565,12 +574,10 @@
             R.textarea_domains.value = Patterns.get().sort().join('\n');
         });
         R.signin.addEventListener('click', function () {
+            R.syncinfo.textContent = '';
+            SYNC.setUseSync(true);
             SYNC.initSync().then(() => {
                 SYNC.compare();
-                R.syncinfo.textContent = '';
-                R.signin.style.display = 'none';
-                R.signout.style.display = 'block';
-                SYNC.setUseSync(true);
             }).catch(() => {
                 R.syncinfo.textContent = LOCAL_STRING.failedtosync;
                 SYNC.setUseSync(false);
@@ -578,19 +585,8 @@
         });
         R.signout.addEventListener('click', function () {
             SYNC.setUseSync(false);
-            SYNC.signOut().then(() => {
-                R.signin.style.display = 'block';
-                R.signout.style.display = 'none';
-            });
+            SYNC.signOut();
         });
-
-        if (SYNC.usesync()) {
-            R.signin.style.display = 'none';
-            R.signout.style.display = 'block';
-        } else {
-            R.signin.style.display = 'block';
-            R.signout.style.display = 'none';
-        }
         R.textarea_domains.disabled = true;
     }
 
@@ -742,6 +738,14 @@
                 return !!parseInt(GM_getValue('usesync', '0'));
             }, function setusesync(bool) {
                 GM_setValue('usesync', (+bool).toString());
+            }, function onsignin() {
+                R.signin.style.display = 'none';
+                R.signout.style.display = 'block';
+                console.log('signed in');
+            }, function onsignout() {
+                R.signin.style.display = 'block';
+                R.signout.style.display = 'none';
+                console.log('signed out');
             })).initSync().then(() => SYNC.compare());
 
 
