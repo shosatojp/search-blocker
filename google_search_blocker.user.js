@@ -8,7 +8,6 @@
 // @match https://www.google.com/search?*
 // @match https://www.bing.com/*
 // @match https://search.yahoo.co.jp/*
-// @match https://m.yahoo.co.jp/*
 // @resource label https://github.com/shosatojp/google_search_blocker/raw/sync/container.html?
 // @resource buttons https://github.com/shosatojp/google_search_blocker/raw/sync/buttons.html?
 // @resource selectors https://github.com/shosatojp/google_search_blocker/raw/sync/selectors.html?
@@ -24,6 +23,10 @@
 
 (function () {
     'use strict';
+
+    const Element_prototype_appendChild = Element.prototype.appendChild;
+    const Element_prototype_insertBefore = Element.prototype.insertBefore;
+
     const DriveSync = (function () {
         const DriveSync = function (client_id, filename, setModifiedTime, getModifiedTime, defaultOnDownload, defaultGetData) {
             this.CLIENT_ID = client_id;
@@ -165,6 +168,7 @@
                     const script = document.createElement('script');
                     script.setAttribute('src', 'https://apis.google.com/js/api.js');
                     document.body.appendChild(script);
+                    // Element_prototype_appendChild.call(document.body, script);
                     script.addEventListener('load', () => {
                         gapi.load("client:auth2", async function () {
                             await gapi.auth2.init({
@@ -661,6 +665,9 @@
         }
 
         window.onload = function () {
+            Element.prototype.insertBefore = Element_prototype_insertBefore;
+            Element.prototype.appendChild = Element_prototype_appendChild;
+
             console.log('loaded');
             if (!(R.result_container = document.querySelector(SETTINGS.result_container))) {
                 console.error('result container not found.');
