@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Search Blocker (Sync Beta)
 // @namespace    https://github.com/ShoSatoJp/sync
-// @version      0.10.2
+// @version      0.10.3
 // @description  block undesired sites from google search results!
 // @author       ShoSato
 // @match https://www.google.co.jp/search?*
