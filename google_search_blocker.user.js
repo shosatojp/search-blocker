@@ -2,12 +2,12 @@
 // @name         Google Search Blocker (Sync Beta)
 // @namespace    https://github.com/shosatojp/google_search_blocker/tree/sync
 // @homepage https://github.com/shosatojp/google_search_blocker
-// @version      0.10.10
+// @version      0.10.11
 // @description  block undesired sites from google search results!
 // @author       Sho Sato
 // @match https://www.google.co.jp/search?*
 // @match https://www.google.com/search?*
-// @match https://www.bing.com/*
+// @match https://www.bing.com/search?*
 // @match https://search.yahoo.co.jp/*
 // @resource label https://github.com/shosatojp/google_search_blocker/raw/sync/container.html?
 // @resource buttons https://github.com/shosatojp/google_search_blocker/raw/sync/buttons.html?
@@ -146,7 +146,6 @@
         DriveSync.prototype.signIn = function () {
             return new Promise((res, rej) => {
                 if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
-                    // console.log(gapi.auth2.getAuthInstance());
                     console.log('%calready signed in', 'color:#4CAF50;');
                     this.onsignin();
                     res();
@@ -344,6 +343,16 @@
                 navigator.userAgent.match(/Windows Phone/i));
             // return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
         };
+        Util.getUrlParams = function (url) {
+            const result = {};
+            new URL(url).search.substring(1).split('&').forEach(e => {
+                const pair = e.split('=');
+                if (pair.length === 2) {
+                    result[pair[0]] = pair[1].length ? pair[1] : null;
+                }
+            });
+            return result;
+        };
         return Util;
     })();
 
@@ -463,7 +472,8 @@
                             if (R.blocked) GoogleSearchBlock.createButton(block_pattern_);
                         }
                         COUNT++;
-                        if (R.count) R.count.textContent = COUNT;
+                        // console.log('one',COUNT);
+                        // if (R.count) R.count.textContent = COUNT;
                         break;
                     }
                 }
@@ -476,11 +486,13 @@
 
         GoogleSearchBlock.all = function () {
             const start_ = performance.now();
-            COUNT = 0;
+            let count_ = 0;
             blocked_patterns_ = [];
             document.querySelectorAll(SETTINGS.first).forEach(e => {
-                GoogleSearchBlock.one(e);
+                if (GoogleSearchBlock.one(e)) count_++;
             });
+            COUNT = count_;
+            console.log('all', count_);
             time = performance.now() - start_;
             GoogleSearchBlock.aggregate();
         };
@@ -680,6 +692,10 @@
         { //detect environment
             const isMobile_ = Util.isMobileDevice();
             if (location.host === 'www.google.com' || location.host === 'www.google.co.jp') {
+                if (Util.getUrlParams(location.href).tbm){
+                    console.warn('this page is not a search result page.')
+                    return;
+                }
                 environment_ = isMobile_ ? 'mobile' : 'pc';
             } else if (location.host === 'www.bing.com') {
                 environment_ = isMobile_ ? "bing_mobile" : 'bing_pc';
@@ -764,6 +780,7 @@
                         if (records.filter(x => {
                                 return ('getAttribute' in x.target) && x.target.getAttribute('data-graft-type') === 'insert';
                             }).length) {
+                            COUNT = 0;
                             GoogleSearchBlock.all();
                         }
                     });
