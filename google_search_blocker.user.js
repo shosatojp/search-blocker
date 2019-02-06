@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name         Google Search Blocker (Sync Beta)
 // @namespace    https://github.com/shosatojp/google_search_blocker/tree/sync
+// @homepage https://github.com/shosatojp/google_search_blocker
 // @version      0.10.5
 // @description  block undesired sites from google search results!
 // @author       Sho Sato
@@ -19,6 +20,7 @@
 // @grant GM_setValue
 // @grant GM_getValue
 // @grant GM_getResourceText
+// @run-at document-start
 // ==/UserScript==
 
 (function () {
