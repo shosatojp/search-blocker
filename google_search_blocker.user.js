@@ -2,7 +2,7 @@
 // @name         Google Search Blocker (Sync Beta)
 // @namespace    https://github.com/shosatojp/google_search_blocker/tree/sync
 // @homepage https://github.com/shosatojp/google_search_blocker
-// @version      0.10.7
+// @version      0.10.8
 // @description  block undesired sites from google search results!
 // @author       Sho Sato
 // @match https://www.google.co.jp/search?*
@@ -45,18 +45,8 @@
             this.onsignout = onsignout;
         };
 
-        class RequestError extends Error {
-            constructor(e) {
-                this.status = e.status;
-            }
-        }
-
         DriveSync.prototype.request = async function (e) {
-            try {
-                return await gapi.client.request(e);
-            } catch (error) {
-                throw new RequestError();
-            }
+            return await gapi.client.request(e);
         }
 
         DriveSync.prototype.authenticate = function () {
@@ -96,7 +86,6 @@
                 },
                 body: content
             });
-            return new Date((await this.findFile(this.FILE_NAME)).modifiedTime).getTime();
         }
 
         DriveSync.prototype.getFileContent = async function (id) {
@@ -128,7 +117,8 @@
                     onDownload(await this.getFileContent(file.id), serverModifiedTime);
                     this.setModifiedTime(serverModifiedTime);
                 } else if (localModifiedTime > serverModifiedTime) {
-                    this.setModifiedTime(await this.updateFileContent(file.id, getData()));
+                    await this.updateFileContent(file.id, getData());
+                    this.setModifiedTime(new Date((await this.findFile(this.FILE_NAME)).modifiedTime).getTime());
                 } else {
                     console.log('nothing to do.');
                 }
@@ -189,7 +179,7 @@
                             self.signIn().then(res, rej);
                         });
                     });
-                    script.addEventListener('error',function(){
+                    script.addEventListener('error', function () {
                         rej();
                     });
                 } else {
@@ -419,7 +409,7 @@
                     GoogleSearchBlock.all();
                     self.open_button_.style.display = 'block';
                     self.close_button_.style.display = 'none';
-                    SYNC.initSync().then(() => SYNC.compare(true)).catch(()=>{
+                    SYNC.initSync().then(() => SYNC.compare(true)).catch(() => {
                         SYNC.setModifiedTime(Date.now());
                     });
                 });
@@ -507,7 +497,7 @@
                 Patterns.remove(domain);
                 BLOCK = Patterns.get();
                 GoogleSearchBlock.all();
-                SYNC.initSync().then(() => SYNC.compare(true)).catch(()=>{
+                SYNC.initSync().then(() => SYNC.compare(true)).catch(() => {
                     SYNC.setModifiedTime(Date.now());
                 });
             });
@@ -548,7 +538,7 @@
             Patterns.set(list_);
             BLOCK = list_;
             GoogleSearchBlock.all();
-            SYNC.initSync().then(() => SYNC.compare(true)).catch(()=>{
+            SYNC.initSync().then(() => SYNC.compare(true)).catch(() => {
                 SYNC.setModifiedTime(Date.now());
             });
         });
