@@ -24,9 +24,11 @@
 (function () {
     'use strict';
 
+    //For bing.com. (bing overrides these functions.)
     const Element_prototype_appendChild = Element.prototype.appendChild;
     const Element_prototype_insertBefore = Element.prototype.insertBefore;
 
+    //Sync library for google drive.
     const DriveSync = (function () {
         const DriveSync = function (client_id, filename, setModifiedTime, getModifiedTime, defaultOnDownload, defaultGetData) {
             this.CLIENT_ID = client_id;
@@ -197,6 +199,7 @@
         return DriveSync;
     })();
 
+    //Ui elements
     const R = {
         label: undefined,
         button_showlist: undefined,
@@ -218,6 +221,7 @@
         window.navigator.userLanguage ||
         window.navigator.browserLanguage;
 
+    //Resource manager
     const TextResource = (function () {
         const TextResource = function () {};
 
@@ -240,6 +244,7 @@
         return TextResource;
     })();
 
+    //Pattern manager
     const Patterns = (function () {
         const Patterns = {};
         Patterns.get = function () {
@@ -260,6 +265,7 @@
         };
         return Patterns;
     })();
+
 
     const Util = (function () {
         const Util = function () {};
@@ -326,6 +332,7 @@
         return Util;
     })();
 
+    //Controller for each result element.
     const Controller = (function () {
         const Controller = function (parent, target_url) {
             this.parent = parent;
@@ -410,6 +417,7 @@
         return Controller;
     })();
 
+    //main class for blocking search result.
     const GoogleSearchBlock = (function () {
         const GoogleSearchBlock = {};
 
@@ -492,6 +500,7 @@
         return GoogleSearchBlock;
     })();
 
+    //initialize form (bottom of the page)
     function initializeForm() {
         const e = document.createElement('div');
         e.innerHTML = TextResource.get('label');
@@ -547,6 +556,7 @@
         R.textarea_domains.disabled = true;
     }
 
+    //select function for observer by environment
     function getObserverFunction(environment) {
         var fn;
         switch (environment) {
@@ -622,6 +632,7 @@
         return fn;
     }
 
+    //initializer
     function init() {
         let environment_ = null;
 
@@ -645,7 +656,7 @@
             });
         }
 
-        { //最初からMutationObserver;
+        { //use MutationObserver from document-start
             const mutation_processed_ = [];
             const observer_ = new MutationObserver(function (records) {
                 getObserverFunction(environment_)(records, (element) => {
@@ -665,15 +676,18 @@
         }
 
         window.onload = function () {
+            console.log('----------------------------------');
+
             Element.prototype.insertBefore = Element_prototype_insertBefore;
             Element.prototype.appendChild = Element_prototype_appendChild;
 
-            console.log('loaded');
+            //check if ...
             if (!(R.result_container = document.querySelector(SETTINGS.result_container))) {
                 console.error('result container not found.');
                 return;
             }
 
+            //initialize sync feature.
             (SYNC = new DriveSync(CLIENT_ID, LIST_FILE_NAME, (time) => {
                 GM_setValue('modified', time.toString());
             }, () => {
@@ -692,35 +706,40 @@
             initializeForm();
             GoogleSearchBlock.aggregate();
 
-            //google mobile ajax load.
-            if (environment_ === 'mobile') {
-                const observer_ = new MutationObserver(function (records, mo) {
-                    if (records.filter(x => {
-                            return ('getAttribute' in x.target) && x.target.getAttribute('data-graft-type') === 'insert';
-                        }).length) {
-                        GoogleSearchBlock.all();
-                    }
-                });
-                observer_.observe(document.querySelector(SETTINGS.observer_target), {
-                    attributes: true,
-                    childList: true,
-                    characterData: true,
-                    attributeFilter: [],
-                    subtree: true
-                });
+            { //google mobile ajax load.
+                if (environment_ === 'mobile') {
+                    const observer_ = new MutationObserver(function (records, mo) {
+                        if (records.filter(x => {
+                                return ('getAttribute' in x.target) && x.target.getAttribute('data-graft-type') === 'insert';
+                            }).length) {
+                            GoogleSearchBlock.all();
+                        }
+                    });
+                    observer_.observe(document.querySelector(SETTINGS.observer_target), {
+                        attributes: true,
+                        childList: true,
+                        characterData: true,
+                        attributeFilter: [],
+                        subtree: true
+                    });
+                }
             }
         }
     }
 
-    let BLOCK = Util.distinct(Patterns.get());
-    let COUNT = 0;
-    let SETTINGS = null;
-    let SYNC = null;
-
+    //client id of this application.
     const CLIENT_ID = '531665009269-96fvecl3pj4717mj2e6if6oaph7eu8ar.apps.googleusercontent.com';
+    //name of block list file in google drive.
     const LIST_FILE_NAME = 'GoogleSearchBlocker.txt';
 
-
+    //block list
+    let BLOCK = Util.distinct(Patterns.get());
+    //number of blocked elements.
+    let COUNT = 0;
+    //settings from environments.json
+    let SETTINGS = null;
+    //instance of DriveSync
+    let SYNC = null;
 
     init();
 })();
