@@ -2,7 +2,7 @@
 // @name         Google Search Blocker (Sync Beta)
 // @namespace    https://github.com/shosatojp/google_search_blocker/tree/sync
 // @homepage https://github.com/shosatojp/google_search_blocker
-// @version      0.10.8
+// @version      0.10.9
 // @description  block undesired sites from google search results!
 // @author       Sho Sato
 // @match https://www.google.co.jp/search?*
@@ -25,6 +25,8 @@
 
 (function () {
     'use strict';
+    console.log(`%cGoogle Search Blocker ${GM_info.script.version}`, 'color:lightseagreen;font-size:large;');
+    console.log(`%cCopyright © 2019 Sho Sato. All Rights Reserved.`, 'color:lightseagreen;');
 
     //For bing.com. (bing overrides these functions.)
     const Element_prototype_appendChild = Element.prototype.appendChild;
@@ -112,12 +114,13 @@
             if (file) {
                 const serverModifiedTime = new Date(file.modifiedTime).getTime();
                 const localModifiedTime = this.getModifiedTime();
-                console.log('server:', serverModifiedTime, ' local:', localModifiedTime);
+                console.log('server:', serverModifiedTime, serverModifiedTime === localModifiedTime ? '=' : serverModifiedTime > localModifiedTime ? '>' : '<', 'local:', localModifiedTime);
                 if (localModifiedTime < serverModifiedTime) {
                     onDownload(await this.getFileContent(file.id), serverModifiedTime);
                     this.setModifiedTime(serverModifiedTime);
                 } else if (localModifiedTime > serverModifiedTime) {
                     await this.updateFileContent(file.id, getData());
+                    this.setModifiedTime(Date.now());
                     this.setModifiedTime(new Date((await this.findFile(this.FILE_NAME)).modifiedTime).getTime());
                 } else {
                     console.log('nothing to do.');
@@ -143,16 +146,17 @@
         DriveSync.prototype.signIn = function () {
             return new Promise((res, rej) => {
                 if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
-                    console.log('already signed in');
+                    // console.log(gapi.auth2.getAuthInstance());
+                    console.log('%calready signed in', 'color:#4CAF50;');
                     this.onsignin();
                     res();
                 } else {
                     this.authenticate().then(() => {
-                        console.log('signed in');
+                        console.log('%csigned in', 'color:#4CAF50;');
                         this.onsignin();
                         res();
                     }, () => {
-                        console.log('signed in failed');
+                        console.log('%csigned in failed', 'color:#4CAF50;');
                         this.onsignout();
                         rej();
                     });
@@ -191,6 +195,8 @@
         DriveSync.prototype.signOut = function () {
             gapi.auth2.getAuthInstance().signOut();
             this.onsignout();
+            console.log('%csigned out', 'color:#4CAF50;');
+
         }
 
         return DriveSync;
@@ -329,7 +335,14 @@
             return result;
         }
         Util.isMobileDevice = function () {
-            return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+            return (navigator.userAgent.match(/Android/i) ||
+                navigator.userAgent.match(/webOS/i) ||
+                navigator.userAgent.match(/iPhone/i) ||
+                navigator.userAgent.match(/iPad/i) ||
+                navigator.userAgent.match(/iPod/i) ||
+                navigator.userAgent.match(/BlackBerry/i) ||
+                navigator.userAgent.match(/Windows Phone/i));
+            // return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
         };
         return Util;
     })();
@@ -577,6 +590,7 @@
             });
         });
         R.signout.addEventListener('click', function () {
+            R.syncinfo.textContent = '';
             SYNC.setUseSync(false);
             SYNC.signOut();
         });
@@ -672,7 +686,7 @@
             } else if (location.host === 'search.yahoo.co.jp') {
                 environment_ = isMobile_ ? 'yahoo_mobile' : "yahoo_pc";
             }
-            console.log(environment_);
+            console.log('environment:', environment_);
         }
 
         { //load settings
@@ -720,12 +734,12 @@
             }, () => {
                 return parseInt(GM_getValue('modified', '0'));
             }, data => {
-                console.log('download', data.split('\n').length);
+                console.log('%cDOWNLOAD', 'color:#E91E63;', data.split('\n').length);
                 Patterns.set(data.split('\n'));
                 BLOCK = Patterns.get();
                 GoogleSearchBlock.all();
             }, () => {
-                console.log('upload', Patterns.get().length);
+                console.log('%cUPLOAD', 'color:#2196F3;', Patterns.get().length);
                 return Patterns.get().join('\n');
             }, function usesync() {
                 return !!parseInt(GM_getValue('usesync', '0'));
@@ -734,11 +748,10 @@
             }, function onsignin() {
                 R.signin.style.display = 'none';
                 R.signout.style.display = 'block';
-                console.log('signed in');
+                R.syncinfo.textContent = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
             }, function onsignout() {
                 R.signin.style.display = 'block';
                 R.signout.style.display = 'none';
-                console.log('signed out');
             })).initSync().then(() => SYNC.compare());
 
 
