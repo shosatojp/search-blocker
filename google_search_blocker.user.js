@@ -2,7 +2,7 @@
 // @name         Google Search Blocker (Sync Beta)
 // @namespace    https://github.com/shosatojp/google_search_blocker/tree/sync
 // @homepage https://github.com/shosatojp/google_search_blocker
-// @version      0.10.11
+// @version      0.10.12
 // @description  block undesired sites from google search results!
 // @author       Sho Sato
 // @match https://www.google.co.jp/search?*
@@ -613,10 +613,10 @@
     function getObserverFunction(environment) {
         var fn;
         switch (environment) {
-            case 'pc':
+            case 'pc'://なぜかFirefoxでGoogleの時だけ効かない時がある
                 fn = (function (records, callback) {
                     records = records.filter(x => {
-                        return x.target.className === 'g' && x.target.parentElement.className == 'srg' && x.addedNodes.length;
+                        return x.target.className === 'g' && x.target.parentElement.className == 'srg';// && x.addedNodes.length;
                     });
                     records.forEach(x => {
                         x.addedNodes.forEach(b => {
@@ -772,7 +772,7 @@
 
 
             initializeForm();
-            GoogleSearchBlock.aggregate();
+            GoogleSearchBlock.all();
 
             { //google mobile ajax load.
                 if (environment_ === 'mobile') {
