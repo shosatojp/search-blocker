@@ -30,13 +30,15 @@
 
     //Sync library for google drive.
     const DriveSync = (function () {
-        const DriveSync = function (client_id, filename, setModifiedTime, getModifiedTime, defaultOnDownload, defaultGetData) {
+        const DriveSync = function (client_id, filename, setModifiedTime, getModifiedTime, defaultOnDownload, defaultGetData, usesync, setUseSync) {
             this.CLIENT_ID = client_id;
             this.FILE_NAME = filename;
             this.setModifiedTime = setModifiedTime;
             this.getModifiedTime = getModifiedTime;
             this.defaultOnDownload = defaultOnDownload;
             this.defaultGetData = defaultGetData;
+            this.usesync = usesync;
+            this.setUseSync = setUseSync;
         };
 
         class RequestError extends Error {
@@ -166,6 +168,7 @@
         DriveSync.prototype.initSync = function (onsignin, onsignout) {
             const self = this;
             return new Promise(((res, rej) => {
+                if (!this.usesync()) rej();
                 if (!('gapi' in window)) {
                     const script = document.createElement('script');
                     script.setAttribute('src', 'https://apis.google.com/js/api.js');
@@ -193,7 +196,7 @@
         }
 
         DriveSync.prototype.signOut = function () {
-            gapi.auth2.getAuthInstance().signOut();
+            return gapi.auth2.getAuthInstance().signOut();
         }
 
         return DriveSync;
@@ -214,12 +217,17 @@
         blocked: undefined,
         info: undefined,
         result_container: undefined,
+        signin: undefined,
+        signout: undefined,
+        syncinfo: undefined,
     }
 
     const LANGUAGE = (window.navigator.languages && window.navigator.languages[0]) ||
         window.navigator.language ||
         window.navigator.userLanguage ||
         window.navigator.browserLanguage;
+    const LOCAL_STRING = JSON.parse(GM_getResourceText('languages'))
+        .filter(x => ~x.language.indexOf(LANGUAGE.toLowerCase()) || ~x.language.indexOf('en'))[0].ui;
 
     //Resource manager
     const TextResource = (function () {
@@ -519,6 +527,9 @@
             textarea_domains: R.label.querySelector('#google_search_block_textarea_domains'),
             blocked: R.label.querySelector('#google_search_block_blocked'),
             info: R.label.querySelector('#google_search_block_info'),
+            signin: R.label.querySelector('#google_search_block_button_signin'),
+            signout: R.label.querySelector('#google_search_block_button_signout'),
+            syncinfo: R.label.querySelector('#google_search_block_button_syncinfo'),
         });
         R.label.classList.add(...SETTINGS.container_class.split(' '));
         R.button_complete.addEventListener('click', function () {
@@ -553,6 +564,33 @@
             R.contents.style.display = 'block';
             R.textarea_domains.value = Patterns.get().sort().join('\n');
         });
+        R.signin.addEventListener('click', function () {
+            SYNC.initSync().then(() => {
+                SYNC.compare();
+                R.syncinfo.textContent = '';
+                R.signin.style.display = 'none';
+                R.signout.style.display = 'block';
+                SYNC.setUseSync(true);
+            }).catch(() => {
+                R.syncinfo.textContent = LOCAL_STRING.failedtosync;
+                SYNC.setUseSync(false);
+            });
+        });
+        R.signout.addEventListener('click', function () {
+            SYNC.setUseSync(false);
+            SYNC.signOut().then(() => {
+                R.signin.style.display = 'block';
+                R.signout.style.display = 'none';
+            });
+        });
+
+        if (SYNC.usesync()) {
+            R.signin.style.display = 'none';
+            R.signout.style.display = 'block';
+        } else {
+            R.signin.style.display = 'block';
+            R.signout.style.display = 'none';
+        }
         R.textarea_domains.disabled = true;
     }
 
@@ -700,6 +738,10 @@
             }, () => {
                 console.log('upload', Patterns.get().length);
                 return Patterns.get().join('\n');
+            }, function usesync() {
+                return !!parseInt(GM_getValue('usesync', '0'));
+            }, function setusesync(bool) {
+                GM_setValue('usesync', (+bool).toString());
             })).initSync().then(() => SYNC.compare());
 
 
