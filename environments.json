@@ -1,6 +1,6 @@
 [{
     "environment": "pc",
-    "first": "#search .g",
+    "first": "#search .srg .g",
     "second": ".r>a",
     "container_class": "google_search_block_container",
     "result_container": "#search",
