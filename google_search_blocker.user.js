@@ -2,11 +2,11 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker
 // @homepage https://github.com/shosatojp/google_search_blocker
-// @version      0.10.17
+// @version      0.10.18
 // @description  block undesired sites from google search results!
 // @author       Sho Sato
-// @match https://www.google.co.jp/search?*
 // @match https://www.google.com/search?*
+// @match https://www.google.co.jp/search?*
 // @match https://www.bing.com/search?*
 // @match https://search.yahoo.co.jp/*
 // @resource label https://github.com/shosatojp/google_search_blocker/raw/master/container.html?
@@ -14,7 +14,6 @@
 // @resource selectors https://github.com/shosatojp/google_search_blocker/raw/master/selectors.html?
 // @resource environments https://github.com/shosatojp/google_search_blocker/raw/master/environments.json?
 // @resource languages https://github.com/shosatojp/google_search_blocker/raw/master/languages.json?
-// @resource drive_sync https://github.com/shosatojp/google_search_blocker/raw/master/drive_sync.js?
 // @updateURL https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js?
 // @downloadURL 	https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js?
 // @grant GM_setValue
@@ -178,9 +177,9 @@
                         gapi.load("client:auth2", async function () {
                             gapi.auth2.init({
                                 client_id: CLIENT_ID
-                            }).then(()=>{
+                            }).then(() => {
                                 self.signIn().then(res, rej);
-                            }).catch((e)=>{
+                            }).catch((e) => {
                                 console.log(e);
                                 rej();
                             });
@@ -470,13 +469,13 @@
                     if (block_pattern_.charAt(0) === '#' ? url_.match(new RegExp(block_pattern_.substr(1), 'g')) : host_.endsWith(block_pattern_)) {
                         e.style.display = 'none';
                         e.style['background-color'] = 'rgba(248, 195, 199, 0.884)';
-                        removed_ = true;
+                        removed_ = block_pattern_ //true;
                         if (!~blocked_patterns_.indexOf(block_pattern_)) {
                             blocked_patterns_.push(block_pattern_);
                             if (R.blocked) GoogleSearchBlock.createButton(block_pattern_);
                         }
                         COUNT++;
-                        // console.log('one', COUNT);
+                        console.log('one', COUNT);
                         // if (R.count) R.count.textContent = COUNT;
                         break;
                     }
@@ -615,80 +614,40 @@
 
     //select function for observer by environment
     function getObserverFunction(environment) {
-        var fn;
-        switch (environment) {
-            case 'pc': //なぜかFirefoxでGoogleの時だけ効かない時がある
-                fn = (function (records, callback) {
-                    records = records.filter(x => {
-                        return x.target && x.target.classList && x.target.classList.contains('g');// && x.target.parentElement.className == 'srg'; // && x.addedNodes.length;
-                    });
-                    records.forEach(x => {
-                        x.addedNodes.forEach(b => {
-                            if (b.tagName === 'DIV') {
-                                callback(x.target);
+        const walkAddedNodesInRecords = function (compare) {
+            return (function (classname) {
+                return (function (records, callback) {
+                    for (const record of records) {
+                        for (const node of record.addedNodes) {
+                            if (compare(node, classname)) {
+                                callback(node);
                             }
-                        });
-                    });
+                        }
+                    }
                 });
-                break;
-            case 'mobile':
-                fn = (function (records, callback) {
-                    records = records.filter(x => {
-                        return x.target && x.target.classList && x.target.classList.contains('xpd'); // && x.addedNodes.length;
-                    });
-                    records.forEach(x => {
-                        x.addedNodes.forEach(b => {
-                            if (b.tagName === 'DIV') {
-                                callback(x.target);
-                            }
-                        });
-                    });
-                });
-                break;
-            case 'bing_pc':
-                fn = (function (records, callback) {
-                    records = records.filter(x => {
-                        return x.target.className === 'b_algo';
-                    });
-                    records.forEach(x => {
-                        callback(x.target);
-                    });
-                });
-                break;
-            case 'bing_mobile':
-                fn = (function (records, callback) {
-                    records = records.filter(x => {
-                        return x.target.className === 'b_algo';
-                    });
-                    records.forEach(x => {
-                        callback(x.target);
-                    });
-                });
-                break;
-            case 'yahoo_pc':
-                fn = (function (records, callback) {
-                    records = records.filter(x => {
-                        return x.target.className === 'w';
-                    });
-                    records.forEach(x => {
-                        callback(x.target);
-                    });
-                });
-                break;
-            case 'yahoo_mobile':
-                fn = (function (records, callback) {
-                    records = records.filter(x => {
-                        return x.target.className === 'sw-CardBase';
-                    });
-                    records.forEach(x => {
-                        callback(x.target);
-                    });
-                });
-                break;
-        }
-        return fn;
-    }
+            });
+        };
 
+        const containsInClassListWhenAdded = walkAddedNodesInRecords((node, classname) => node instanceof Element && node.classList.contains(classname));
+        const equalsClassNameWhenAdded = walkAddedNodesInRecords((node, classname) => node instanceof Element && node.className === classname);
+
+        switch (environment) {
+            case 'pc':
+                return containsInClassListWhenAdded('g');
+            case 'mobile':
+                return containsInClassListWhenAdded('xpd');
+            case 'bing_pc':
+                return equalsClassNameWhenAdded('b_algo');
+            case 'bing_mobile':
+                return equalsClassNameWhenAdded('b_algo');
+            case 'yahoo_pc':
+                return equalsClassNameWhenAdded('w');
+            case 'yahoo_mobile':
+                return equalsClassNameWhenAdded('sw-CardBase');
+            default:
+                throw new Error('invalid environment');
+        }
+    }
     //initializer
     function init() {
         let environment_ = null;
@@ -719,67 +678,45 @@
 
         //use MutationObserver from document-start
         const mutation_processed_ = [];
+        const onmutated = getObserverFunction(environment_);
         const observer_ = new MutationObserver(function (records) {
-            getObserverFunction(environment_)(records, (element) => {
+            onmutated(records, (element) => {
                 if (!~mutation_processed_.indexOf(element)) {
                     GoogleSearchBlock.one(element);
                     mutation_processed_.push(element);
                 }
             });
         });
-        observer_.observe(document, {
-            attributes: true,
+        observer_.observe(document.documentElement, {
             childList: true,
-            characterData: true,
-            attributeFilter: [],
             subtree: true
         });
 
+        // let blocked_by_interval=[];
         // let find_elements_interval = setInterval(() => {
         //     if (document.querySelector(SETTINGS.first)) {
-        //         clearInterval(find_elements_interval);
-        //         find_elements_interval = 0;
-        //         GoogleSearchBlock.all();
+        //         console.log('hoge');
+        //         try {
+        //             document.querySelectorAll(SETTINGS.first).forEach(e=>{
+        //                 if(!~blocked_by_interval.indexOf(e)){
+        //                     blocked_by_interval.push(e);
+        //                     GoogleSearchBlock.one(e);
+        //                 }
+        //             })
+        //         } catch (error) {
+        //             console.warn(error);
+        //         }
         //     }
-        // }, 10);
+        // }, 1);
 
         window.addEventListener('DOMContentLoaded', function () {
-            console.log('----------------------------------');
-
-            Element.prototype.insertBefore = Element_prototype_insertBefore;
-            Element.prototype.appendChild = Element_prototype_appendChild;
+            console.log('----------DOMContentLoaded----------');
 
             //check if ...
             if (!(R.result_container = document.querySelector(SETTINGS.result_container))) {
                 console.error('result container not found.');
                 return;
             }
-
-            //initialize sync feature.
-            (SYNC = new DriveSync(CLIENT_ID, LIST_FILE_NAME, (time) => {
-                GM_setValue('modified', time.toString());
-            }, () => {
-                return parseInt(GM_getValue('modified', '0'));
-            }, data => {
-                console.log('%cDOWNLOAD', 'color:#E91E63;', data.split('\n').length);
-                Patterns.set(data.split('\n'));
-                BLOCK = Patterns.get();
-                GoogleSearchBlock.all();
-            }, () => {
-                console.log('%cUPLOAD', 'color:#2196F3;', Patterns.get().length);
-                return Patterns.get().join('\n');
-            }, function usesync() {
-                return !!parseInt(GM_getValue('usesync', '0'));
-            }, function setusesync(bool) {
-                GM_setValue('usesync', (+bool).toString());
-            }, function onsignin() {
-                R.signin.style.display = 'none';
-                R.signout.style.display = 'block';
-                R.syncinfo.textContent = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
-            }, function onsignout() {
-                R.signin.style.display = 'block';
-                R.signout.style.display = 'none';
-            })).initSync().then(() => SYNC.compare()).catch(()=>{});
 
             // if (find_elements_interval) clearInterval(find_elements_interval);
             observer_.disconnect();
@@ -805,8 +742,48 @@
                     });
                 }
             }
+
+            window.addEventListener('load',function(){
+            console.log('----------load----------');
+
+                Element.prototype.insertBefore = Element_prototype_insertBefore;
+                Element.prototype.appendChild = Element_prototype_appendChild;
+    
+                //initialize sync feature.
+                (SYNC = new DriveSync(CLIENT_ID, LIST_FILE_NAME, (time) => {
+                    GM_setValue('modified', time.toString());
+                }, () => {
+                    return parseInt(GM_getValue('modified', '0'));
+                }, data => {
+                    console.log('%cDOWNLOAD', 'color:#E91E63;', data.split('\n').length);
+                    Patterns.set(data.split('\n'));
+                    BLOCK = Patterns.get();
+                    GoogleSearchBlock.all();
+                }, () => {
+                    console.log('%cUPLOAD', 'color:#2196F3;', Patterns.get().length);
+                    return Patterns.get().join('\n');
+                }, function usesync() {
+                    return !!parseInt(GM_getValue('usesync', '0'));
+                }, function setusesync(bool) {
+                    GM_setValue('usesync', (+bool).toString());
+                }, function onsignin() {
+                    R.signin.style.display = 'none';
+                    R.signout.style.display = 'block';
+                    R.syncinfo.textContent = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
+                }, function onsignout() {
+                    R.signin.style.display = 'block';
+                    R.signout.style.display = 'none';
+                })).initSync().then(() => SYNC.compare()).catch(() => {});
+    
+            });
         });
     }
+    //number of blocked elements.
+    let COUNT = 0;
+    //settings from environments.json
+    let SETTINGS = null;
+    //instance of DriveSync
+    let SYNC = null;
 
     //client id of this application.
     const CLIENT_ID = '531665009269-96fvecl3pj4717mj2e6if6oaph7eu8ar.apps.googleusercontent.com';
@@ -815,12 +792,7 @@
 
     //block list
     let BLOCK = Util.distinct(Patterns.get());
-    //number of blocked elements.
-    let COUNT = 0;
-    //settings from environments.json
-    let SETTINGS = null;
-    //instance of DriveSync
-    let SYNC = null;
 
     init();
+
 })();
