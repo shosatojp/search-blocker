@@ -472,7 +472,7 @@
                             if (R.blocked) GoogleSearchBlock.createButton(block_pattern_);
                         }
                         COUNT++;
-                        console.log('one', COUNT);
+                        // console.log('one', COUNT);
                         // if (R.count) R.count.textContent = COUNT;
                         break;
                     }
@@ -492,7 +492,7 @@
                 if (GoogleSearchBlock.one(e)) count_++;
             });
             COUNT = count_;
-            console.log('all', count_);
+            // console.log('all', count_);
             time = performance.now() - start_;
             GoogleSearchBlock.aggregate();
         };
