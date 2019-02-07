@@ -2,7 +2,7 @@
 // @name         Google Search Blocker (Sync Beta)
 // @namespace    https://github.com/shosatojp/google_search_blocker/tree/sync
 // @homepage https://github.com/shosatojp/google_search_blocker
-// @version      0.10.12
+// @version      0.10.13
 // @description  block undesired sites from google search results!
 // @author       Sho Sato
 // @match https://www.google.co.jp/search?*
@@ -472,7 +472,7 @@
                             if (R.blocked) GoogleSearchBlock.createButton(block_pattern_);
                         }
                         COUNT++;
-                        console.log('one',COUNT);
+                        console.log('one', COUNT);
                         // if (R.count) R.count.textContent = COUNT;
                         break;
                     }
@@ -613,10 +613,10 @@
     function getObserverFunction(environment) {
         var fn;
         switch (environment) {
-            case 'pc'://なぜかFirefoxでGoogleの時だけ効かない時がある
+            case 'pc': //なぜかFirefoxでGoogleの時だけ効かない時がある
                 fn = (function (records, callback) {
                     records = records.filter(x => {
-                        return x.target.className === 'g' && x.target.parentElement.className == 'srg';// && x.addedNodes.length;
+                        return x.target.className === 'g';// && x.target.parentElement.className == 'srg'; // && x.addedNodes.length;
                     });
                     records.forEach(x => {
                         x.addedNodes.forEach(b => {
@@ -692,7 +692,7 @@
         { //detect environment
             const isMobile_ = Util.isMobileDevice();
             if (location.host === 'www.google.com' || location.host === 'www.google.co.jp') {
-                if (Util.getUrlParams(location.href).tbm){
+                if (Util.getUrlParams(location.href).tbm) {
                     console.warn('this page is not a search result page.')
                     return;
                 }
@@ -713,26 +713,33 @@
             });
         }
 
-        { //use MutationObserver from document-start
-            const mutation_processed_ = [];
-            const observer_ = new MutationObserver(function (records) {
-                getObserverFunction(environment_)(records, (element) => {
-                    if (!~mutation_processed_.indexOf(element)) {
-                        GoogleSearchBlock.one(element);
-                        mutation_processed_.push(element);
-                    }
-                });
+        //use MutationObserver from document-start
+        const mutation_processed_ = [];
+        const observer_ = new MutationObserver(function (records) {
+            getObserverFunction(environment_)(records, (element) => {
+                if (!~mutation_processed_.indexOf(element)) {
+                    GoogleSearchBlock.one(element);
+                    mutation_processed_.push(element);
+                }
             });
-            observer_.observe(document, {
-                attributes: true,
-                childList: true,
-                characterData: true,
-                attributeFilter: [],
-                subtree: true
-            });
-        }
+        });
+        observer_.observe(document, {
+            attributes: true,
+            childList: true,
+            characterData: true,
+            attributeFilter: [],
+            subtree: true
+        });
 
-        window.onload = function () {
+        // let find_elements_interval = setInterval(() => {
+        //     if (document.querySelector(SETTINGS.first)) {
+        //         clearInterval(find_elements_interval);
+        //         find_elements_interval = 0;
+        //         GoogleSearchBlock.all();
+        //     }
+        // }, 10);
+
+        window.addEventListener('DOMContentLoaded', function () {
             console.log('----------------------------------');
 
             Element.prototype.insertBefore = Element_prototype_insertBefore;
@@ -770,7 +777,8 @@
                 R.signout.style.display = 'none';
             })).initSync().then(() => SYNC.compare());
 
-
+            // if (find_elements_interval) clearInterval(find_elements_interval);
+            observer_.disconnect();
             initializeForm();
             GoogleSearchBlock.all();
 
@@ -793,7 +801,7 @@
                     });
                 }
             }
-        }
+        });
     }
 
     //client id of this application.
