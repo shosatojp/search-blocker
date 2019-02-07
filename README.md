@@ -18,3 +18,39 @@ You can use original domain or regex with prefix '#'.
 ## Auto Block Level Selector
 ![](https://github.com/ShoSatoJp/google_search_blocker/raw/master/README/block2.png)  
 You only need to click button to block domain.
+
+
+
+# Available Environments
+
+| OS      | Browser  | Domain       | Block | Sync |
+| ------- | -------- | ------------ | ----- | ---- |
+| Windows | Chrome   | google.com   | O     | O    |
+| Windows | Chrome   | google.co.jp | O     | O    |
+| Windows | Chrome   | bing.com     | O     | O    |
+| Windows | Chrome   | yahoo.co.jp  | O     | O    |
+| Windows | Firefox  | google.com   | O     | O    |
+| Windows | Firefox  | google.co.jp | O     | O    |
+| Windows | Firefox  | bing.com     | O     | X    |
+| Windows | Firefox  | yahoo.co.jp  | O     | O    |
+| Windows | Edge     | google.com   | O     | O    |
+| Windows | Edge     | google.co.jp | O     | O    |
+| Windows | Edge     | bing.com     | O     | Δ    |
+| Windows | Edge     | yahoo.co.jp  | O     | O    |
+| Windows | Opera    | any sites    | X     | X    |
+| Windows | Vivaldi  | google.com   | O     | O    |
+| Windows | Vivaldi  | google.co.jp | O     | O    |
+| Windows | Vivaldi  | bing.com     | O     | X    |
+| Windows | Vivaldi  | yahoo.co.jp  | O     | O    |
+| Windows | Waterfox | google.com   | O     | O    |
+| Windows | Waterfox | google.co.jp | O     | O    |
+| Windows | Waterfox | bing.com     | O     | X    |
+| Windows | Waterfox | yahoo.co.jp  | O     | O    |
+| Windows | Sleipnir | google.com   | O     | O    |
+| Windows | Sleipnir | google.co.jp | O     | O    |
+| Windows | Sleipnir | bing.com     | O     | X    |
+| Windows | Sleipnir | yahoo.co.jp  | O     | O    |
+| Android | Firefox  | google.com   | O     | O    |
+| Android | Firefox  | google.co.jp | O     | O    |
+| Android | Firefox  | bing.com     | O     | O    |
+| Android | Firefox  | yahoo.co.jp  | O     | O    |
