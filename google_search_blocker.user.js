@@ -775,7 +775,7 @@
             }, function onsignout() {
                 R.signin.style.display = 'block';
                 R.signout.style.display = 'none';
-            })).initSync().then(() => SYNC.compare());
+            })).initSync().then(() => SYNC.compare()).catch(()=>{});
 
             // if (find_elements_interval) clearInterval(find_elements_interval);
             observer_.disconnect();
