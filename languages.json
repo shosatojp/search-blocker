@@ -10,7 +10,10 @@
         "hide_list":"リストを隠す",
         "show_list":"除外リスト",
         "expand":"除外",
-        "collapse":"閉じる"
+        "collapse":"閉じる",
+        "failedtosync":"サインインに失敗しました",
+        "signin":"サインイン",
+        "signout":"サインアウト"
     }
 },{
     "language":["en","en-us"],
@@ -24,6 +27,9 @@
         "hide_list":"Hide list",
         "show_list":"Show list",
         "expand":"Expand",
-        "collapse":"Collapse"
+        "collapse":"Collapse",
+        "failedtosync":"failed to signin",
+        "signin":"Sign In",
+        "signout":"Sign Out"
     }
 }]

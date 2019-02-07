@@ -59,11 +59,16 @@
         margin: 5px
     }
 
+    .google_search_block_button:hover{
+        border-color: darkgray;
+    }
+
     #google_search_block_buttons {
         display: flex;
         justify-content: flex-end;
         padding: 0 10px 10px
     }
+    
 
     .google_search_block_domain {
         margin: 10px;
@@ -86,6 +91,12 @@
         font-family: monospace;
         font-size: medium;
     }
+
+    #google_search_block_button_syncinfo {
+        font-size: small;
+        margin: 10px;
+    }
+
 </style>
 <div class="google_search_block_container" id="google_search_block">
     <div id="google_search_block_header">
@@ -108,10 +119,15 @@
         </div>
         <div class="google_search_block_hr"></div>
     </div>
-    <div id="google_search_block_buttons">
-        <button class="google_search_block_button" id="google_search_block_button_show">${redisplay}</button>
-        <button class="google_search_block_button" id="google_search_block_button_reblock" style="display: none;">${reblock}</button>
-        <button class="google_search_block_button" id="google_search_block_button_hidelist" style="display: none;">${hide_list}</button>
-        <button class="google_search_block_button" id="google_search_block_button_showlist" style="display: block;">${show_list}</button>
+    <div style="display: flex;flex-direction: row;justify-content: space-between;flex-wrap: wrap;">
+        <div id="google_search_block_button_syncinfo"></div>
+        <div id="google_search_block_buttons">
+            <button class="google_search_block_button" id="google_search_block_button_signin">${signin}</button>
+            <button class="google_search_block_button" id="google_search_block_button_signout" style="display: none;">${signout}</button>
+            <button class="google_search_block_button" id="google_search_block_button_show">${redisplay}</button>
+            <button class="google_search_block_button" id="google_search_block_button_reblock" style="display: none;">${reblock}</button>
+            <button class="google_search_block_button" id="google_search_block_button_hidelist" style="display: none;">${hide_list}</button>
+            <button class="google_search_block_button" id="google_search_block_button_showlist" style="display: block;">${show_list}</button>
+        </div>
     </div>
 </div>
