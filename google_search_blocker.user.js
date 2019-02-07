@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         Google Search Blocker (Sync Beta)
-// @namespace    https://github.com/shosatojp/google_search_blocker/tree/sync
+// @name         Google Search Blocker
+// @namespace    https://github.com/shosatojp/google_search_blocker
 // @homepage https://github.com/shosatojp/google_search_blocker
 // @version      0.10.14
 // @description  block undesired sites from google search results!
@@ -9,14 +9,14 @@
 // @match https://www.google.com/search?*
 // @match https://www.bing.com/search?*
 // @match https://search.yahoo.co.jp/*
-// @resource label https://github.com/shosatojp/google_search_blocker/raw/sync/container.html?
-// @resource buttons https://github.com/shosatojp/google_search_blocker/raw/sync/buttons.html?
-// @resource selectors https://github.com/shosatojp/google_search_blocker/raw/sync/selectors.html?
-// @resource environments https://github.com/shosatojp/google_search_blocker/raw/sync/environments.json?
-// @resource languages https://github.com/shosatojp/google_search_blocker/raw/sync/languages.json?
-// @resource drive_sync https://github.com/shosatojp/google_search_blocker/raw/sync/drive_sync.js?
-// @updateURL https://github.com/shosatojp/google_search_blocker/raw/sync/google_search_blocker.user.js?
-// @downloadURL 	https://github.com/shosatojp/google_search_blocker/raw/sync/google_search_blocker.user.js?
+// @resource label https://github.com/shosatojp/google_search_blocker/raw/master/container.html?
+// @resource buttons https://github.com/shosatojp/google_search_blocker/raw/master/buttons.html?
+// @resource selectors https://github.com/shosatojp/google_search_blocker/raw/master/selectors.html?
+// @resource environments https://github.com/shosatojp/google_search_blocker/raw/master/environments.json?
+// @resource languages https://github.com/shosatojp/google_search_blocker/raw/master/languages.json?
+// @resource drive_sync https://github.com/shosatojp/google_search_blocker/raw/master/drive_sync.js?
+// @updateURL https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js?
+// @downloadURL 	https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js?
 // @grant GM_setValue
 // @grant GM_getValue
 // @grant GM_getResourceText
