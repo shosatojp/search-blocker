@@ -2,7 +2,7 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker
 // @homepage https://github.com/shosatojp/google_search_blocker
-// @version      0.10.16
+// @version      0.10.17
 // @description  block undesired sites from google search results!
 // @author       Sho Sato
 // @match https://www.google.co.jp/search?*
@@ -176,10 +176,14 @@
                     document.body.appendChild(script);
                     script.addEventListener('load', () => {
                         gapi.load("client:auth2", async function () {
-                            await gapi.auth2.init({
+                            gapi.auth2.init({
                                 client_id: CLIENT_ID
+                            }).then(()=>{
+                                self.signIn().then(res, rej);
+                            }).catch((e)=>{
+                                console.log(e);
+                                rej();
                             });
-                            self.signIn().then(res, rej);
                         });
                     });
                     script.addEventListener('error', function () {
