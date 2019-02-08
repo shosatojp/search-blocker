@@ -1,0 +1,46 @@
+<style>
+    #google_search_block_float_container {
+        z-index: 9999998;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        display: none;
+    }
+
+    #google_search_block_float_container>div {
+        align-self: center;
+        width: calc(100% - 20px);
+        max-width: 500px;
+    }
+
+    #google_search_block_float_container>div>.google_search_block_container {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .google_search_block_float_button {
+        z-index: 9999999;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        height: 40px;
+        width: 40px;
+        background-color: rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        line-height: 40px;
+        text-align: center;
+        border-top-right-radius: 20px;
+    }
+</style>
+
+<div id="google_search_block_float_container"></div>
+<div id="google_search_block_float_button_open" class="google_search_block_float_button">↗</div>
+<div id="google_search_block_float_button_close" class="google_search_block_float_button" style="display:none;">↙</div>

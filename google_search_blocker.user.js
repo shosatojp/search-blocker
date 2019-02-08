@@ -2,7 +2,7 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      0.10.19.3
+// @version      0.11.0
 // @description  Block undesired sites from google search results!
 // @author       Sho Sato
 // @match        https://www.google.com/search?*
@@ -10,6 +10,7 @@
 // @match        https://www.bing.com/search?*
 // @match        https://search.yahoo.co.jp/*
 // @resource     label        https://github.com/shosatojp/google_search_blocker/raw/master/container.html?
+// @resource     float        https://github.com/shosatojp/google_search_blocker/raw/master/float.html?
 // @resource     buttons      https://github.com/shosatojp/google_search_blocker/raw/master/buttons.html?
 // @resource     selectors    https://github.com/shosatojp/google_search_blocker/raw/master/selectors.html?
 // @resource     environments https://github.com/shosatojp/google_search_blocker/raw/master/environments.json?
@@ -244,6 +245,7 @@
         signin: undefined,
         signout: undefined,
         syncinfo: undefined,
+        float:undefined,
     }
 
     const LANGUAGE = (window.navigator.languages && window.navigator.languages[0]) ||
@@ -497,6 +499,7 @@
                             if (R.blocked) GoogleSearchBlock.createButton(block_pattern_);
                         }
                         COUNT++;
+                        if(R.count)R.count.textContent=COUNT;
                         console.log('one', COUNT);
                         break;
                     }
@@ -512,11 +515,12 @@
             const start_ = performance.now();
             let count_ = 0;
             blocked_patterns_ = [];
+            COUNT=0;
             document.querySelectorAll(SETTINGS.first).forEach(e => {
                 if (GoogleSearchBlock.one(e)) count_++;
             });
             COUNT = count_;
-            // console.log('all', count_);
+            console.log('all', count_);
             time = performance.now() - start_;
             if (aggregate)
                 GoogleSearchBlock.aggregate();
@@ -559,11 +563,10 @@
     })();
 
     //initialize form (bottom of the page)
-    function initializeForm() {
+    function initializeForm(container) {
         const e = document.createElement('div');
         e.innerHTML = TextResource.get('label');
-        R.result_container.appendChild(e);
-        // R.result_container.insertAdjacentElement('afterBegin',e);
+        container.appendChild(e);
 
         R.label = document.querySelector('#google_search_block');
         Object.assign(R, {
@@ -581,6 +584,7 @@
             signin: R.label.querySelector('#google_search_block_button_signin'),
             signout: R.label.querySelector('#google_search_block_button_signout'),
             syncinfo: R.label.querySelector('#google_search_block_button_syncinfo'),
+            float:R.label.querySelector('#google_search_block_float'),
         });
         R.label.classList.add(...SETTINGS.container_class.split(' '));
         R.button_complete.addEventListener('click', function () {
@@ -634,8 +638,44 @@
             SYNC.setUseSync(false);
             SYNC.signOut();
         });
+        R.float.addEventListener('change', function () {
+            Float.set(this.checked);
+            location.reload();
+        });
+        R.float.checked=Float.get();
         R.textarea_domains.disabled = true;
     }
+
+    const Float = (function () {
+        const Float ={};
+        
+        Float.init= function () {
+            document.body.insertAdjacentHTML('beforeEnd', TextResource.get('float'));
+            Float.button_open = document.querySelector('#google_search_block_float_button_open');
+            Float.button_close = document.querySelector('#google_search_block_float_button_close');
+            Float.container = document.querySelector('#google_search_block_float_container');
+            Float.button_open.addEventListener('click', function () {
+                Float.button_close.style.display = 'block';
+                Float.button_open.style.display = 'none';
+                Float.container.style.display = 'flex';
+            });
+            Float.button_close.addEventListener('click', function () {
+                Float.button_open.style.display = 'block';
+                Float.button_close.style.display = 'none';
+                Float.container.style.display = 'none';
+            });
+        };
+        Float.getContainer = function () {
+            return Float.container;
+        };
+        Float.set = function (bool) {
+            GM_setValue('float', (+bool).toString());
+        };
+        Float.get = function () {
+            return !!parseInt(GM_getValue('float', '0'));
+        };
+        return Float;
+    })();
 
     //select function for observer by environment
     function getObserverFunction(environment) {
@@ -730,9 +770,13 @@
                 return;
             }
 
-            // observer_.disconnect();
             COUNT = 0;
-            initializeForm();
+            if(Float.get()){
+                Float.init();
+                initializeForm(Float.getContainer());
+            }else{
+                initializeForm(R.result_container);
+            }
             GoogleSearchBlock.all();
 
             { //google mobile ajax load.
