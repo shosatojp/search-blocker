@@ -23,6 +23,8 @@
 // ==/UserScript==
 
 (function () {
+    
+    console.log(Element.prototype.appendChild.toString());
     'use strict';
     console.log(`%cGoogle Search Blocker ${GM_info.script.version}`, 'color:lightseagreen;font-size:large;');
     console.log(`%cCopyright © 2019 Sho Sato. All Rights Reserved.`, 'color:lightseagreen;');
