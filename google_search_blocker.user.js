@@ -2,7 +2,7 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker
 // @homepage https://github.com/shosatojp/google_search_blocker
-// @version      0.10.18
+// @version      0.10.18.1
 // @description  block undesired sites from google search results!
 // @author       Sho Sato
 // @match https://www.google.com/search?*
@@ -677,7 +677,7 @@
                 }
             });
         }
-
+        console.log(document.querySelectorAll(SETTINGS.first));
         //use MutationObserver from document-start
         const mutation_processed_ = [];
         const onmutated = getObserverFunction(environment_);
