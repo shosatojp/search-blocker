@@ -512,12 +512,13 @@
 
         GoogleSearchBlock.all = function (aggregate = true) {
             const start_ = performance.now();
-            let count_ = 0;
+            // let count_ = 0;
             blocked_patterns_ = [];
+            // COUNT=0;
             document.querySelectorAll(SETTINGS.first).forEach(e => {
                 if (GoogleSearchBlock.one(e)) count_++;
             });
-            COUNT = count_;
+            // COUNT = count_;
             // console.log('all', count_);
             time = performance.now() - start_;
             if (aggregate)
