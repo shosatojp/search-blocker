@@ -640,19 +640,20 @@
 
     const Float = (function () {
         const Float = function () {
+            const self=this;
             document.body.insertAdjacentHTML('beforeEnd', TextResource.get('float'));
-            this.button_open = document.querySelector('google_search_block_float_button_open');
-            this.button_close = document.querySelector('google_search_block_float_button_close');
-            this.container = document.querySelector('google_search_block_float_container');
+            this.button_open = document.querySelector('#google_search_block_float_button_open');
+            this.button_close = document.querySelector('#google_search_block_float_button_close');
+            this.container = document.querySelector('#google_search_block_float_container');
             this.button_open.addEventListener('click',function(){
-                this.button_close.style.display='block';
-                this.button_open.style.display='none';
-                this.container.style.display='block';
+                self.button_close.style.display='block';
+                self.button_open.style.display='none';
+                self.container.style.display='flex';
             });
             this.button_close.addEventListener('click',function(){
-                this.button_open.style.display='block';
-                this.button_close.style.display='none';
-                this.container.style.display='none';
+                self.button_open.style.display='block';
+                self.button_close.style.display='none';
+                self.container.style.display='none';
             });
         };
         Float.prototype.getContainer = function () {
