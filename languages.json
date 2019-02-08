@@ -13,7 +13,8 @@
         "collapse":"閉じる",
         "failedtosync":"サインインに失敗しました",
         "signin":"サインイン",
-        "signout":"サインアウト"
+        "signout":"サインアウト",
+        "ontop":"上に表示"
     }
 },{
     "language":["en","en-us"],
@@ -30,6 +31,7 @@
         "collapse":"Collapse",
         "failedtosync":"failed to signin",
         "signin":"Sign In",
-        "signout":"Sign Out"
+        "signout":"Sign Out",
+        "ontop":"Top"
     }
 }]

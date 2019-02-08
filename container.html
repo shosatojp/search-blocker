@@ -114,9 +114,15 @@
         </div>
         <div class="google_search_block_hr"></div>
         <textarea id="google_search_block_textarea_domains" spellcheck="false"></textarea>
-        <div id="google_search_block_buttons">
-            <button class="google_search_block_button" id="google_search_block_button_complete">${complete}</button>
-            <button class="google_search_block_button" id="google_search_block_button_edit">${edit}</button>
+        <div id="google_search_block_buttons" style="justify-content: space-between;">
+            <div>
+                <input type="checkbox" id="ontop">
+                <label for="ontop">${ontop}</label>
+            </div>
+            <div>
+                <button class="google_search_block_button" id="google_search_block_button_complete">${complete}</button>
+                <button class="google_search_block_button" id="google_search_block_button_edit">${edit}</button>
+            </div>
         </div>
         <div class="google_search_block_hr"></div>
     </div>
