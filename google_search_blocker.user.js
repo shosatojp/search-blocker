@@ -2,7 +2,7 @@
 // @name         Google Search Blocker (Auto Pagerize Beta)
 // @namespace    https://github.com/shosatojp/google_search_blocker
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      0.10.19.3
+// @version      0.10.20.0
 // @description  Block undesired sites from google search results!
 // @author       Sho Sato
 // @match        https://www.google.com/search?*
@@ -245,6 +245,7 @@
         signin: undefined,
         signout: undefined,
         syncinfo: undefined,
+        float:undefined,
     }
 
     const LANGUAGE = (window.navigator.languages && window.navigator.languages[0]) ||
@@ -582,6 +583,7 @@
             signin: R.label.querySelector('#google_search_block_button_signin'),
             signout: R.label.querySelector('#google_search_block_button_signout'),
             syncinfo: R.label.querySelector('#google_search_block_button_syncinfo'),
+            float:R.label.querySelector('#google_search_block_float'),
         });
         R.label.classList.add(...SETTINGS.container_class.split(' '));
         R.button_complete.addEventListener('click', function () {
@@ -635,30 +637,41 @@
             SYNC.setUseSync(false);
             SYNC.signOut();
         });
+        R.float.addEventListener('input',function(){
+            Float.set(this.checked);
+            location.reload();
+        });
         R.textarea_domains.disabled = true;
     }
 
     const Float = (function () {
-        const Float = function () {
-            const self=this;
+        const Float ={};
+        
+        Float.init= function () {
             document.body.insertAdjacentHTML('beforeEnd', TextResource.get('float'));
-            this.button_open = document.querySelector('#google_search_block_float_button_open');
-            this.button_close = document.querySelector('#google_search_block_float_button_close');
-            this.container = document.querySelector('#google_search_block_float_container');
-            this.button_open.addEventListener('click',function(){
-                self.button_close.style.display='block';
-                self.button_open.style.display='none';
-                self.container.style.display='flex';
+            Float.button_open = document.querySelector('#google_search_block_float_button_open');
+            Float.button_close = document.querySelector('#google_search_block_float_button_close');
+            Float.container = document.querySelector('#google_search_block_float_container');
+            Float.button_open.addEventListener('click', function () {
+                Float.button_close.style.display = 'block';
+                Float.button_open.style.display = 'none';
+                Float.container.style.display = 'flex';
             });
-            this.button_close.addEventListener('click',function(){
-                self.button_open.style.display='block';
-                self.button_close.style.display='none';
-                self.container.style.display='none';
+            Float.button_close.addEventListener('click', function () {
+                Float.button_open.style.display = 'block';
+                Float.button_close.style.display = 'none';
+                Float.container.style.display = 'none';
             });
         };
-        Float.prototype.getContainer = function () {
-            return this.container;
-        }
+        Float.getContainer = function () {
+            return Float.container;
+        };
+        Float.set = function (bool) {
+            GM_setValue('float', (+bool).toString());
+        };
+        Float.get = function () {
+            return !!parseInt(GM_getValue('float', '0'));
+        };
         return Float;
     })();
 
@@ -755,10 +768,13 @@
                 return;
             }
 
-            // observer_.disconnect();
             COUNT = 0;
-            // initializeForm(R.result_container);
-            initializeForm((new Float().getContainer()));
+            if(Float.get()){
+                Float.init();
+                initializeForm(Float.getContainer());
+            }else{
+                initializeForm(R.result_container);
+            }
             GoogleSearchBlock.all();
 
             { //google mobile ajax load.
