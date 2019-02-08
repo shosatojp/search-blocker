@@ -78,7 +78,7 @@
             return gapi.auth2.getAuthInstance()
                 .signIn({
                     scope: "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file",
-                    prompt:'select_account'
+                    prompt: 'select_account'
                 });
         }
 
@@ -175,7 +175,7 @@
                     res();
                 } else {
                     this.authenticate().then(() => {
-                        console.log('%csigned in',`color:${Colors.Green};`);
+                        console.log('%csigned in', `color:${Colors.Green};`);
                         this.onsignin();
                         res();
                     }, () => {
@@ -222,7 +222,7 @@
         DriveSync.prototype.signOut = function () {
             gapi.auth2.getAuthInstance().signOut();
             this.onsignout();
-            console.log('%csigned out',`color:${Colors.Green};`);
+            console.log('%csigned out', `color:${Colors.Green};`);
 
         }
 
@@ -247,7 +247,7 @@
         signin: undefined,
         signout: undefined,
         syncinfo: undefined,
-        float:undefined,
+        float: undefined,
     }
 
     const LANGUAGE = (window.navigator.languages && window.navigator.languages[0]) ||
@@ -495,13 +495,13 @@
                     if (block_pattern_.charAt(0) === '#' ? url_.match(new RegExp(block_pattern_.substr(1), 'g')) : host_.endsWith(block_pattern_)) {
                         e.style.display = 'none';
                         e.style['background-color'] = 'rgba(248, 195, 199, 0.884)';
-                        removed_ = block_pattern_ ;
+                        removed_ = block_pattern_;
                         if (!~blocked_patterns_.indexOf(block_pattern_)) {
                             blocked_patterns_.push(block_pattern_);
                             if (R.blocked) GoogleSearchBlock.createButton(block_pattern_);
                         }
                         COUNT++;
-                        if(R.count)R.count.textContent=COUNT;
+                        if (R.count) R.count.textContent = COUNT;
                         console.log('one', COUNT);
                         break;
                     }
@@ -517,7 +517,7 @@
             const start_ = performance.now();
             let count_ = 0;
             blocked_patterns_ = [];
-            COUNT=0;
+            COUNT = 0;
             document.querySelectorAll(SETTINGS.first).forEach(e => {
                 if (GoogleSearchBlock.one(e)) count_++;
             });
@@ -586,12 +586,12 @@
             signin: R.label.querySelector('#google_search_block_button_signin'),
             signout: R.label.querySelector('#google_search_block_button_signout'),
             syncinfo: R.label.querySelector('#google_search_block_button_syncinfo'),
-            float:R.label.querySelector('#google_search_block_float'),
+            float: R.label.querySelector('#google_search_block_float'),
         });
         R.label.classList.add(...SETTINGS.container_class.split(' '));
         R.button_complete.addEventListener('click', function () {
             R.textarea_domains.disabled = true;
-            R.textarea_domains.style.overflow='hidden';
+            R.textarea_domains.style.overflow = 'hidden';
             const list_ = Util.distinct(R.textarea_domains.value.split('\n').map(e => e.trim()).filter(e => e));
             Patterns.set(list_);
             BLOCK = list_;
@@ -602,7 +602,7 @@
         });
         R.button_edit.addEventListener('click', function () {
             R.textarea_domains.disabled = false;
-            R.textarea_domains.style.overflow='unset';
+            R.textarea_domains.style.overflow = 'unset';
         });
         R.button_show.addEventListener('click', function () {
             document.querySelectorAll(SETTINGS.first).forEach(e => e.style.display = 'block');
@@ -644,14 +644,14 @@
             Float.set(this.checked);
             location.reload();
         });
-        R.float.checked=Float.get();
+        R.float.checked = Float.get();
         R.textarea_domains.disabled = true;
     }
 
     const Float = (function () {
-        const Float ={};
-        
-        Float.init= function () {
+        const Float = {};
+
+        Float.init = function () {
             document.body.insertAdjacentHTML('beforeEnd', TextResource.get('float'));
             Float.button_open = document.querySelector('#google_search_block_float_button_open');
             Float.button_close = document.querySelector('#google_search_block_float_button_close');
@@ -694,28 +694,11 @@
                 });
             });
         };
-        const observer_functions={
-            containsInClassListWhenAdded:walkAddedNodesInRecords((node, classname) => node instanceof Element && node.classList.contains(classname)),
-            equalsClassNameWhenAdded:walkAddedNodesInRecords((node, classname) => node instanceof Element && node.className === classname),
+        const observer_functions = {
+            containsInClassListWhenAdded: walkAddedNodesInRecords((node, classname) => node instanceof Element && node.classList.contains(classname)),
+            equalsClassNameWhenAdded: walkAddedNodesInRecords((node, classname) => node instanceof Element && node.className === classname),
         }
-
         return observer_functions[SETTINGS.observer_function](...SETTINGS.observer_fn_arguments);
-        // switch (environment) {
-        //     case 'pc':
-        //         return containsInClassListWhenAdded('g');
-        //     case 'mobile':
-        //         return containsInClassListWhenAdded('xpd');
-        //     case 'bing_pc':
-        //         return equalsClassNameWhenAdded('b_algo');
-        //     case 'bing_mobile':
-        //         return equalsClassNameWhenAdded('b_algo');
-        //     case 'yahoo_pc':
-        //         return equalsClassNameWhenAdded('w');
-        //     case 'yahoo_mobile':
-        //         return equalsClassNameWhenAdded('sw-CardBase');
-        //     default:
-        //         throw new Error('invalid environment');
-        // }
     }
     //initializer
     function init() {
@@ -723,30 +706,30 @@
 
         { //detect environment
             const isMobile_ = Util.isMobileDevice();
-            if (location.host === 'www.google.com' || location.host === 'www.google.co.jp') {
+            if (location.host === 'www.google.com' ||
+                location.host === 'www.google.co.jp') {
                 if (Util.getUrlParams(location.href).tbm) {
                     console.warn('this page is not a search result page.')
                     return;
                 }
-                environment_ = isMobile_ ? 'mobile' : 'pc';
+                environment_ = isMobile_ ? 'google_mobile' : 'google_pc';
             } else if (location.host === 'www.bing.com') {
                 environment_ = isMobile_ ? "bing_mobile" : 'bing_pc';
             } else if (location.host === 'search.yahoo.co.jp') {
-                environment_ = isMobile_ ? 'yahoo_mobile' : "yahoo_pc";
+                environment_ = isMobile_ ? 'yahoo_co_jp_mobile' : "yahoo_co_jp_pc";
             }
             console.log('environment:', environment_);
         }
 
         { //load settings
-            JSON.parse(TextResource.get('environments')).forEach(e => {
-                if (e.environment === environment_) {
-                    SETTINGS = e;
-                }
-            });
+            if(SETTINGS = JSON.parse(TextResource.get('environments'))[environment_]){
+                console.error('no settings');
+                return;
+            }
         }
 
         //if there are any elements before observe, block these elements.
-        console.log(document.querySelectorAll(SETTINGS.first).length+' elements was found before start MutationObserver');
+        console.log(document.querySelectorAll(SETTINGS.first).length + ' elements was found before start MutationObserver');
         GoogleSearchBlock.all(false);
 
         //use MutationObserver from document-start
@@ -766,7 +749,7 @@
         });
 
         window.addEventListener('DOMContentLoaded', function () {
-            console.log('%c----------DOMContentLoaded----------',`color:${Colors.LightBlue};`);
+            console.log('%c----------DOMContentLoaded----------', `color:${Colors.LightBlue};`);
 
             //check if ...
             if (!(R.result_container = document.querySelector(SETTINGS.result_container))) {
@@ -775,10 +758,10 @@
             }
 
             COUNT = 0;
-            if(Float.get()){
+            if (Float.get()) {
                 Float.init();
                 initializeForm(Float.getContainer());
-            }else{
+            } else {
                 initializeForm(R.result_container);
             }
             GoogleSearchBlock.all();
@@ -804,7 +787,7 @@
             }
 
             window.addEventListener('load', function () {
-                console.log('%c----------------load----------------',`color:${Colors.LightGreen};`);
+                console.log('%c----------------load----------------', `color:${Colors.LightGreen};`);
 
                 Element.prototype.insertBefore = Element_prototype_insertBefore;
                 Element.prototype.appendChild = Element_prototype_appendChild;
