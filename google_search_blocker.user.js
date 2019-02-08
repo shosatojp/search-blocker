@@ -722,7 +722,7 @@
         }
 
         { //load settings
-            if(SETTINGS = JSON.parse(TextResource.get('environments'))[environment_]){
+            if(!(SETTINGS = JSON.parse(TextResource.get('environments'))[environment_])){
                 console.error('no settings');
                 return;
             }
