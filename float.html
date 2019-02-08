@@ -1,0 +1,36 @@
+<style>
+    #google_search_block_float_container {
+        z-index: 9999998;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        display: none;
+    }
+
+    #google_search_block_float_container>div {
+        align-self: center;
+    }
+
+    .google_search_block_float_button {
+        z-index: 9999999;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        height: 20px;
+        width: 20px;
+        background-color: rgba(0, 0, 0, 0.5);
+        cursor: pointer;
+    }
+</style>
+
+<div id="google_search_block_float_container"></div>
+<div id="google_search_block_float_button_open" class="google_search_block_float_button">Open</div>
+<div id="google_search_block_float_button_close" class="google_search_block_float_button" style="display:none;">Close</div>

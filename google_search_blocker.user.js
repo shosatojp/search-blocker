@@ -10,6 +10,7 @@
 // @match        https://www.bing.com/search?*
 // @match        https://search.yahoo.co.jp/*
 // @resource     label        https://github.com/shosatojp/google_search_blocker/raw/auto_pagerize/container.html?
+// @resource     float        https://github.com/shosatojp/google_search_blocker/raw/auto_pagerize/float.html?
 // @resource     buttons      https://github.com/shosatojp/google_search_blocker/raw/master/buttons.html?
 // @resource     selectors    https://github.com/shosatojp/google_search_blocker/raw/master/selectors.html?
 // @resource     environments https://github.com/shosatojp/google_search_blocker/raw/master/environments.json?
@@ -559,10 +560,10 @@
     })();
 
     //initialize form (bottom of the page)
-    function initializeForm() {
+    function initializeForm(container) {
         const e = document.createElement('div');
         e.innerHTML = TextResource.get('label');
-        R.result_container.appendChild(e);
+        container.appendChild(e);
         // R.result_container.insertAdjacentElement('afterBegin',e);
 
         R.label = document.querySelector('#google_search_block');
@@ -636,6 +637,29 @@
         });
         R.textarea_domains.disabled = true;
     }
+
+    const Float = (function () {
+        const Float = function () {
+            document.body.insertAdjacentHTML('beforeEnd', TextResource.get('float'));
+            this.button_open = document.querySelector('google_search_block_float_button_open');
+            this.button_close = document.querySelector('google_search_block_float_button_close');
+            this.container = document.querySelector('google_search_block_float_container');
+            this.button_open.addEventListener('click',function(){
+                this.button_close.style.display='block';
+                this.button_open.style.display='none';
+                this.container.style.display='block';
+            });
+            this.button_close.addEventListener('click',function(){
+                this.button_open.style.display='block';
+                this.button_close.style.display='none';
+                this.container.style.display='none';
+            });
+        };
+        Float.prototype.getContainer = function () {
+            return this.container;
+        }
+        return Float;
+    })();
 
     //select function for observer by environment
     function getObserverFunction(environment) {
@@ -732,7 +756,8 @@
 
             // observer_.disconnect();
             COUNT = 0;
-            initializeForm();
+            // initializeForm(R.result_container);
+            initializeForm((new Float().getContainer()));
             GoogleSearchBlock.all();
 
             { //google mobile ajax load.
