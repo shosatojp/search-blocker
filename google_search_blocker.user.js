@@ -1,25 +1,25 @@
 // ==UserScript==
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker
-// @homepage https://github.com/shosatojp/google_search_blocker
-// @version      0.10.19
+// @homepage     https://github.com/shosatojp/google_search_blocker
+// @version      0.10.19.1
 // @description  block undesired sites from google search results!
 // @author       Sho Sato
-// @match https://www.google.com/search?*
-// @match https://www.google.co.jp/search?*
-// @match https://www.bing.com/search?*
-// @match https://search.yahoo.co.jp/*
-// @resource label https://github.com/shosatojp/google_search_blocker/raw/master/container.html?
-// @resource buttons https://github.com/shosatojp/google_search_blocker/raw/master/buttons.html?
-// @resource selectors https://github.com/shosatojp/google_search_blocker/raw/master/selectors.html?
-// @resource environments https://github.com/shosatojp/google_search_blocker/raw/master/environments.json?
-// @resource languages https://github.com/shosatojp/google_search_blocker/raw/master/languages.json?
-// @updateURL https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js?
-// @downloadURL 	https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js?
-// @grant GM_setValue
-// @grant GM_getValue
-// @grant GM_getResourceText
-// @run-at document-start
+// @match        https://www.google.com/search?*
+// @match        https://www.google.co.jp/search?*
+// @match        https://www.bing.com/search?*
+// @match        https://search.yahoo.co.jp/*
+// @resource     label        https://github.com/shosatojp/google_search_blocker/raw/master/container.html?
+// @resource     buttons      https://github.com/shosatojp/google_search_blocker/raw/master/buttons.html?
+// @resource     selectors    https://github.com/shosatojp/google_search_blocker/raw/master/selectors.html?
+// @resource     environments https://github.com/shosatojp/google_search_blocker/raw/master/environments.json?
+// @resource     languages    https://github.com/shosatojp/google_search_blocker/raw/master/languages.json?
+// @updateURL    https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js?
+// @downloadURL  https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js?
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @grant        GM_getResourceText
+// @run-at       document-start
 // ==/UserScript==
 
 (function () {
