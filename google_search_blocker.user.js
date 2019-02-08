@@ -694,26 +694,28 @@
                 });
             });
         };
-
-        const containsInClassListWhenAdded = walkAddedNodesInRecords((node, classname) => node instanceof Element && node.classList.contains(classname));
-        const equalsClassNameWhenAdded = walkAddedNodesInRecords((node, classname) => node instanceof Element && node.className === classname);
-
-        switch (environment) {
-            case 'pc':
-                return containsInClassListWhenAdded('g');
-            case 'mobile':
-                return containsInClassListWhenAdded('xpd');
-            case 'bing_pc':
-                return equalsClassNameWhenAdded('b_algo');
-            case 'bing_mobile':
-                return equalsClassNameWhenAdded('b_algo');
-            case 'yahoo_pc':
-                return equalsClassNameWhenAdded('w');
-            case 'yahoo_mobile':
-                return equalsClassNameWhenAdded('sw-CardBase');
-            default:
-                throw new Error('invalid environment');
+        const observer_functions={
+            containsInClassListWhenAdded:walkAddedNodesInRecords((node, classname) => node instanceof Element && node.classList.contains(classname)),
+            equalsClassNameWhenAdded:walkAddedNodesInRecords((node, classname) => node instanceof Element && node.className === classname),
         }
+
+        return observer_functions[SETTINGS.observer_function](...SETTINGS.observer_fn_arguments);
+        // switch (environment) {
+        //     case 'pc':
+        //         return containsInClassListWhenAdded('g');
+        //     case 'mobile':
+        //         return containsInClassListWhenAdded('xpd');
+        //     case 'bing_pc':
+        //         return equalsClassNameWhenAdded('b_algo');
+        //     case 'bing_mobile':
+        //         return equalsClassNameWhenAdded('b_algo');
+        //     case 'yahoo_pc':
+        //         return equalsClassNameWhenAdded('w');
+        //     case 'yahoo_mobile':
+        //         return equalsClassNameWhenAdded('sw-CardBase');
+        //     default:
+        //         throw new Error('invalid environment');
+        // }
     }
     //initializer
     function init() {
