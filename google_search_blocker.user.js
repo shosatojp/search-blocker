@@ -2,7 +2,7 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker
 // @homepage https://github.com/shosatojp/google_search_blocker
-// @version      0.10.18.1
+// @version      0.10.18.2
 // @description  block undesired sites from google search results!
 // @author       Sho Sato
 // @match https://www.google.com/search?*
@@ -487,7 +487,7 @@
             return removed_;
         };
 
-        GoogleSearchBlock.all = function () {
+        GoogleSearchBlock.all = function (aggregate = true) {
             const start_ = performance.now();
             let count_ = 0;
             blocked_patterns_ = [];
@@ -497,7 +497,8 @@
             COUNT = count_;
             // console.log('all', count_);
             time = performance.now() - start_;
-            GoogleSearchBlock.aggregate();
+            if (aggregate)
+                GoogleSearchBlock.aggregate();
         };
 
         GoogleSearchBlock.aggregate = function () {
@@ -676,6 +677,7 @@
             });
         }
         console.log(document.querySelectorAll(SETTINGS.first));
+        GoogleSearchBlock.all(false);
         //use MutationObserver from document-start
         const mutation_processed_ = [];
         const onmutated = getObserverFunction(environment_);
@@ -743,12 +745,12 @@
                 }
             }
 
-            window.addEventListener('load',function(){
-            console.log('----------load----------');
+            window.addEventListener('load', function () {
+                console.log('----------load----------');
 
                 Element.prototype.insertBefore = Element_prototype_insertBefore;
                 Element.prototype.appendChild = Element_prototype_appendChild;
-    
+
                 //initialize sync feature.
                 (SYNC = new DriveSync(CLIENT_ID, LIST_FILE_NAME, (time) => {
                     GM_setValue('modified', time.toString());
@@ -774,7 +776,7 @@
                     R.signin.style.display = 'block';
                     R.signout.style.display = 'none';
                 })).initSync().then(() => SYNC.compare()).catch(() => {});
-    
+
             });
         });
     }
