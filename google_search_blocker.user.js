@@ -2,7 +2,7 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker
 // @homepage https://github.com/shosatojp/google_search_blocker
-// @version      0.10.18.2
+// @version      0.10.19
 // @description  block undesired sites from google search results!
 // @author       Sho Sato
 // @match https://www.google.com/search?*
@@ -30,6 +30,28 @@
     //For bing.com. (bing overrides these functions.)
     const Element_prototype_appendChild = Element.prototype.appendChild;
     const Element_prototype_insertBefore = Element.prototype.insertBefore;
+
+    const Colors = {
+        Red: '#F44336',
+        Pink: '#E91E63',
+        Purple: '#9C27B0',
+        Deeppurple: '#673AB7',
+        Indigo: '#3F51B5',
+        Blue: '#2196F3',
+        LightBlue: '#03A9F4',
+        Cyan: '#00BCD4',
+        Teal: '#009688',
+        Green: '#4CAF50',
+        LightGreen: '#8BC34A',
+        Lime: '#CDDC39',
+        Yellow: '#FFEB3B',
+        Amber: '#FFC107',
+        Orange: '#FF9800',
+        DeepOrange: '#FF5722',
+        Brown: '#795548',
+        Gray: '#9E9E9E',
+        BlueGray: '#607D8B'
+    }
 
     //Sync library for google drive.
     const DriveSync = (function () {
@@ -125,7 +147,7 @@
                     console.log('nothing to do.');
                 }
             } else {
-                console.error('cannot sync file');
+                console.error('%ccannot sync file', `color:${Colors.Red};`);
             }
         }
 
@@ -145,16 +167,16 @@
         DriveSync.prototype.signIn = function () {
             return new Promise((res, rej) => {
                 if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
-                    console.log('%calready signed in', 'color:#4CAF50;');
+                    console.log('%calready signed in', `color:${Colors.Green};`);
                     this.onsignin();
                     res();
                 } else {
                     this.authenticate().then(() => {
-                        console.log('%csigned in', 'color:#4CAF50;');
+                        console.log('%csigned in',`color:${Colors.Green};`);
                         this.onsignin();
                         res();
                     }, () => {
-                        console.log('%csigned in failed', 'color:#4CAF50;');
+                        console.log('%csigned in failed', `color:${Colors.Green};`);
                         this.onsignout();
                         rej();
                     });
@@ -197,7 +219,7 @@
         DriveSync.prototype.signOut = function () {
             gapi.auth2.getAuthInstance().signOut();
             this.onsignout();
-            console.log('%csigned out', 'color:#4CAF50;');
+            console.log('%csigned out',`color:${Colors.Green};`);
 
         }
 
@@ -676,8 +698,11 @@
                 }
             });
         }
-        console.log(document.querySelectorAll(SETTINGS.first));
+
+        //if there are any elements before observe, block these elements.
+        console.log(document.querySelectorAll(SETTINGS.first).length+' elements was found before start MutationObserver');
         GoogleSearchBlock.all(false);
+
         //use MutationObserver from document-start
         const mutation_processed_ = [];
         const onmutated = getObserverFunction(environment_);
@@ -694,25 +719,8 @@
             subtree: true
         });
 
-        // let blocked_by_interval=[];
-        // let find_elements_interval = setInterval(() => {
-        //     if (document.querySelector(SETTINGS.first)) {
-        //         console.log('hoge');
-        //         try {
-        //             document.querySelectorAll(SETTINGS.first).forEach(e=>{
-        //                 if(!~blocked_by_interval.indexOf(e)){
-        //                     blocked_by_interval.push(e);
-        //                     GoogleSearchBlock.one(e);
-        //                 }
-        //             })
-        //         } catch (error) {
-        //             console.warn(error);
-        //         }
-        //     }
-        // }, 1);
-
         window.addEventListener('DOMContentLoaded', function () {
-            console.log('----------DOMContentLoaded----------');
+            console.log('%c----------DOMContentLoaded----------',`color:${Colors.LightBlue};`);
 
             //check if ...
             if (!(R.result_container = document.querySelector(SETTINGS.result_container))) {
@@ -720,7 +728,6 @@
                 return;
             }
 
-            // if (find_elements_interval) clearInterval(find_elements_interval);
             observer_.disconnect();
             initializeForm();
             GoogleSearchBlock.all();
@@ -746,7 +753,7 @@
             }
 
             window.addEventListener('load', function () {
-                console.log('----------load----------');
+                console.log('%c----------------load----------------',`color:${Colors.LightGreen};`);
 
                 Element.prototype.insertBefore = Element_prototype_insertBefore;
                 Element.prototype.appendChild = Element_prototype_appendChild;
@@ -757,12 +764,12 @@
                 }, () => {
                     return parseInt(GM_getValue('modified', '0'));
                 }, data => {
-                    console.log('%cDOWNLOAD', 'color:#E91E63;', data.split('\n').length);
+                    console.log('%cDOWNLOAD', `color:${Colors.Pink};`, data.split('\n').length);
                     Patterns.set(data.split('\n'));
                     BLOCK = Patterns.get();
                     GoogleSearchBlock.all();
                 }, () => {
-                    console.log('%cUPLOAD', 'color:#2196F3;', Patterns.get().length);
+                    console.log('%cUPLOAD', `color:${Colors.Blue};`, Patterns.get().length);
                     return Patterns.get().join('\n');
                 }, function usesync() {
                     return !!parseInt(GM_getValue('usesync', '0'));
@@ -780,18 +787,18 @@
             });
         });
     }
-    //number of blocked elements.
-    let COUNT = 0;
-    //settings from environments.json
-    let SETTINGS = null;
-    //instance of DriveSync
-    let SYNC = null;
 
     //client id of this application.
     const CLIENT_ID = '531665009269-96fvecl3pj4717mj2e6if6oaph7eu8ar.apps.googleusercontent.com';
     //name of block list file in google drive.
     const LIST_FILE_NAME = 'GoogleSearchBlocker.txt';
 
+    //number of blocked elements.
+    let COUNT = 0;
+    //settings from environments.json
+    let SETTINGS = null;
+    //instance of DriveSync
+    let SYNC = null;
     //block list
     let BLOCK = Util.distinct(Patterns.get());
 
