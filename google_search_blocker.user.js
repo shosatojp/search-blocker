@@ -2,7 +2,7 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      0.10.19.1
+// @version      0.10.19.2
 // @description  block undesired sites from google search results!
 // @author       Sho Sato
 // @match        https://www.google.com/search?*
@@ -585,6 +585,7 @@
         R.label.classList.add(...SETTINGS.container_class.split(' '));
         R.button_complete.addEventListener('click', function () {
             R.textarea_domains.disabled = true;
+            R.textarea_domains.style.overflow='hidden';
             const list_ = Util.distinct(R.textarea_domains.value.split('\n').map(e => e.trim()).filter(e => e));
             Patterns.set(list_);
             BLOCK = list_;
@@ -595,6 +596,7 @@
         });
         R.button_edit.addEventListener('click', function () {
             R.textarea_domains.disabled = false;
+            R.textarea_domains.style.overflow='unset';
         });
         R.button_show.addEventListener('click', function () {
             document.querySelectorAll(SETTINGS.first).forEach(e => e.style.display = 'block');
@@ -729,6 +731,7 @@
             }
 
             observer_.disconnect();
+            COUNT = 0;
             initializeForm();
             GoogleSearchBlock.all();
 
