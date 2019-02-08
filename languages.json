@@ -14,7 +14,7 @@
         "failedtosync":"サインインに失敗しました",
         "signin":"サインイン",
         "signout":"サインアウト",
-        "float":"Float"
+        "float":"モーダル"
     }
 },{
     "language":["en","en-us"],
@@ -32,6 +32,6 @@
         "failedtosync":"failed to signin",
         "signin":"Sign In",
         "signout":"Sign Out",
-        "float":"Float"
+        "float":"Modal"
     }
 }]

@@ -565,7 +565,6 @@
         const e = document.createElement('div');
         e.innerHTML = TextResource.get('label');
         container.appendChild(e);
-        // R.result_container.insertAdjacentElement('afterBegin',e);
 
         R.label = document.querySelector('#google_search_block');
         Object.assign(R, {
@@ -637,10 +636,11 @@
             SYNC.setUseSync(false);
             SYNC.signOut();
         });
-        R.float.addEventListener('input',function(){
+        R.float.addEventListener('change', function () {
             Float.set(this.checked);
             location.reload();
         });
+        R.float.checked=Float.get();
         R.textarea_domains.disabled = true;
     }
 
