@@ -2,7 +2,7 @@
 // @name         Google Search Blocker (Auto Pagerize Beta)
 // @namespace    https://github.com/shosatojp/google_search_blocker
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      0.10.20.0
+// @version      0.10.20.1
 // @description  Block undesired sites from google search results!
 // @author       Sho Sato
 // @match        https://www.google.com/search?*
