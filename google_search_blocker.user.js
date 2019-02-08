@@ -2,7 +2,7 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      0.11.0
+// @version      0.11.1
 // @description  Block undesired sites from google search results!
 // @author       Sho Sato
 // @match        https://www.google.com/search?*
@@ -21,6 +21,7 @@
 // @grant        GM_getValue
 // @grant        GM_getResourceText
 // @run-at       document-start
+// @noframes
 // ==/UserScript==
 
 (function () {
@@ -76,7 +77,8 @@
         DriveSync.prototype.authenticate = function () {
             return gapi.auth2.getAuthInstance()
                 .signIn({
-                    scope: "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file"
+                    scope: "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file",
+                    prompt:'select_account'
                 });
         }
 
