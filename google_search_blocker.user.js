@@ -2,8 +2,8 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      0.10.19.2
-// @description  block undesired sites from google search results!
+// @version      0.10.19.3
+// @description  Block undesired sites from google search results!
 // @author       Sho Sato
 // @match        https://www.google.com/search?*
 // @match        https://www.google.co.jp/search?*
@@ -491,14 +491,13 @@
                     if (block_pattern_.charAt(0) === '#' ? url_.match(new RegExp(block_pattern_.substr(1), 'g')) : host_.endsWith(block_pattern_)) {
                         e.style.display = 'none';
                         e.style['background-color'] = 'rgba(248, 195, 199, 0.884)';
-                        removed_ = block_pattern_ //true;
+                        removed_ = block_pattern_ ;
                         if (!~blocked_patterns_.indexOf(block_pattern_)) {
                             blocked_patterns_.push(block_pattern_);
                             if (R.blocked) GoogleSearchBlock.createButton(block_pattern_);
                         }
                         COUNT++;
                         console.log('one', COUNT);
-                        // if (R.count) R.count.textContent = COUNT;
                         break;
                     }
                 }
@@ -564,6 +563,7 @@
         const e = document.createElement('div');
         e.innerHTML = TextResource.get('label');
         R.result_container.appendChild(e);
+        // R.result_container.insertAdjacentElement('afterBegin',e);
 
         R.label = document.querySelector('#google_search_block');
         Object.assign(R, {
@@ -730,7 +730,7 @@
                 return;
             }
 
-            observer_.disconnect();
+            // observer_.disconnect();
             COUNT = 0;
             initializeForm();
             GoogleSearchBlock.all();

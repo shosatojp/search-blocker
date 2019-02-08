@@ -9,7 +9,7 @@ https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldm
 Firefox:
 https://addons.mozilla.org/ja/firefox/addon/tampermonkey/
 ### 2.Click this URL to install script.
-https://raw.githubusercontent.com/ShoSatoJp/google_search_blocker/master/google_search_blocker.user.js
+https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js?
 
 ## Edit Quickly On Google Search Result Page
 ![](https://github.com/ShoSatoJp/google_search_blocker/raw/master/README/label3.png)  
@@ -23,7 +23,12 @@ You only need to click button to block domain.
 
 # Available Environments
 
-`||www.bing.com$inline-script`
+<!-- ## Windows
+Chrome, Firefox, Edge, Vivaldi, Waterfox, Sleipnir  
+*Opera is not available.
+## Android
+Firefox
+## Mac -->
 
 | OS      | Browser  | Domain       | Block | Sync |
 | ------- | -------- | ------------ | ----- | ---- |
@@ -61,5 +66,5 @@ You only need to click button to block domain.
 This script use `document.body.appendChild` to load Google API. bing.com overrides `Element.prototype.appendChild` at html sctipt tag, and because browser extensions will be injected async, this script cannot copy original and use `appendChild` properly. Nevertheless, you want to use sync in bing.com, you have to add this line to uBlockOrigin's "my filter".
 
 #### Add this to "my filter" of uBlockOrigin.
-> www.bing.com##script:contains(Element.prototype.appendChild)  
-> ||www.bing.com/search$inline-script  
+<!-- > www.bing.com##script:contains(Element.prototype.appendChild)   -->
+> `||www.bing.com/search$inline-script  `
