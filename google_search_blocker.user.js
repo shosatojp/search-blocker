@@ -2,15 +2,15 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      0.11.1
+// @version      0.11.2
 // @description  Block undesired sites from google search results!
 // @author       Sho Sato
 // @match        https://www.google.com/search?*
 // @match        https://www.google.co.jp/search?*
 // @match        https://www.bing.com/search?*
 // @match        https://search.yahoo.co.jp/*
-// @resource     label        https://github.com/shosatojp/google_search_blocker/raw/master/container.html?
-// @resource     float        https://github.com/shosatojp/google_search_blocker/raw/master/float.html?
+// @resource     form         https://github.com/shosatojp/google_search_blocker/raw/master/form.html?
+// @resource     modal        https://github.com/shosatojp/google_search_blocker/raw/master/modal.html?
 // @resource     buttons      https://github.com/shosatojp/google_search_blocker/raw/master/buttons.html?
 // @resource     selectors    https://github.com/shosatojp/google_search_blocker/raw/master/selectors.html?
 // @resource     environments https://github.com/shosatojp/google_search_blocker/raw/master/environments.json?
@@ -124,18 +124,11 @@
             })).body;
         }
 
-        DriveSync.prototype.compare = async function (presetModifiedTime = false, onDownload, getData) {
+        DriveSync.prototype.compare = async function (onDownload, getData) {
             onDownload = onDownload || this.defaultOnDownload;
             getData = getData || this.defaultGetData;
-            if (presetModifiedTime) {
-                this.setModifiedTime(Date.now());
-            }
             var file;
-            if (!(file = await this.findFile(this.FILE_NAME))) {
-                file = await this.createFile(this.FILE_NAME);
-            }
-
-            if (file) {
+            if ((file = await this.findFile(this.FILE_NAME)) || (file = await this.createFile(this.FILE_NAME))) {
                 const serverModifiedTime = new Date(file.modifiedTime).getTime();
                 const localModifiedTime = this.getModifiedTime();
                 console.log('server:', serverModifiedTime, serverModifiedTime === localModifiedTime ? '=' : serverModifiedTime > localModifiedTime ? '>' : '<', 'local:', localModifiedTime);
@@ -152,7 +145,7 @@
             } else {
                 console.error('%ccannot sync file', `color:${Colors.Red};`);
             }
-        }
+        };
 
         DriveSync.prototype.marge = function () {
 
@@ -162,10 +155,16 @@
 
         }
 
-        DriveSync.prototype.push = function () {
-
-        }
-
+        DriveSync.prototype.push = async function () {
+            var file;
+            if ((file = await this.findFile(this.FILE_NAME)) || (file = await this.createFile(this.FILE_NAME))) {
+                await this.updateFileContent(file.id, this.defaultGetData());
+                this.setModifiedTime(Date.now());
+                this.setModifiedTime(new Date((await this.findFile(this.FILE_NAME)).modifiedTime).getTime());
+            } else {
+                console.error('%ccannot sync file', `color:${Colors.Red};`);
+            }
+        };
 
         DriveSync.prototype.signIn = function () {
             return new Promise((res, rej) => {
@@ -231,7 +230,7 @@
 
     //Ui elements
     const R = {
-        label: undefined,
+        form: undefined,
         button_showlist: undefined,
         count: undefined,
         button_reblock: undefined,
@@ -247,7 +246,7 @@
         signin: undefined,
         signout: undefined,
         syncinfo: undefined,
-        float: undefined,
+        modal: undefined,
     }
 
     const LANGUAGE = (window.navigator.languages && window.navigator.languages[0]) ||
@@ -259,7 +258,7 @@
 
     //Resource manager
     const TextResource = (function () {
-        const TextResource = function () {};
+        const TextResource = {};
 
         const _resource = {};
 
@@ -304,7 +303,7 @@
 
 
     const Util = (function () {
-        const Util = function () {};
+        const Util = {};
         Util.distinct = function distinct(list, f = e => e) {
             var temp_ = list.map(x => f(x));
             return list.filter((value, index, self) => {
@@ -323,10 +322,8 @@
                 return 0;
             });
         };
-        Util.regex_escape = function (src) {
-            const escapes = '\\*{}[]()^$.+|?';
-            escapes.split('').forEach(e => src = src.replace(new RegExp(`\\${e}`, 'gi'), `\\${e}`));
-            return src;
+        Util.regex_escape = function (n) {
+            return n.replace(/([.?*+^$&[\]\\(){}|<>-])/g, "\\$1")
         };
         Util.getCandidate = function (url) {
             let c = new URL(url);
@@ -363,14 +360,7 @@
             return result;
         }
         Util.isMobileDevice = function () {
-            return (navigator.userAgent.match(/Android/i) ||
-                navigator.userAgent.match(/webOS/i) ||
-                navigator.userAgent.match(/iPhone/i) ||
-                navigator.userAgent.match(/iPad/i) ||
-                navigator.userAgent.match(/iPod/i) ||
-                navigator.userAgent.match(/BlackBerry/i) ||
-                navigator.userAgent.match(/Windows Phone/i));
-            // return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+            return navigator.userAgent.match(/(Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone)/i);
         };
         Util.getUrlParams = function (url) {
             const result = {};
@@ -395,9 +385,9 @@
         };
 
         Controller.prototype.createButton = function () {
-            if (!this.parent.querySelector('.google_search_block_buttons_container')) {
+            if (!this.parent.querySelector('.google_search_block_buttons_form')) {
                 const container_ = document.createElement('div');
-                container_.className = 'google_search_block_buttons_container';
+                container_.className = 'google_search_block_buttons_form';
                 container_.innerHTML = TextResource.get('buttons');
 
                 this.open_button_ = container_.querySelector('.google_search_block_button_openui');
@@ -460,7 +450,7 @@
                     GoogleSearchBlock.all();
                     self.open_button_.style.display = 'block';
                     self.close_button_.style.display = 'none';
-                    SYNC.initSync().then(() => SYNC.compare(true)).catch(() => {
+                    SYNC.initSync().then(() => SYNC.push()).catch(() => {
                         SYNC.setModifiedTime(Date.now());
                     });
                 });
@@ -553,7 +543,7 @@
                 Patterns.remove(domain);
                 BLOCK = Patterns.get();
                 GoogleSearchBlock.all();
-                SYNC.initSync().then(() => SYNC.compare(true)).catch(() => {
+                SYNC.initSync().then(() => SYNC.push()).catch(() => {
                     SYNC.setModifiedTime(Date.now());
                 });
             });
@@ -567,28 +557,28 @@
     //initialize form (bottom of the page)
     function initializeForm(container) {
         const e = document.createElement('div');
-        e.innerHTML = TextResource.get('label');
+        e.innerHTML = TextResource.get('form');
         container.appendChild(e);
 
-        R.label = document.querySelector('#google_search_block');
+        R.form = document.querySelector('#google_search_block');
         Object.assign(R, {
-            button_showlist: R.label.querySelector('#google_search_block_button_showlist'),
-            count: R.label.querySelector('#google_search_block_count'),
-            button_reblock: R.label.querySelector('#google_search_block_button_reblock'),
-            button_show: R.label.querySelector('#google_search_block_button_show'),
-            button_hidelist: R.label.querySelector('#google_search_block_button_hidelist'),
-            button_complete: R.label.querySelector('#google_search_block_button_complete'),
-            button_edit: R.label.querySelector('#google_search_block_button_edit'),
-            contents: R.label.querySelector('#google_search_block_contents'),
-            textarea_domains: R.label.querySelector('#google_search_block_textarea_domains'),
-            blocked: R.label.querySelector('#google_search_block_blocked'),
-            info: R.label.querySelector('#google_search_block_info'),
-            signin: R.label.querySelector('#google_search_block_button_signin'),
-            signout: R.label.querySelector('#google_search_block_button_signout'),
-            syncinfo: R.label.querySelector('#google_search_block_button_syncinfo'),
-            float: R.label.querySelector('#google_search_block_float'),
+            button_showlist: R.form.querySelector('#google_search_block_button_showlist'),
+            count: R.form.querySelector('#google_search_block_count'),
+            button_reblock: R.form.querySelector('#google_search_block_button_reblock'),
+            button_show: R.form.querySelector('#google_search_block_button_show'),
+            button_hidelist: R.form.querySelector('#google_search_block_button_hidelist'),
+            button_complete: R.form.querySelector('#google_search_block_button_complete'),
+            button_edit: R.form.querySelector('#google_search_block_button_edit'),
+            contents: R.form.querySelector('#google_search_block_contents'),
+            textarea_domains: R.form.querySelector('#google_search_block_textarea_domains'),
+            blocked: R.form.querySelector('#google_search_block_blocked'),
+            info: R.form.querySelector('#google_search_block_info'),
+            signin: R.form.querySelector('#google_search_block_button_signin'),
+            signout: R.form.querySelector('#google_search_block_button_signout'),
+            syncinfo: R.form.querySelector('#google_search_block_button_syncinfo'),
+            modal: R.form.querySelector('#google_search_block_modal'),
         });
-        R.label.classList.add(...SETTINGS.container_class.split(' '));
+        R.form.classList.add(...SETTINGS.container_class.split(' '));
         R.button_complete.addEventListener('click', function () {
             R.textarea_domains.disabled = true;
             R.textarea_domains.style.overflow = 'hidden';
@@ -596,7 +586,7 @@
             Patterns.set(list_);
             BLOCK = list_;
             GoogleSearchBlock.all();
-            SYNC.initSync().then(() => SYNC.compare(true)).catch(() => {
+            SYNC.initSync().then(() => SYNC.push()).catch(() => {
                 SYNC.setModifiedTime(Date.now());
             });
         });
@@ -640,47 +630,47 @@
             SYNC.setUseSync(false);
             SYNC.signOut();
         });
-        R.float.addEventListener('change', function () {
-            Float.set(this.checked);
+        R.modal.addEventListener('change', function () {
+            Modal.set(this.checked);
             location.reload();
         });
-        R.float.checked = Float.get();
+        R.modal.checked = Modal.get();
         R.textarea_domains.disabled = true;
     }
 
-    const Float = (function () {
-        const Float = {};
+    const Modal = (function () {
+        const Modal = {};
 
-        Float.init = function () {
-            document.body.insertAdjacentHTML('beforeEnd', TextResource.get('float'));
-            Float.button_open = document.querySelector('#google_search_block_float_button_open');
-            Float.button_close = document.querySelector('#google_search_block_float_button_close');
-            Float.container = document.querySelector('#google_search_block_float_container');
-            Float.button_open.addEventListener('click', function () {
-                Float.button_close.style.display = 'block';
-                Float.button_open.style.display = 'none';
-                Float.container.style.display = 'flex';
+        Modal.init = function () {
+            document.body.insertAdjacentHTML('beforeEnd', TextResource.get('modal'));
+            Modal.button_open = document.querySelector('#google_search_block_modal_button_open');
+            Modal.button_close = document.querySelector('#google_search_block_modal_button_close');
+            Modal.container = document.querySelector('#google_search_block_modal_container');
+            Modal.button_open.addEventListener('click', function () {
+                Modal.button_close.style.display = 'block';
+                Modal.button_open.style.display = 'none';
+                Modal.container.style.display = 'flex';
             });
-            Float.button_close.addEventListener('click', function () {
-                Float.button_open.style.display = 'block';
-                Float.button_close.style.display = 'none';
-                Float.container.style.display = 'none';
+            Modal.button_close.addEventListener('click', function () {
+                Modal.button_open.style.display = 'block';
+                Modal.button_close.style.display = 'none';
+                Modal.container.style.display = 'none';
             });
         };
-        Float.getContainer = function () {
-            return Float.container;
+        Modal.getContainer = function () {
+            return Modal.container;
         };
-        Float.set = function (bool) {
-            GM_setValue('float', (+bool).toString());
+        Modal.set = function (bool) {
+            GM_setValue('modal', (+bool).toString());
         };
-        Float.get = function () {
-            return !!parseInt(GM_getValue('float', '0'));
+        Modal.get = function () {
+            return !!parseInt(GM_getValue('modal', '0'));
         };
-        return Float;
+        return Modal;
     })();
 
     //select function for observer by environment
-    function getObserverFunction(environment) {
+    function getObserverFunction() {
         const walkAddedNodesInRecords = function (compare) {
             return (function (classname) {
                 return (function (records, callback) {
@@ -697,7 +687,7 @@
         const observer_functions = {
             containsInClassListWhenAdded: walkAddedNodesInRecords((node, classname) => node instanceof Element && node.classList.contains(classname)),
             equalsClassNameWhenAdded: walkAddedNodesInRecords((node, classname) => node instanceof Element && node.className === classname),
-        }
+        };
         return observer_functions[SETTINGS.observer_function](...SETTINGS.observer_fn_arguments);
     }
     //initializer
@@ -722,7 +712,7 @@
         }
 
         { //load settings
-            if(!(SETTINGS = JSON.parse(TextResource.get('environments'))[environment_])){
+            if (!(SETTINGS = JSON.parse(TextResource.get('environments'))[environment_])) {
                 console.error('no settings');
                 return;
             }
@@ -734,9 +724,9 @@
 
         //use MutationObserver from document-start
         const mutation_processed_ = [];
-        const onmutated = getObserverFunction(environment_);
+        const onMutated = getObserverFunction();
         const observer_ = new MutationObserver(function (records) {
-            onmutated(records, (element) => {
+            onMutated(records, (element) => {
                 if (!~mutation_processed_.indexOf(element)) {
                     GoogleSearchBlock.one(element);
                     mutation_processed_.push(element);
@@ -758,9 +748,9 @@
             }
 
             COUNT = 0;
-            if (Float.get()) {
-                Float.init();
-                initializeForm(Float.getContainer());
+            if (Modal.get()) {
+                Modal.init();
+                initializeForm(Modal.getContainer());
             } else {
                 initializeForm(R.result_container);
             }
@@ -768,7 +758,7 @@
 
             { //google mobile ajax load.
                 if (environment_ === 'mobile') {
-                    const observer_ = new MutationObserver(function (records, mo) {
+                    const observer_ = new MutationObserver(function (records) {
                         if (records.filter(x => {
                                 return ('getAttribute' in x.target) && x.target.getAttribute('data-graft-type') === 'insert';
                             }).length) {
