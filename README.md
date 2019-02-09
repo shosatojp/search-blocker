@@ -23,44 +23,16 @@ You only need to click button to block domain.
 
 # Available Environments
 
-<!-- ## Windows
-Chrome, Firefox, Edge, Vivaldi, Waterfox, Sleipnir  
-*Opera is not available.
-## Android
-Firefox
-## Mac -->
-
-| OS      | Browser  | Domain       | Block | Sync |
-| ------- | -------- | ------------ | ----- | ---- |
-| Windows | Chrome   | google.com   | O     | O    |
-| Windows | Chrome   | google.co.jp | O     | O    |
-| Windows | Chrome   | bing.com     | O     | O    |
-| Windows | Chrome   | yahoo.co.jp  | O     | O    |
-| Windows | Firefox  | google.com   | O     | O    |
-| Windows | Firefox  | google.co.jp | O     | O    |
-| Windows | Firefox  | bing.com     | O     | O*   |
-| Windows | Firefox  | yahoo.co.jp  | O     | O    |
-| Windows | Edge     | google.com   | O     | O    |
-| Windows | Edge     | google.co.jp | O     | O    |
-| Windows | Edge     | bing.com     | O     | O*   |
-| Windows | Edge     | yahoo.co.jp  | O     | O    |
-| Windows | Opera    | any sites    | X     | X    |
-| Windows | Vivaldi  | google.com   | O     | O    |
-| Windows | Vivaldi  | google.co.jp | O     | O    |
-| Windows | Vivaldi  | bing.com     | O     | O*    |
-| Windows | Vivaldi  | yahoo.co.jp  | O     | O    |
-| Windows | Waterfox | google.com   | O     | O    |
-| Windows | Waterfox | google.co.jp | O     | O    |
-| Windows | Waterfox | bing.com     | O     | O*    |
-| Windows | Waterfox | yahoo.co.jp  | O     | O    |
-| Windows | Sleipnir | google.com   | O     | O    |
-| Windows | Sleipnir | google.co.jp | O     | O    |
-| Windows | Sleipnir | bing.com     | O     | O*    |
-| Windows | Sleipnir | yahoo.co.jp  | O     | O    |
-| Android | Firefox  | google.com   | O     | O    |
-| Android | Firefox  | google.co.jp | O     | O    |
-| Android | Firefox  | bing.com     | O     | O    |
-| Android | Firefox  | yahoo.co.jp  | O     | O    |
+| OS      | Browser  |     | Sites                                            |
+| ------- | -------- | --- | ------------------------------------------------ |
+| Windows | Chrome   | O   | google.com, google.co.jp, bing.com, yahoo.co.jp  |
+|         | Firefox  | O   | google.com, google.co.jp, bing.com*, yahoo.co.jp |
+|         | Edge     | O   | google.com, google.co.jp, bing.com*, yahoo.co.jp |
+|         | Opera    | X   |                                                  |
+|         | Vivaldi  | O   | google.com, google.co.jp, bing.com*, yahoo.co.jp |
+|         | Waterfox | O   | google.com, google.co.jp, bing.com*, yahoo.co.jp |
+|         | Sleipnir | O   | google.com, google.co.jp, bing.com*, yahoo.co.jp |
+| Android | Firefox  | O   | google.com, google.co.jp, bing.com, yahoo.co.jp  |
 
 ## * Why this script cannot sync in bing.com by itself:
 This script use `document.body.appendChild` to load Google API. bing.com overrides `Element.prototype.appendChild` at html sctipt tag, and because browser extensions will be injected async, this script cannot copy original and use `appendChild` properly. Nevertheless, you want to use sync in bing.com, you have to add this line to uBlockOrigin's "my filter".
