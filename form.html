@@ -6,7 +6,7 @@
         padding: 10px 20px 0 20px;
     }
 
-    .google_search_block_container {
+    .google_search_block_form {
         box-shadow: none;
         border: 1px solid #dfe1e5;
         border-radius: 8px;
@@ -19,17 +19,17 @@
         margin-top: 10px;
     }
 
-    .container_yahoo_mobile {
+    .form_yahoo_mobile {
         margin-right: 8px;
         margin-left: 8px;
     }
 
-    .container_yahoo_pc {
+    .form_yahoo_pc {
         margin-right: 0px;
         margin-left: 0px;
     }
 
-    .container_bing_mobile {
+    .form_bing_mobile {
         margin-right: 0;
         margin-left: 0;
         margin: 8px;
@@ -99,7 +99,7 @@
     }
 
 </style>
-<div class="google_search_block_container" id="google_search_block">
+<div class="google_search_block_form" id="google_search_block">
     <div id="google_search_block_header">
         <div>
             <b>${before_count}</b>
@@ -116,8 +116,8 @@
         <textarea id="google_search_block_textarea_domains" spellcheck="false"></textarea>
         <div id="google_search_block_buttons" style="justify-content: space-between;">
             <div>
-                <input type="checkbox" id="google_search_block_float">
-                <label for="google_search_block_float">${float}</label>
+                <input type="checkbox" id="google_search_block_modal">
+                <label for="google_search_block_modal">${modal}</label>
             </div>
             <div>
                 <button class="google_search_block_button" id="google_search_block_button_complete">${complete}</button>

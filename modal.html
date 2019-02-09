@@ -1,5 +1,5 @@
 <style>
-    #google_search_block_float_container {
+    #google_search_block_modal_container {
         z-index: 9999998;
         position: fixed;
         bottom: 0;
@@ -15,18 +15,18 @@
         display: none;
     }
 
-    #google_search_block_float_container>div {
+    #google_search_block_modal_container>div {
         align-self: center;
         width: calc(100% - 20px);
         max-width: 500px;
     }
 
-    #google_search_block_float_container>div>.google_search_block_container {
+    #google_search_block_modal_container>div>.google_search_block_form {
         max-height: 90vh;
         overflow-y: auto;
     }
 
-    .google_search_block_float_button {
+    .google_search_block_modal_button {
         z-index: 9999999;
         position: fixed;
         bottom: 0;
@@ -41,6 +41,6 @@
     }
 </style>
 
-<div id="google_search_block_float_container"></div>
-<div id="google_search_block_float_button_open" class="google_search_block_float_button">↗</div>
-<div id="google_search_block_float_button_close" class="google_search_block_float_button" style="display:none;">↙</div>
+<div id="google_search_block_modal_container"></div>
+<div id="google_search_block_modal_button_open" class="google_search_block_modal_button">↗</div>
+<div id="google_search_block_modal_button_close" class="google_search_block_modal_button" style="display:none;">↙</div>
