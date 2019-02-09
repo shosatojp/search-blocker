@@ -2,7 +2,7 @@
     "google_pc": {
         "first": "#search .g",
         "second": ".r>a",
-        "container_class": "google_search_block_container",
+        "container_class": "google_search_block_form",
         "result_container": "#search",
         "result_box_style_class": "pc_result_box",
         "observer_function": "containsInClassListWhenAdded",
@@ -20,7 +20,7 @@
     "bing_pc": {
         "first": ".b_algo",
         "second": "a",
-        "container_class": "google_search_block_container",
+        "container_class": "google_search_block_form",
         "result_container": "#b_results",
         "result_box_style_class": "bing_pc_result_box",
         "observer_function": "equalsClassNameWhenAdded",
@@ -37,7 +37,7 @@
     "yahoo_co_jp_pc": {
         "first": ".w",
         "second": "a",
-        "container_class": "google_search_block_container form_yahoo_pc",
+        "container_class": "google_search_block_form form_yahoo_pc",
         "result_container": "#WS2m",
         "result_box_style_class": "yahoo_co_jp_result_box",
         "observer_function": "equalsClassNameWhenAdded",
