@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Google Search Blocker
-// @namespace    https://github.com/shosatojp/google_search_blocker
+// @namespace    https://github.com/shosatojp/google_search_blocker/raw/master
 // @homepage     https://github.com/shosatojp/google_search_blocker
 // @version      0.11.2.2
 // @description  Block undesired sites from google search results!
@@ -9,14 +9,14 @@
 // @match        https://www.google.co.jp/search?*
 // @match        https://www.bing.com/search?*
 // @match        https://search.yahoo.co.jp/*
-// @resource     form         https://github.com/shosatojp/google_search_blocker/raw/master/form.html?
-// @resource     modal        https://github.com/shosatojp/google_search_blocker/raw/master/modal.html?
-// @resource     buttons      https://github.com/shosatojp/google_search_blocker/raw/master/buttons.html?
-// @resource     selectors    https://github.com/shosatojp/google_search_blocker/raw/master/selectors.html?
-// @resource     environments https://github.com/shosatojp/google_search_blocker/raw/master/environments.json?
-// @resource     languages    https://github.com/shosatojp/google_search_blocker/raw/master/languages.json?
-// @updateURL    https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js?
-// @downloadURL  https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js?
+// @resource     form         ./form.html?
+// @resource     modal        ./modal.html?
+// @resource     buttons      ./buttons.html?
+// @resource     selectors    ./selectors.html?
+// @resource     environments ./environments.json?
+// @resource     languages    ./languages.json?
+// @updateURL    ./google_search_blocker.user.js?
+// @downloadURL  ./google_search_blocker.user.js?
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_getResourceText
