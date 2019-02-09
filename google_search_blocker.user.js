@@ -401,7 +401,6 @@
         }
 
         Controller.prototype.openButton = function () {
-            // createController(this.parent, this.target_url);
             this.create();
             this.open_button_.style.display = 'none';
             this.close_button_.style.display = 'block';
