@@ -22,6 +22,7 @@
         "second": "a",
         "container_class": "google_search_block_container",
         "result_container": "#b_results",
+        "result_box_style_class": "bing_pc_result_box",
         "observer_function": "equalsClassNameWhenAdded",
         "observer_fn_arguments": ["b_algo"]
     },
@@ -38,6 +39,7 @@
         "second": "a",
         "container_class": "google_search_block_container container_yahoo_pc",
         "result_container": "#WS2m",
+        "result_box_style_class": "yahoo_co_jp_result_box",
         "observer_function": "equalsClassNameWhenAdded",
         "observer_fn_arguments": ["w"]
     },
