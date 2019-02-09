@@ -2,7 +2,7 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker/raw/master
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      0.11.2.3
+// @version      0.11.3
 // @description  Block undesired sites from google search results!
 // @author       Sho Sato
 // @match        https://www.google.com/search?*
@@ -756,7 +756,7 @@
             GoogleSearchBlock.all();
 
             { //google mobile ajax load.
-                if (environment_ === 'mobile') {
+                if (environment_ === 'google_mobile') {
                     const observer_ = new MutationObserver(function (records) {
                         if (records.filter(x => {
                                 return ('getAttribute' in x.target) && x.target.getAttribute('data-graft-type') === 'insert';
