@@ -549,12 +549,6 @@
                 return intitle_(element, url) || inbody_(element, url);
             });
         };
-        // const regex = function (...args) {
-        //     var re = new RegExp(...args);
-        //     return (function (element, url) {
-        //         return !!re.test(url);
-        //     });
-        // };
         const inurl = function (...args) {
             if (args[1]||args[1]==='')
                 var re = new RegExp(...args);

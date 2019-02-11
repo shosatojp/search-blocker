@@ -8,10 +8,11 @@
         "observer_function": "containsInClassListWhenAdded",
         "observer_fn_arguments": ["g"],
         "title":"h3",
-        "body":".st"
+        "body":".st",
+        "info":".w"
     },
     "google_mobile": {
-        "first": ".srg .xpd",
+        "first": ".xpd",
         "second": "a",
         "container_class": "mnr-c",
         "result_container": "#main",
@@ -19,7 +20,8 @@
         "observer_function": "containsInClassListWhenAdded",
         "observer_fn_arguments": ["xpd"],
         "title":"a>div",
-        "body":"div>div[jsname]:nth-child(2)"
+        "body":"div>div[jsname]:nth-child(2)",
+        "info":""
     },
     "bing_pc": {
         "first": ".b_algo",
@@ -30,7 +32,8 @@
         "observer_function": "equalsClassNameWhenAdded",
         "observer_fn_arguments": ["b_algo"],
         "title":"h2",
-        "body":"p"
+        "body":"p",
+        "info":""
     },
     "bing_mobile": {
         "first": ".b_algo",
@@ -40,7 +43,8 @@
         "observer_function": "equalsClassNameWhenAdded",
         "observer_fn_arguments": ["b_algo"],
         "title":"h2",
-        "body":".b_caption"
+        "body":".b_caption",
+        "info":""
     },
     "yahoo_co_jp_pc": {
         "first": ".w",
@@ -51,7 +55,8 @@
         "observer_function": "equalsClassNameWhenAdded",
         "observer_fn_arguments": ["w"],
         "title":"a",
-        "body":"p"
+        "body":"p",
+        "info":"span.r"
     },
     "yahoo_co_jp_mobile": {
         "first": ".sw-CardBase",
@@ -61,6 +66,7 @@
         "observer_function": "equalsClassNameWhenAdded",
         "observer_fn_arguments": ["sw-CardBase"],
         "title":"h3",
-        "body":"p"
+        "body":"p",
+        "info":""
     }
 }
