@@ -2,7 +2,7 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker/raw/master
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      0.11.3.1
+// @version      0.12.0
 // @description  Block undesired sites from google search results!
 // @author       Sho Sato
 // @match        https://www.google.com/search?*
@@ -279,29 +279,6 @@
         return TextResource;
     })();
 
-    //Pattern manager
-    const Patterns = (function () {
-        const Patterns = {};
-        Patterns.get = function () {
-            return GM_getValue('url', '').split(';').filter(e => e);
-        };
-        Patterns.set = function (domains) {
-            GM_setValue('url', domains.join(';'));
-        };
-        Patterns.add = function (pattern) {
-            const list_ = Patterns.get();
-            if (pattern && !~list_.indexOf(pattern)) list_.push(pattern);
-            Patterns.set(list_)
-        };
-        Patterns.remove = function (pattern) {
-            let list_ = Patterns.get();
-            let newlist_ = list_.filter(e => e != pattern);
-            Patterns.set(newlist_);
-        };
-        return Patterns;
-    })();
-
-
     const Util = (function () {
         const Util = {};
         Util.distinct = function distinct(list, f = e => e) {
@@ -463,6 +440,153 @@
         return Controller;
     })();
 
+
+    //Pattern manager
+    const Patterns = (function () {
+        const Patterns = {};
+        Patterns.get = function () {
+            return GM_getValue('rules', []).map(e => Object.setPrototypeOf(e, Rule.prototype)).map(e => (e.make_command_function(), e));
+        };
+        Patterns.get_json = function () {
+            return JSON.stringify(Patterns.get());
+        };
+        Patterns.set = function (list) {
+            GM_setValue('rules', list.map(src => new Rule(src)));
+        };
+        Patterns.set_json = function (json) {
+            GM_setValue('rules', JSON.parse(json));
+        };
+        Patterns.add = function (src) {
+            const list_ = Patterns.get();
+            if (src && !list_.filter(e => e.source === src).length) list_.push(new Rule(src));
+            GM_setValue('rules', list_);
+        };
+        Patterns.remove = function (src) {
+            let list_ = Patterns.get();
+            let newlist_ = list_.filter(e => e.source !== src);
+            GM_setValue('rules', newlist_);
+        };
+        return Patterns;
+    })();
+
+
+    const Rule = (function () {
+        const Rule = function (str) {
+            this.source = str;
+            if (str.startsWith('#')) {
+                str = `$inurl('${str.substring(1).replace('\'','\\\'')}','')`;
+            }
+            if (this.iscomment = str.startsWith('!')) return;
+            const index = str.indexOf('$');
+            var pair;
+            if (index === -1) {
+                pair = [str, null];
+            } else {
+                pair = [str.substring(0, index), str.substring(index + 1)];
+            }
+            this.domain_length = pair[0].length;
+            this.domain = this.domain_length ? pair[0] : null;
+            if (this.command = pair[1] || null)
+                this.command_function = eval(this.command);
+        };
+        Rule.prototype.make_command_function = function () {
+            if (this.command) {
+                try {
+                    this.command_function = eval(this.command);
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+        };
+        Rule.prototype.match = function (element, url, domain, domain_length) {
+            if (this.iscomment) {
+                return false;
+            } else {
+                return this.match_domain(domain, domain_length) && this.commands(element, url);
+            }
+        }
+
+        Rule.prototype.match_domain = function (domain, domain_length) {
+            return !this.domain || domain.endsWith(this.domain) && (this.domain_length === domain_length || domain.charAt(domain_length - this.domain_length - 1) === '.');
+        };
+
+        const intitle = function (...args) {
+            if (args[1]||args[1]==='')
+                var re = new RegExp(...args);
+            return (function (element, url) {
+                const title = element.querySelector(SETTINGS.title);
+                if (title) {
+                    if (re) {
+                        return re.test(title.textContent);
+                    } else {
+                        return !!~title.textContent.indexOf(...args);
+                    }
+                } else {
+                    return false;
+                }
+            });
+        };
+        const inbody = function (...args) {
+            if (args[1]||args[1]==='')
+                var re = new RegExp(...args);
+            return (function (element, url) {
+                const body = element.querySelector(SETTINGS.body);
+                if (body) {
+                    if (re) {
+                        return re.test(body.textContent);
+                    } else {
+                        return !!~body.textContent.indexOf(...args);
+                    }
+                } else {
+                    return false;
+                }
+            });
+        };
+        const intext = function (...args) {
+            const intitle_ = intitle(...args);
+            const inbody_ = inbody(...args);
+            return (function (element, url) {
+                return intitle_(element, url) || inbody_(element, url);
+            });
+        };
+        // const regex = function (...args) {
+        //     var re = new RegExp(...args);
+        //     return (function (element, url) {
+        //         return !!re.test(url);
+        //     });
+        // };
+        const inurl = function (...args) {
+            if (args[1]||args[1]==='')
+                var re = new RegExp(...args);
+            return (function (element, url) {
+                if (re) {
+                    return re.test(url);
+                } else {
+                    return !!~url.indexOf(...args);
+                }
+            });
+        };
+        // $$ = element, $ = url
+        const script = function (...args) {
+            return (function ($$, $) {
+                return !!eval(...args);
+            });
+        };
+
+        Rule.prototype.commands = function (element, url) {
+            try {
+                if (this.iscomment) {
+                    return false;
+                } else {
+                    return !this.command || this.command_function(element, url);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        return Rule;
+    })();
+
     //main class for blocking search result.
     const GoogleSearchBlock = (function () {
         const GoogleSearchBlock = {};
@@ -478,10 +602,11 @@
                 e.style['background-color'] = '';
                 const url_ = link_.getAttribute('href');
                 if (!url_.startsWith('http')) return;
-                const host_ = new URL(url_).host;
+                const domain = new URL(url_).host;
+                const domain_length = domain.length;
                 for (let i = 0, len = BLOCK.length; i < len; i++) {
-                    const block_pattern_ = BLOCK[i];
-                    if (block_pattern_.charAt(0) === '#' ? url_.match(new RegExp(block_pattern_.substr(1), 'g')) : host_.endsWith(block_pattern_)) {
+                    const block_pattern_ = BLOCK[i].source;
+                    if (BLOCK[i].match(e, url_, domain, domain_length)) {
                         e.style.display = 'none';
                         e.style['background-color'] = 'rgba(248, 195, 199, 0.884)';
                         removed_ = block_pattern_;
@@ -526,7 +651,7 @@
             });
 
             R.count.textContent = COUNT;
-            R.textarea_domains.value = Patterns.get().sort().join('\n');
+            R.textarea_domains.value = Patterns.get().map(e => e.source).sort().join('\n');
             R.info.textContent = `${Math.floor(time*10)/10}ms ${BLOCK.length}`;
         };
 
@@ -583,7 +708,7 @@
             R.textarea_domains.style.overflow = 'hidden';
             const list_ = Util.distinct(R.textarea_domains.value.split('\n').map(e => e.trim()).filter(e => e));
             Patterns.set(list_);
-            BLOCK = list_;
+            BLOCK = Patterns.get();
             GoogleSearchBlock.all();
             SYNC.initSync().then(() => SYNC.push()).catch(() => {
                 SYNC.setModifiedTime(Date.now());
@@ -612,7 +737,7 @@
             R.button_showlist.style.display = 'none';
             R.button_hidelist.style.display = 'block';
             R.contents.style.display = 'block';
-            R.textarea_domains.value = Patterns.get().sort().join('\n');
+            R.textarea_domains.value = Patterns.get().map(e => e.source).sort().join('\n');
         });
         R.signin.addEventListener('click', function () {
             R.syncinfo.textContent = '';
@@ -787,13 +912,14 @@
                 }, () => {
                     return parseInt(GM_getValue('modified', '0'));
                 }, data => {
-                    console.log('%cDOWNLOAD', `color:${Colors.Pink};`, data.split('\n').length);
-                    Patterns.set(data.split('\n'));
+                    Patterns.set_json(data);
                     BLOCK = Patterns.get();
+                    console.log('%cDOWNLOAD', `color:${Colors.Pink};`, BLOCK.length);
                     GoogleSearchBlock.all();
                 }, () => {
-                    console.log('%cUPLOAD', `color:${Colors.Blue};`, Patterns.get().length);
-                    return Patterns.get().join('\n');
+                    const patterns = Patterns.get();
+                    console.log('%cUPLOAD', `color:${Colors.Blue};`, patterns.length);
+                    return JSON.stringify(patterns);
                 }, function usesync() {
                     return !!parseInt(GM_getValue('usesync', '0'));
                 }, function setusesync(bool) {
@@ -823,7 +949,7 @@
     //instance of DriveSync
     let SYNC = null;
     //block list
-    let BLOCK = Util.distinct(Patterns.get());
+    let BLOCK = Util.distinct(Patterns.get(), e => e.source);
 
     init();
 
