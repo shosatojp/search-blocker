@@ -447,13 +447,13 @@
         Patterns.get = function () {
             return GM_getValue('rules', []).map(e => Object.setPrototypeOf(e, Rule.prototype));
         };
-        Patterns.get_json=function(){
+        Patterns.get_json = function () {
             return JSON.stringify(Patterns.get());
         };
         Patterns.set = function (list) {
             GM_setValue('rules', list.map(src => new Rule(src)));
         };
-        Patterns.set_json=function(json){
+        Patterns.set_json = function (json) {
             GM_setValue('rules', JSON.parse(json));
         };
         Patterns.add = function (src) {
@@ -476,12 +476,12 @@
             if (str.startsWith('#')) {
                 str = `$regex('${str.substring(1).replace('\'','\\\'')}')`;
             }
-            this.iscomment = str.startsWith('!');
-            const index=str.indexOf('$');
+            if (this.iscomment = str.startsWith('!')) return;
+            const index = str.indexOf('$');
             var pair;
-            if(index===-1){
-                pair = [str,null];
-            }else{
+            if (index === -1) {
+                pair = [str, null];
+            } else {
                 pair = [str.substring(0, index), str.substring(index + 1)];
             }
             this.domain_length = pair[0].length;
@@ -490,32 +490,50 @@
         };
 
         Rule.prototype.match = function (element, url) {
-            const url_ = new URL(url);
-            return this.match_domain(url_.host) && this.commands(element, url);
-        }
-
-        Rule.prototype.match_domain = function (domain) {
             if (this.iscomment) {
                 return false;
             } else {
-                const domain_length = domain.length;
-                return !this.domain || domain.endsWith(this.domain) && (this.domain_length === domain_length || domain.charAt(domain_length - this.domain_length - 1) === '.');
+                const url_ = new URL(url);
+                return this.match_domain(url_.host) && this.commands(element, url);
             }
+        }
+
+        Rule.prototype.match_domain = function (domain) {
+            const domain_length = domain.length;
+            return !this.domain || domain.endsWith(this.domain) && (this.domain_length === domain_length || domain.charAt(domain_length - this.domain_length - 1) === '.');
         };
 
         const intitle = function (...args) {
             return (function (element, url) {
-                return !!~element.querySelector(SETTINGS.title).indexOf(...args);
+                const title = element.querySelector(SETTINGS.title);
+                if (title) {
+                    if (args[1]) {
+                        return new RegExp(...args).test(title.textContent);
+                    } else {
+                        return !!~title.textContent.indexOf(...args);
+                    }
+                } else {
+                    return false;
+                }
             });
         };
         const inbody = function (...args) {
             return (function (element, url) {
-                return !!~element.querySelector(SETTINGS.body).indexOf(...args);
+                const body = element.querySelector(SETTINGS.body);
+                if (body) {
+                    if (args[1]) {
+                        return new RegExp(...args).test(body.textContent);
+                    } else {
+                        return !!~body.textContent.indexOf(...args);
+                    }
+                } else {
+                    return false;
+                }
             });
         };
         const intext = function (...args) {
             return (function (element, url) {
-                return !!~element.textContent.indexOf(...args);
+                return intitle(...args)(element, url) || inbody(...args)(element, url);
             });
         };
         const regex = function (...args) {
@@ -535,10 +553,14 @@
         };
 
         Rule.prototype.commands = function (element, url) {
-            if (this.iscomment) {
-                return false;
-            } else {
-                return !this.command || eval(this.command)(element, url);
+            try {
+                if (this.iscomment) {
+                    return false;
+                } else {
+                    return !this.command || eval(this.command)(element, url);
+                }
+            } catch (error) {
+                console.log(error);
             }
         };
         return Rule;
@@ -873,7 +895,7 @@
                     console.log('%cDOWNLOAD', `color:${Colors.Pink};`, BLOCK.length);
                     GoogleSearchBlock.all();
                 }, () => {
-                    const patterns=Patterns.get();
+                    const patterns = Patterns.get();
                     console.log('%cUPLOAD', `color:${Colors.Blue};`, patterns.length);
                     return JSON.stringify(patterns);
                 }, function usesync() {

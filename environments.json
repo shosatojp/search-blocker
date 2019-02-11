@@ -8,8 +8,7 @@
         "observer_function": "containsInClassListWhenAdded",
         "observer_fn_arguments": ["g"],
         "title":"h3",
-        "body":".st",
-        "text":"div"
+        "body":".st"
     },
     "google_mobile": {
         "first": ".srg .xpd",
@@ -18,7 +17,9 @@
         "result_container": "#main",
         "observer_target": "#botstuff",
         "observer_function": "containsInClassListWhenAdded",
-        "observer_fn_arguments": ["xpd"]
+        "observer_fn_arguments": ["xpd"],
+        "title":"a>div",
+        "body":"div>div[jsname]:nth-child(2)"
     },
     "bing_pc": {
         "first": ".b_algo",
@@ -27,7 +28,9 @@
         "result_container": "#b_results",
         "result_box_style_class": "bing_pc_result_box",
         "observer_function": "equalsClassNameWhenAdded",
-        "observer_fn_arguments": ["b_algo"]
+        "observer_fn_arguments": ["b_algo"],
+        "title":"h2",
+        "body":"p"
     },
     "bing_mobile": {
         "first": ".b_algo",
@@ -35,7 +38,9 @@
         "container_class": "b_algo form_bing_mobile",
         "result_container": "#b_results",
         "observer_function": "equalsClassNameWhenAdded",
-        "observer_fn_arguments": ["b_algo"]
+        "observer_fn_arguments": ["b_algo"],
+        "title":"h2",
+        "body":".b_caption"
     },
     "yahoo_co_jp_pc": {
         "first": ".w",
@@ -44,7 +49,9 @@
         "result_container": "#WS2m",
         "result_box_style_class": "yahoo_co_jp_result_box",
         "observer_function": "equalsClassNameWhenAdded",
-        "observer_fn_arguments": ["w"]
+        "observer_fn_arguments": ["w"],
+        "title":"a",
+        "body":"p"
     },
     "yahoo_co_jp_mobile": {
         "first": ".sw-CardBase",
@@ -52,6 +59,8 @@
         "container_class": "sw-CardBase form_yahoo_mobile",
         "result_container": "#contentsInner",
         "observer_function": "equalsClassNameWhenAdded",
-        "observer_fn_arguments": ["sw-CardBase"]
+        "observer_fn_arguments": ["sw-CardBase"],
+        "title":"h3",
+        "body":"p"
     }
 }
