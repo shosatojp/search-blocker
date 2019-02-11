@@ -445,7 +445,7 @@
     const Patterns = (function () {
         const Patterns = {};
         Patterns.get = function () {
-            return GM_getValue('rules', []).map(e => Object.setPrototypeOf(e, Rule.prototype));
+            return GM_getValue('rules', []).map(e => Object.setPrototypeOf(e, Rule.prototype)).map(e => (e.make_command_function(), e));
         };
         Patterns.get_json = function () {
             return JSON.stringify(Patterns.get());
@@ -486,29 +486,34 @@
             }
             this.domain_length = pair[0].length;
             this.domain = this.domain_length ? pair[0] : null;
-            this.command = pair[1] || null;
+            if (this.command = pair[1] || null)
+                this.command_function = eval(this.command);
         };
-
-        Rule.prototype.match = function (element, url) {
+        Rule.prototype.make_command_function = function () {
+            if (this.command) {
+                this.command_function = eval(this.command);
+            }
+        };
+        Rule.prototype.match = function (element, url, domain, domain_length) {
             if (this.iscomment) {
                 return false;
             } else {
-                const url_ = new URL(url);
-                return this.match_domain(url_.host) && this.commands(element, url);
+                return this.match_domain(domain, domain_length) && this.commands(element, url);
             }
         }
 
-        Rule.prototype.match_domain = function (domain) {
-            const domain_length = domain.length;
+        Rule.prototype.match_domain = function (domain, domain_length) {
             return !this.domain || domain.endsWith(this.domain) && (this.domain_length === domain_length || domain.charAt(domain_length - this.domain_length - 1) === '.');
         };
 
         const intitle = function (...args) {
+            if (args[1])
+                var re = new RegExp(...args);
             return (function (element, url) {
                 const title = element.querySelector(SETTINGS.title);
                 if (title) {
                     if (args[1]) {
-                        return new RegExp(...args).test(title.textContent);
+                        return re.test(title.textContent);
                     } else {
                         return !!~title.textContent.indexOf(...args);
                     }
@@ -518,11 +523,13 @@
             });
         };
         const inbody = function (...args) {
+            if (args[1])
+                var re = new RegExp(...args);
             return (function (element, url) {
                 const body = element.querySelector(SETTINGS.body);
                 if (body) {
                     if (args[1]) {
-                        return new RegExp(...args).test(body.textContent);
+                        return re.test(body.textContent);
                     } else {
                         return !!~body.textContent.indexOf(...args);
                     }
@@ -532,13 +539,16 @@
             });
         };
         const intext = function (...args) {
+            const intitle_ = intitle(...args);
+            const inbody_ = inbody(...args);
             return (function (element, url) {
-                return intitle(...args)(element, url) || inbody(...args)(element, url);
+                return intitle_(element, url) || inbody_(element, url);
             });
         };
         const regex = function (...args) {
+            var re = new RegExp(...args);
             return (function (element, url) {
-                return !!url.match(new RegExp(...args));
+                return !!re.test(url);
             });
         };
         const inurl = function (...args) {
@@ -546,8 +556,9 @@
                 return !!~url.indexOf(...args);
             });
         };
+        // $$ = element, $ = url
         const script = function (...args) {
-            return (function (element, url) {
+            return (function ($$, $) {
                 return !!eval(...args);
             });
         };
@@ -557,7 +568,7 @@
                 if (this.iscomment) {
                     return false;
                 } else {
-                    return !this.command || eval(this.command)(element, url);
+                    return !this.command || this.command_function(element, url);
                 }
             } catch (error) {
                 console.log(error);
@@ -581,10 +592,11 @@
                 e.style['background-color'] = '';
                 const url_ = link_.getAttribute('href');
                 if (!url_.startsWith('http')) return;
-                // const host_ = new URL(url_).host;
+                const domain = new URL(url_).host;
+                const domain_length = domain.length;
                 for (let i = 0, len = BLOCK.length; i < len; i++) {
                     const block_pattern_ = BLOCK[i].source;
-                    if (BLOCK[i].match(e, url_)) {
+                    if (BLOCK[i].match(e, url_, domain, domain_length)) {
                         e.style.display = 'none';
                         e.style['background-color'] = 'rgba(248, 195, 199, 0.884)';
                         removed_ = block_pattern_;
