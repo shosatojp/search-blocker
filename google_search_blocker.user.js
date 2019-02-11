@@ -2,7 +2,7 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker/raw/master
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      0.12.0
+// @version      0.12.1
 // @description  Block undesired sites from google search results!
 // @author       Sho Sato
 // @match        https://www.google.com/search?*
