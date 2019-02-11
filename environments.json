@@ -6,7 +6,10 @@
         "result_container": "#search",
         "result_box_style_class": "pc_result_box",
         "observer_function": "containsInClassListWhenAdded",
-        "observer_fn_arguments": ["g"]
+        "observer_fn_arguments": ["g"],
+        "title":"h3",
+        "body":".st",
+        "text":"div"
     },
     "google_mobile": {
         "first": ".srg .xpd",
