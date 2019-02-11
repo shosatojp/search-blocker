@@ -511,7 +511,7 @@
         };
 
         const intitle = function (...args) {
-            if (args[1]||args[1]==='')
+            if (args[1] || args[1] === '')
                 var re = new RegExp(...args);
             return (function (element, url) {
                 const title = element.querySelector(SETTINGS.title);
@@ -527,7 +527,7 @@
             });
         };
         const inbody = function (...args) {
-            if (args[1]||args[1]==='')
+            if (args[1] || args[1] === '')
                 var re = new RegExp(...args);
             return (function (element, url) {
                 const body = element.querySelector(SETTINGS.body);
@@ -550,7 +550,7 @@
             });
         };
         const inurl = function (...args) {
-            if (args[1]||args[1]==='')
+            if (args[1] || args[1] === '')
                 var re = new RegExp(...args);
             return (function (element, url) {
                 if (re) {
@@ -563,7 +563,7 @@
         // $$ = element, $ = url
         const script = function (...args) {
             return (function ($$, $) {
-                return !!eval(...args);
+                return !args[0] || !!eval(args[0]);
             });
         };
 
