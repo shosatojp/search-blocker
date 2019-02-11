@@ -2,7 +2,7 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker/raw/master
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      0.11.3.1
+// @version      0.12.0
 // @description  Block undesired sites from google search results!
 // @author       Sho Sato
 // @match        https://www.google.com/search?*
@@ -474,7 +474,7 @@
         const Rule = function (str) {
             this.source = str;
             if (str.startsWith('#')) {
-                str = `$regex('${str.substring(1).replace('\'','\\\'')}')`;
+                str = `$inurl('${str.substring(1).replace('\'','\\\'')}','')`;
             }
             if (this.iscomment = str.startsWith('!')) return;
             const index = str.indexOf('$');
@@ -491,7 +491,11 @@
         };
         Rule.prototype.make_command_function = function () {
             if (this.command) {
-                this.command_function = eval(this.command);
+                try {
+                    this.command_function = eval(this.command);
+                } catch (error) {
+                    console.log(error);
+                }
             }
         };
         Rule.prototype.match = function (element, url, domain, domain_length) {
@@ -507,12 +511,12 @@
         };
 
         const intitle = function (...args) {
-            if (args[1])
+            if (args[1]||args[1]==='')
                 var re = new RegExp(...args);
             return (function (element, url) {
                 const title = element.querySelector(SETTINGS.title);
                 if (title) {
-                    if (args[1]) {
+                    if (re) {
                         return re.test(title.textContent);
                     } else {
                         return !!~title.textContent.indexOf(...args);
@@ -523,12 +527,12 @@
             });
         };
         const inbody = function (...args) {
-            if (args[1])
+            if (args[1]||args[1]==='')
                 var re = new RegExp(...args);
             return (function (element, url) {
                 const body = element.querySelector(SETTINGS.body);
                 if (body) {
-                    if (args[1]) {
+                    if (re) {
                         return re.test(body.textContent);
                     } else {
                         return !!~body.textContent.indexOf(...args);
@@ -545,15 +549,21 @@
                 return intitle_(element, url) || inbody_(element, url);
             });
         };
-        const regex = function (...args) {
-            var re = new RegExp(...args);
-            return (function (element, url) {
-                return !!re.test(url);
-            });
-        };
+        // const regex = function (...args) {
+        //     var re = new RegExp(...args);
+        //     return (function (element, url) {
+        //         return !!re.test(url);
+        //     });
+        // };
         const inurl = function (...args) {
+            if (args[1]||args[1]==='')
+                var re = new RegExp(...args);
             return (function (element, url) {
-                return !!~url.indexOf(...args);
+                if (re) {
+                    return re.test(url);
+                } else {
+                    return !!~url.indexOf(...args);
+                }
             });
         };
         // $$ = element, $ = url
