@@ -9,10 +9,7 @@
         "observer_fn_arguments": ["g"],
         "title":"h3",
         "body":".st",
-        "info":".w",
-        "exclude_parent":{
-            "class":["xpdopen"]
-        }
+        "info":".w"
     },
     "google_mobile": {
         "first": ".xpd",
@@ -23,7 +20,7 @@
         "observer_function": "containsInClassListWhenAdded",
         "observer_fn_arguments": ["xpd"],
         "title":"a>div",
-        "body":"div>div[jsname]:nth-child(2)",
+        "body":"hr + div",
         "info":""
     },
     "bing_pc": {
