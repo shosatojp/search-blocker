@@ -1,5 +1,6 @@
 # Google Search Blocker
-Google Search Blocker blocks sites you don't want to see in google results. You can use this script not only on google.com but bing.com and yahoo.co.jp. This script is also available on mobile (Android Firefox (changing useragent to Android Chrome is recommended.)).
+Google Search Blocker blocks sites you don't want to see in google results. You can use this script not only on **google.com** but **bing.com** and **yahoo.co.jp**. This script is also available on **mobile** (Android Firefox (changing useragent to Android Chrome is recommended.)). 
+![](./README/004.png)  
 
 ## Get Started
 
@@ -21,17 +22,17 @@ You can use original domain or regex with prefix '#'.
 You only need to click button to block domain.
 
 ## How to write rules
-| Block by:       | Rule                                                                                              |
-| --------------- | ------------------------------------------------------------------------------------------------- |
-| Domain          | `example.com`<br>`foo.example.com`                                                                                        |
-| PDF             | `#\.pdf`                                                                                          |
-| IDN             | `#https?://xn--[0-9a-z.]+/`                                                                       |
-| Title           | `$intitle('w3schools')`                                                                           |
-| Content         | `$inbody('w3schools')`                                                                            |
-| Title + Content | `$intext('foo')`                                                                                  |
-| URL             | `$inurl('/wp-content/uploads/')`                                                                  |
-| Script          | `$script('~$.indexOf("bar")')`                                                                    |
-| Regex           | `$intitle('foo','')`<br>`$inbody('foo','i')`<br>`$intext('w3schools','m')`<br>`$inurl('w3schools','igmy')` |
+| Block by:       | Rule                                                                                                                                          ||
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |---|
+| Domain          | `example.com`<br>`foo.example.com`                                                                                                            |fast|
+| PDF             | `#\.pdf`                                                                                                                                      |slow|
+| IDN             | `#https?://xn--[0-9a-z.]+/`                                                                                                                   |slow|
+| Title           | `$intitle('foo')`<br>`example.com$intitle('foo')`                                                                                             |middle|
+| Content         | `$inbody('foo')`<br>`example.com$inbody('foo')`                                                                                               |middle|
+| Title + Content | `$intext('foo')`<br>`example.com$intext('foo')`                                                                                               |middle|
+| URL             | `$inurl('/wp-content/uploads/')`<br>`example.com$inurl('/wp-content/uploads/')`                                                               |middle|
+| Script          | `$script('~$.indexOf("bar")')`<br>`example.com$script('~$.indexOf("bar")')`                                                                   |slow|
+| Regex           | `$intitle('foo','')`<br>`example.com$intitle('foo','')`<br>`$inbody('foo','i')`<br>`$intext('w3schools','m')`<br>`$inurl('w3schools','igmy')` |slow|
 
 `#...` is alias of `$inurl(...,'')`
 

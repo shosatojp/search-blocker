@@ -9,7 +9,10 @@
         "observer_fn_arguments": ["g"],
         "title":"h3",
         "body":".st",
-        "info":".w"
+        "info":".w",
+        "exclude_parent":{
+            "class":["xpdopen"]
+        }
     },
     "google_mobile": {
         "first": ".xpd",
