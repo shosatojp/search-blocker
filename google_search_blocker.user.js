@@ -713,6 +713,9 @@
     function initializeForm(container) {
         const e = document.createElement('div');
         e.innerHTML = TextResource.get('form');
+        e.addEventListener('click',function(e){
+            e.stopPropagation();
+        });
         container.appendChild(e);
 
         R.form = document.querySelector('#google_search_block');
@@ -807,6 +810,11 @@
                 Modal.container.style.display = 'flex';
             });
             Modal.button_close.addEventListener('click', function () {
+                Modal.button_open.style.display = 'block';
+                Modal.button_close.style.display = 'none';
+                Modal.container.style.display = 'none';
+            });
+            Modal.container.addEventListener('click',function(){
                 Modal.button_open.style.display = 'block';
                 Modal.button_close.style.display = 'none';
                 Modal.container.style.display = 'none';
