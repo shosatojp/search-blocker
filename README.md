@@ -1,5 +1,6 @@
 # Google Search Blocker
 Google Search Blocker blocks sites you don't want to see in google results. You can use this script not only on **google.com** but **bing.com** and **yahoo.co.jp**. This script is also available on **mobile** (Android Firefox (changing useragent to Android Chrome is recommended.)). 
+
 ![](./README/004.png)  
 
 ## Get Started
@@ -33,7 +34,7 @@ You only need to click button to block domain.
 | URL             | `$inurl('/wp-content/uploads/')`<br>`example.com$inurl('/wp-content/uploads/')`                                                               |middle|
 | Script          | `$script('~$.indexOf("bar")')`<br>`example.com$script('~$.indexOf("bar")')`                                                                   |slow|
 | Regex           | `$intitle('foo','')`<br>`example.com$intitle('foo','')`<br>`$inbody('foo','i')`<br>`$intext('w3schools','m')`<br>`$inurl('w3schools','igmy')` |slow|
-
+|(Comment)|`!example.com`||
 `#...` is alias of `$inurl(...,'')`
 
 
