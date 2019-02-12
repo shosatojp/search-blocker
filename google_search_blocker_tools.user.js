@@ -3,7 +3,7 @@
 // @namespace    https://github.com/shosatojp/google_search_blocker/raw/master
 // @homepage     https://github.com/shosatojp/google_search_blocker
 // @version      0.1
-// @description  tools for Google Search Blocker. This script must run after the main script.
+// @description  tools for Google Search Blocker. This script must run after the main script. Google Search Blocker version 0.13.0 or higher is needed.
 // @author       Sho Sato
 // @match        *://*/*
 // @resource     languages        ./languages.json?
