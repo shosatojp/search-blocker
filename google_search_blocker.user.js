@@ -578,7 +578,7 @@
         };
         return Rule;
     })();
-    
+
     const FindElement = (function () {
         const FindElement = {};
         FindElement.is_element_of_AND = function (element, props = {
@@ -873,6 +873,17 @@
             }
         }
 
+        // import from tools
+        unsafeWindow.google_search_blocker_import = function (imports) {
+            try {
+                imports.forEach(e => Patterns.add(e));
+                BLOCK = Patterns.get();
+                console.log(`%cimported ${imports.length} rules`, `color:${Colors.Purple}`);
+            } catch (error) {
+                console.error('failed to import', error);
+            }
+        };
+
         //if there are any elements before observe, block these elements.
         console.log(document.querySelectorAll(SETTINGS.first).length + ' elements was found before start MutationObserver');
         GoogleSearchBlock.all(false);
@@ -930,41 +941,41 @@
                     });
                 }
             }
+        });
 
-            window.addEventListener('load', function () {
-                console.log('%c----------------load----------------', `color:${Colors.LightGreen};`);
+        window.addEventListener('load', function () {
+            console.log('%c----------------load----------------', `color:${Colors.LightGreen};`);
 
-                Element.prototype.insertBefore = Element_prototype_insertBefore;
-                Element.prototype.appendChild = Element_prototype_appendChild;
+            Element.prototype.insertBefore = Element_prototype_insertBefore;
+            Element.prototype.appendChild = Element_prototype_appendChild;
 
-                //initialize sync feature.
-                (SYNC = new DriveSync(CLIENT_ID, LIST_FILE_NAME, (time) => {
-                    GM_setValue('modified', time.toString());
-                }, () => {
-                    return parseInt(GM_getValue('modified', '0'));
-                }, data => {
-                    Patterns.set_json(data);
-                    BLOCK = Patterns.get();
-                    console.log('%cDOWNLOAD', `color:${Colors.Pink};`, BLOCK.length);
-                    GoogleSearchBlock.all();
-                }, () => {
-                    const patterns = Patterns.get();
-                    console.log('%cUPLOAD', `color:${Colors.Blue};`, patterns.length);
-                    return JSON.stringify(patterns);
-                }, function usesync() {
-                    return !!parseInt(GM_getValue('usesync', '0'));
-                }, function setusesync(bool) {
-                    GM_setValue('usesync', (+bool).toString());
-                }, function onsignin() {
-                    R.signin.style.display = 'none';
-                    R.signout.style.display = 'block';
-                    R.syncinfo.textContent = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
-                }, function onsignout() {
-                    R.signin.style.display = 'block';
-                    R.signout.style.display = 'none';
-                })).initSync().then(() => SYNC.compare()).catch(() => {});
+            //initialize sync feature.
+            (SYNC = new DriveSync(CLIENT_ID, LIST_FILE_NAME, (time) => {
+                GM_setValue('modified', time.toString());
+            }, () => {
+                return parseInt(GM_getValue('modified', '0'));
+            }, data => {
+                Patterns.set_json(data);
+                BLOCK = Patterns.get();
+                console.log('%cDOWNLOAD', `color:${Colors.Pink};`, BLOCK.length);
+                GoogleSearchBlock.all();
+            }, () => {
+                const patterns = Patterns.get();
+                console.log('%cUPLOAD', `color:${Colors.Blue};`, patterns.length);
+                return JSON.stringify(patterns);
+            }, function usesync() {
+                return !!parseInt(GM_getValue('usesync', '0'));
+            }, function setusesync(bool) {
+                GM_setValue('usesync', (+bool).toString());
+            }, function onsignin() {
+                R.signin.style.display = 'none';
+                R.signout.style.display = 'block';
+                R.syncinfo.textContent = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
+            }, function onsignout() {
+                R.signin.style.display = 'block';
+                R.signout.style.display = 'none';
+            })).initSync().then(() => SYNC.compare()).catch(() => {});
 
-            });
         });
     }
 

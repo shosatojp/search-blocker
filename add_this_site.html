@@ -1,0 +1,80 @@
+<style>
+    #google_search_blocker_tools_container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 100%;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        z-index: 99999999999999999999999999999999999999999999999999999999999999999;
+    }
+    #google_search_blocker_tools_inner{
+        align-self: center;
+        background-color: white;
+        border: solid gray 1px;
+        border-radius: 10px;
+        max-width: 500px;
+        width: 100%;
+    }
+    #google_search_blocker_tools_rule{
+        font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
+        width: 100%;
+        font-size: large;
+        border-radius: 10px;
+        border: 1px solid #DFE1E5;
+        padding: 10px;
+        margin: 0 -10px;
+        cursor: unset;
+    }
+
+    .google_search_blocker_tools_button {
+        white-space: nowrap;
+        display: inline-block;
+        background-color: #fff;
+        text-align: center;
+        font-size: 14px;
+        color: #202124;
+        border-radius: 10px;
+        border: 1px solid #DFE1E5;
+        padding: 7px 10px;
+        cursor: pointer;
+        margin: 5px;
+        line-height: 1.6;
+        height: unset;
+        font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
+    }
+    #google_search_blocker_tools_button_close{
+        background-color: #fff;
+        text-align: center;
+        font-size: 14px;
+        color: #202124;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        padding: 5px 10px;
+        cursor: pointer;
+        margin: 5px;
+        line-height: 1;
+        font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
+    }
+</style>
+<div id="google_search_blocker_tools_container">
+    <div id="google_search_blocker_tools_inner">
+        <div style="margin: 20px;">
+            <div style="margin: 10px;display: flex;justify-content: space-between">
+                <div style="font-size: large">${blocksettings}</div>
+                <button id="google_search_blocker_tools_button_close">X</button>
+            </div>
+            <div>
+                <input id="google_search_blocker_tools_rule" type="text">
+            </div>
+            <div style="display: flex;justify-content: flex-end;">
+                <button class="google_search_blocker_tools_button" id="google_search_blocker_tools_button_add_rule">${add_rule}</button>
+            </div>
+        </div>
+    </div>
+</div>

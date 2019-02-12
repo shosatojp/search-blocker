@@ -14,7 +14,11 @@
         "failedtosync":"サインインに失敗しました",
         "signin":"サインイン",
         "signout":"サインアウト",
-        "modal":"モーダル"
+        "modal":"モーダル",
+        "addthissite":"このサイトを除外",
+        "blocksettings":"除外設定",
+        "add_rule":"追加",
+        "ruleisempty":"除外規則を入力してください"
     }
 },{
     "language":["en","en-us"],
@@ -32,6 +36,10 @@
         "failedtosync":"failed to signin",
         "signin":"Sign In",
         "signout":"Sign Out",
-        "modal":"Modal"
+        "modal":"Modal",
+        "addthissite":"Block this site",
+        "blocksettings":"Block Settings",
+        "add_rule":"Add Rule",
+        "ruleisempty":"Rule is empty!"
     }
 }]
