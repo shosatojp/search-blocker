@@ -59,8 +59,7 @@ You need google account to sync block list. This script sync using your google d
 This script use `document.body.appendChild` to load Google API. bing.com overrides `Element.prototype.appendChild` at html sctipt tag, and because browser extensions will be injected async, this script cannot copy original and use `appendChild` properly. Nevertheless, you want to use sync in bing.com, you have to add this line to uBlockOrigin's "my filter".
 
 #### Add this to "my filter" of uBlockOrigin.
-<!-- > www.bing.com##script:contains(Element.prototype.appendChild)   -->
-> `||www.bing.com/search$inline-script  `
+> `||www.bing.com/search$inline-script`
 
 
 ## Available on mobile too (Android Firefox)
