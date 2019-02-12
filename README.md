@@ -35,6 +35,7 @@ You only need to click button to block domain.
 | Script          | `$script('~$.indexOf("bar")')`<br>`example.com$script('~$.indexOf("bar")')`                                                                   |slow|
 | Regex           | `$intitle('foo','')`<br>`example.com$intitle('foo','')`<br>`$inbody('foo','i')`<br>`$intext('w3schools','m')`<br>`$inurl('w3schools','igmy')` |slow|
 |(Comment)|`!example.com`||
+
 `#...` is alias of `$inurl(...,'')`
 
 
