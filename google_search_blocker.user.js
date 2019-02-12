@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Google Search Blocker
-// @namespace    https://github.com/shosatojp/google_search_blocker/raw/master
+// @namespace    https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js
 // @homepage     https://github.com/shosatojp/google_search_blocker
 // @version      0.13.1
 // @description  Block undesired sites from google search results!
