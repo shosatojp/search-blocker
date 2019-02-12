@@ -7,9 +7,14 @@
         "result_box_style_class": "pc_result_box",
         "observer_function": "containsInClassListWhenAdded",
         "observer_fn_arguments": ["g"],
-        "title":"h3",
-        "body":".st",
-        "info":".w"
+        "title": "h3",
+        "body": ".st",
+        "info": ".w",
+        "excludes": {
+            "has_ancestor_of": {
+                "classList": ["xpdopen"]
+            }
+        }
     },
     "google_mobile": {
         "first": ".xpd",
@@ -19,9 +24,9 @@
         "observer_target": "#botstuff",
         "observer_function": "containsInClassListWhenAdded",
         "observer_fn_arguments": ["xpd"],
-        "title":"a>div",
-        "body":"hr + div",
-        "info":""
+        "title": "a>div",
+        "body": "hr + div",
+        "info": ""
     },
     "bing_pc": {
         "first": ".b_algo",
@@ -31,9 +36,9 @@
         "result_box_style_class": "bing_pc_result_box",
         "observer_function": "equalsClassNameWhenAdded",
         "observer_fn_arguments": ["b_algo"],
-        "title":"h2",
-        "body":"p",
-        "info":""
+        "title": "h2",
+        "body": "p",
+        "info": ""
     },
     "bing_mobile": {
         "first": ".b_algo",
@@ -42,9 +47,9 @@
         "result_container": "#b_results",
         "observer_function": "equalsClassNameWhenAdded",
         "observer_fn_arguments": ["b_algo"],
-        "title":"h2",
-        "body":".b_caption",
-        "info":""
+        "title": "h2",
+        "body": ".b_caption",
+        "info": ""
     },
     "yahoo_co_jp_pc": {
         "first": ".w",
@@ -54,9 +59,9 @@
         "result_box_style_class": "yahoo_co_jp_result_box",
         "observer_function": "equalsClassNameWhenAdded",
         "observer_fn_arguments": ["w"],
-        "title":"a",
-        "body":"p",
-        "info":"span.r"
+        "title": "a",
+        "body": "p",
+        "info": "span.r"
     },
     "yahoo_co_jp_mobile": {
         "first": ".sw-CardBase",
@@ -65,8 +70,8 @@
         "result_container": "#contentsInner",
         "observer_function": "equalsClassNameWhenAdded",
         "observer_fn_arguments": ["sw-CardBase"],
-        "title":"h3",
-        "body":"p",
-        "info":""
+        "title": "h3",
+        "body": "p",
+        "info": ""
     }
 }

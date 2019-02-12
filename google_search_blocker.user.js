@@ -440,7 +440,6 @@
         return Controller;
     })();
 
-
     //Pattern manager
     const Patterns = (function () {
         const Patterns = {};
@@ -504,8 +503,7 @@
             } else {
                 return this.match_domain(domain, domain_length) && this.commands(element, url);
             }
-        }
-
+        };
         Rule.prototype.match_domain = function (domain, domain_length) {
             return !this.domain || domain.endsWith(this.domain) && (this.domain_length === domain_length || domain.charAt(domain_length - this.domain_length - 1) === '.');
         };
@@ -580,6 +578,44 @@
         };
         return Rule;
     })();
+    
+    const FindElement = (function () {
+        const FindElement = {};
+        FindElement.is_element_of_AND = function (element, props = {
+            id: '',
+            classList: [],
+            attrs: {},
+            tagName: '',
+        }) {
+            return (!props.id || element.id === props.id) &&
+                (!props.tagName || element.tagName.toLowerCase() === props.tagName.toLowerCase()) &&
+                (!(props.classList && (props.classList instanceof Array) && props.classList.length) ||
+                    props.classList.filter(e => !element.classList.contains(e)).length === 0) &&
+                (!(props.attrs && props.attrs instanceof Object) ||
+                    Object.keys(props.attrs).filter(e => element.getAttribute(e) !== props.attrs[e]).length ===
+                    0);
+        };
+        FindElement.has_ancestor_of = function (element, props) {
+            while (element = element.parentElement)
+                if (FindElement.is_element_of_AND(element, props)) return true;
+            return false;
+        };
+        FindElement.is_exclude = function (element) {
+            const excludes = SETTINGS.excludes;
+            if (excludes) {
+                for (const key in excludes) {
+                    if (excludes.hasOwnProperty(key)) {
+                        if (FindElement[key](element, excludes[key])) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        };
+        return FindElement;
+    })();
+
 
     //main class for blocking search result.
     const GoogleSearchBlock = (function () {
@@ -589,6 +625,7 @@
         let time = 0;
 
         GoogleSearchBlock.one = function (e) {
+            if (FindElement.is_exclude(e)) return false;
             const start_ = performance.now();
             const link_ = e.querySelector(SETTINGS.second);
             let removed_ = false;
