@@ -8,8 +8,8 @@
 // @match        *://*/*
 // @resource     languages        ./languages.json?
 // @resource     add_this_site    ./add_this_site.html?
-// @updateURL    https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js?
-// @downloadURL  https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js?
+// @updateURL    https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker_tools.user.js?
+// @downloadURL  https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker_tools.user.js?
 // @grant        GM_registerMenuCommand
 // @grant        GM_getResourceText
 // @grant        GM_setValue
