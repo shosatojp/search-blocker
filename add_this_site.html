@@ -12,6 +12,7 @@
         flex-direction: column;
         justify-content: center;
         z-index: 99999999999999999999999999999999999999999999999999999999999999999;
+        color: black;
     }
     #google_search_blocker_tools_inner{
         align-self: center;
@@ -20,7 +21,7 @@
         border-radius: 10px;
         max-width: 500px;
         width: calc(100% - 20px);
-    margin: 10px;
+        margin: 10px;
     }
     #google_search_blocker_tools_rule{
         font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
@@ -29,8 +30,10 @@
         border-radius: 10px;
         border: 1px solid #DFE1E5;
         padding: 10px;
-        margin: 0 -10px;
         cursor: text;
+        box-sizing: border-box;
+        height: unset;
+        line-height: unset;
     }
 
     .google_search_blocker_tools_button {
@@ -44,7 +47,7 @@
         border: 1px solid #DFE1E5;
         padding: 7px 10px;
         cursor: pointer;
-        margin: 5px;
+        margin: 5px 0;
         line-height: 1.6;
         height: unset;
         font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
@@ -62,12 +65,13 @@
         line-height: 1;
         font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
     }
+
 </style>
 <div id="google_search_blocker_tools_container">
     <div id="google_search_blocker_tools_inner">
         <div style="margin: 20px;">
             <div style="margin: 10px;display: flex;justify-content: space-between">
-                <div style="font-size: large">${blocksettings}</div>
+                <div style="font-size: 18px;line-height: 2;">${blocksettings}</div>
                 <button id="google_search_blocker_tools_button_close">X</button>
             </div>
             <div>

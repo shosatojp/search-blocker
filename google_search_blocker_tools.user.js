@@ -2,7 +2,7 @@
 // @name         Google Search Blocker Tools
 // @namespace    https://github.com/shosatojp/google_search_blocker/raw/master
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      0.1
+// @version      0.1.1
 // @description  tools for Google Search Blocker. This script must run after the main script. Google Search Blocker version 0.13.0 or higher is needed.
 // @author       Sho Sato
 // @match        *://*/*
@@ -26,7 +26,6 @@
         window.navigator.browserLanguage;
     const LOCAL_STRING = JSON.parse(GM_getResourceText('languages'))
         .filter(x => ~x.language.indexOf(LANGUAGE.toLowerCase()) || ~x.language.indexOf('en'))[0].ui;
-    //Resource manager
     const TextResource = (function () {
         const TextResource = {};
 
@@ -75,9 +74,12 @@
     if (is_search_site()) {
         const export_rules = StoredRules.get();
         if (export_rules.length && unsafeWindow.google_search_blocker_import) {
-            console.log(`%cexported ${export_rules.length} rules`, 'color:#9C27B0;');
-            unsafeWindow.google_search_blocker_import(export_rules);
-            StoredRules.set([]);
+            if (unsafeWindow.google_search_blocker_import(export_rules)) {
+                console.log(`%cexported ${export_rules.length} rules`, 'color:#9C27B0;');
+                StoredRules.set([]);
+            } else {
+                console.log(`%cfailed to export rules`, 'color:#9C27B0;');
+            }
         }
     } else {
         GM_registerMenuCommand(LOCAL_STRING.addthissite, function () {
@@ -89,6 +91,7 @@
                     rule: R.wrapper.querySelector('#google_search_blocker_tools_rule'),
                     container: R.wrapper.querySelector('#google_search_blocker_tools_container'),
                     close: R.wrapper.querySelector('#google_search_blocker_tools_button_close'),
+                    inner: R.wrapper.querySelector('#google_search_blocker_tools_inner'),
                 });
                 R.add_rule.addEventListener('click', function () {
                     if (R.rule.value) {
@@ -100,6 +103,12 @@
                     }
                 });
                 R.close.addEventListener('click', function () {
+                    R.container.style.display = 'none';
+                });
+                R.inner.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                });
+                R.container.addEventListener('click', function () {
                     R.container.style.display = 'none';
                 });
                 document.body.appendChild(R.wrapper);
