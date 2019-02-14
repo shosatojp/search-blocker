@@ -33,7 +33,6 @@ You only need to click button to block domain.
 | URL             | `$inurl('/wp-content/uploads/')`<br>`example.com$inurl('/wp-content/uploads/')`                                                               | middle |
 | Pathname Prefix | `$prefix('/search')`<br>`example.com$inurl('/wp-content/uploads/')`                                                                           | middle |
 | Pathname Suffix | `$suffix('.pdf')`                                                                                                                             | middle |
-| URL             | `$inurl('/wp-content/uploads/')`<br>`example.com$inurl('/wp-content/uploads/')`                                                               | middle |
 | Script          | `$script('~$.indexOf("bar")')`<br>`example.com$script('~$.indexOf("bar")')`                                                                   | slow   |
 | Regex           | `$intitle('foo','')`<br>`example.com$intitle('foo','')`<br>`$inbody('foo','i')`<br>`$intext('w3schools','m')`<br>`$inurl('w3schools','igmy')` | slow   |
 | (Comment)       | `!example.com`                                                                                                                                |        |
