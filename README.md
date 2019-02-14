@@ -7,7 +7,8 @@ Google Search Blocker blocks sites you don't want to see in google results. You 
 
 ### 1.Install Tampermonkey on your browser
 Chrome:
-https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo  
+https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo
+
 Firefox:
 https://addons.mozilla.org/ja/firefox/addon/tampermonkey/
 ### 2.Click this URL to install script.
@@ -16,27 +17,44 @@ https://github.com/shosatojp/google_search_blocker/raw/master/google_search_bloc
 ### Edit Quickly On Google Search Result Page
 ![](./README/000.png)  
 
-You can use original domain or regex with prefix '#'.
-
 ### Auto Block Level Selector
 ![](./README/001.png)  
 You only need to click button to block domain.
 
 ## How to write rules
-| Block by:       | Rule                                                                                                                                          ||
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |---|
-| Domain          | `example.com`<br>`foo.example.com`                                                                                                            |fast|
-| PDF             | `#\.pdf`                                                                                                                                      |slow|
-| IDN             | `#https?://xn--[0-9a-z.]+/`                                                                                                                   |slow|
-| Title           | `$intitle('foo')`<br>`example.com$intitle('foo')`                                                                                             |middle|
-| Content         | `$inbody('foo')`<br>`example.com$inbody('foo')`                                                                                               |middle|
-| Title + Content | `$intext('foo')`<br>`example.com$intext('foo')`                                                                                               |middle|
-| URL             | `$inurl('/wp-content/uploads/')`<br>`example.com$inurl('/wp-content/uploads/')`                                                               |middle|
-| Script          | `$script('~$.indexOf("bar")')`<br>`example.com$script('~$.indexOf("bar")')`                                                                   |slow|
-| Regex           | `$intitle('foo','')`<br>`example.com$intitle('foo','')`<br>`$inbody('foo','i')`<br>`$intext('w3schools','m')`<br>`$inurl('w3schools','igmy')` |slow|
-|(Comment)|`!example.com`||
+| Block by:       | Rule                                                                                                                                          |        |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| Domain          | `example.com`<br>`foo.example.com`                                                                                                            | fast   |
+| PDF             | `#\.pdf`                                                                                                                                      | slow   |
+| IDN             | `#https?://xn--[0-9a-z.]+/`                                                                                                                   | slow   |
+| Title           | `$intitle('foo')`<br>`example.com$intitle('foo')`                                                                                             | middle |
+| Content         | `$inbody('foo')`<br>`example.com$inbody('foo')`                                                                                               | middle |
+| Title + Content | `$intext('foo')`<br>`example.com$intext('foo')`                                                                                               | middle |
+| URL             | `$inurl('/wp-content/uploads/')`<br>`example.com$inurl('/wp-content/uploads/')`                                                               | middle |
+| Pathname Prefix | `$prefix('/search')`<br>`example.com$inurl('/wp-content/uploads/')`                                                                           | middle |
+| Pathname Suffix | `$suffix('.pdf')`                                                                                                                             | middle |
+| URL             | `$inurl('/wp-content/uploads/')`<br>`example.com$inurl('/wp-content/uploads/')`                                                               | middle |
+| Script          | `$script('~$.indexOf("bar")')`<br>`example.com$script('~$.indexOf("bar")')`                                                                   | slow   |
+| Regex           | `$intitle('foo','')`<br>`example.com$intitle('foo','')`<br>`$inbody('foo','i')`<br>`$intext('w3schools','m')`<br>`$inurl('w3schools','igmy')` | slow   |
+| (Comment)       | `!example.com`                                                                                                                                |        |
 
 `#...` is alias of `$inurl(...,'')`
+
+### Logical Operators
+|      | Operator       |
+| ---- | -------------- |
+| AND  | `and(...fns)`  |
+| OR   | `or(...fns)`   |
+| NOT  | `not(fn)`      |
+| XOR  | `xor(...fns)`  |
+| NAND | `nand(...fns)` |
+| NOR  | `nor(...fns)`  |
+
+#### Usage
+```js
+$xor(or(and(intitle('foo','i'),not(inbody('bar'))),prefix('/content')),suffix('.html'))
+```
+
 
 
 ## Sync
@@ -62,6 +80,10 @@ This script use `document.body.appendChild` to load Google API. bing.com overrid
 #### Add this to "my filter" of uBlockOrigin.
 > `||www.bing.com/search$inline-script`
 
+## Google Search Blocker Tools Extension
+If you install [Google Search Blocker Tools](https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker_tools.user.js?) extension, you can add rule to blocklist when you are not in search result page.  
+![](./README/005.png)  
+![](./README/006.png)  
 
 ## Available on mobile too (Android Firefox)
 ![](./README/002.png)  

@@ -323,19 +323,19 @@
             result = result.filter(e => !~exclude.indexOf(e.regex));
 
             var split = c.pathname.substr(1).split('/').filter(e => e);
-            var temp = '#https?://' + Util.regex_escape(c.host);
+            var temp = c.host + '$prefix(\'';
             var temp_alias = c.host;
             split.pop();
             split.slice(0, 2).forEach(e => {
-                temp += '/' + Util.regex_escape(e);
+                temp += '/' + e.replace('\'', '\\\'');
                 temp_alias += '/' + e;
                 result.push({
-                    regex: temp,
+                    regex: temp + '\')',
                     alias: temp_alias
                 });
             });
             return result;
-        }
+        };
         Util.isMobileDevice = function () {
             return navigator.userAgent.match(/(Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone)/i);
         };
@@ -497,11 +497,43 @@
                 }
             }
         };
-        Rule.prototype.match = function (element, url, domain, domain_length) {
+        const not = function (fn) {
+            return (function (...args) {
+                return !fn(...args);
+            });
+        };
+        const and = function (...fns) {
+            return (function (...args) {
+                for (const fn of fns)
+                    if (!fn(...args))
+                        return false;
+                return true;
+            });
+        };
+        const or = function (...fns) {
+            return (function (...args) {
+                for (const fn of fns)
+                    if (fn(...args))
+                        return true;
+                return false;
+            });
+        };
+        const nor = function (...fns) {
+            return not(or(...fns));
+        };
+        const nand = function (...fns) {
+            return not(and(...fns));
+        };
+        const xor = function (...fns) {
+            return (function (...args) {
+                return fns.reduce((a, b) => b(...args) ? !a : a, false);
+            });
+        };
+        Rule.prototype.match = function (element, url, domain, domain_length, url_obj) {
             if (this.iscomment) {
                 return false;
             } else {
-                return this.match_domain(domain, domain_length) && this.commands(element, url);
+                return this.match_domain(domain, domain_length) && this.commands(element, url, url_obj);
             }
         };
         Rule.prototype.match_domain = function (domain, domain_length) {
@@ -511,7 +543,7 @@
         const intitle = function (...args) {
             if (args[1] || args[1] === '')
                 var re = new RegExp(...args);
-            return (function (element, url) {
+            return (function (element, url, url_obj) {
                 const title = element.querySelector(SETTINGS.title);
                 if (title) {
                     if (re) {
@@ -527,7 +559,7 @@
         const inbody = function (...args) {
             if (args[1] || args[1] === '')
                 var re = new RegExp(...args);
-            return (function (element, url) {
+            return (function (element, url, url_obj) {
                 const body = element.querySelector(SETTINGS.body);
                 if (body) {
                     if (re) {
@@ -543,14 +575,14 @@
         const intext = function (...args) {
             const intitle_ = intitle(...args);
             const inbody_ = inbody(...args);
-            return (function (element, url) {
+            return (function (element, url, url_obj) {
                 return intitle_(element, url) || inbody_(element, url);
             });
         };
         const inurl = function (...args) {
             if (args[1] || args[1] === '')
                 var re = new RegExp(...args);
-            return (function (element, url) {
+            return (function (element, url, url_obj) {
                 if (re) {
                     return re.test(url);
                 } else {
@@ -564,13 +596,22 @@
                 return !args[0] || !!eval(args[0]);
             });
         };
-
-        Rule.prototype.commands = function (element, url) {
+        const prefix = function (...args) {
+            return (function (element, url, url_obj) {
+                return url_obj.pathname.startsWith(...args);
+            });
+        };
+        const suffix = function (...args) {
+            return (function (element, url, url_obj) {
+                return url_obj.pathname.endsWith(...args);
+            });
+        };
+        Rule.prototype.commands = function (element, url, url_obj) {
             try {
                 if (this.iscomment) {
                     return false;
                 } else {
-                    return !this.command || this.command_function(element, url);
+                    return !this.command || this.command_function(element, url, url_obj);
                 }
             } catch (error) {
                 console.log(error);
@@ -633,11 +674,12 @@
                 e.style['background-color'] = '';
                 const url_ = link_.getAttribute('href');
                 if (!url_.startsWith('http')) return;
-                const domain = new URL(url_).host;
+                const url_obj = new URL(url_);
+                const domain = url_obj.host;
                 const domain_length = domain.length;
                 for (let i = 0, len = BLOCK.length; i < len; i++) {
                     const block_pattern_ = BLOCK[i].source;
-                    if (BLOCK[i].match(e, url_, domain, domain_length)) {
+                    if (BLOCK[i].match(e, url_, domain, domain_length, url_obj)) {
                         e.style.display = 'none';
                         e.style['background-color'] = 'rgba(248, 195, 199, 0.884)';
                         removed_ = block_pattern_;
@@ -713,7 +755,7 @@
     function initializeForm(container) {
         const e = document.createElement('div');
         e.innerHTML = TextResource.get('form');
-        e.addEventListener('click',function(e){
+        e.addEventListener('click', function (e) {
             e.stopPropagation();
         });
         container.appendChild(e);
@@ -814,7 +856,7 @@
                 Modal.button_close.style.display = 'none';
                 Modal.container.style.display = 'none';
             });
-            Modal.container.addEventListener('click',function(){
+            Modal.container.addEventListener('click', function () {
                 Modal.button_open.style.display = 'block';
                 Modal.button_close.style.display = 'none';
                 Modal.container.style.display = 'none';
