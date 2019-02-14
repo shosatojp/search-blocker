@@ -42,16 +42,16 @@ You only need to click button to block domain.
 ### Logical Operators
 |      | Operator       |
 | ---- | -------------- |
-| AND  | `and(...fns)`  |
-| OR   | `or(...fns)`   |
-| NOT  | `not(fn)`      |
-| XOR  | `xor(...fns)`  |
-| NAND | `nand(...fns)` |
-| NOR  | `nor(...fns)`  |
+| AND  | `and(...args)`  |
+| OR   | `or(...args)`   |
+| NOT  | `not(arg)`      |
+| XOR  | `xor(...args)`  |
+| NAND | `nand(...args)` |
+| NOR  | `nor(...args)`  |
 
 #### Usage
 ```js
-$xor(or(and(intitle('foo','i'),not(inbody('bar'))),prefix('/content')),suffix('.html'))
+$xor(or(and(intitle('foo', 'i'), not(inbody('bar'))), prefix('/content')), suffix('.html'))
 ```
 
 
