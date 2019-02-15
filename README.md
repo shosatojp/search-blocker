@@ -31,7 +31,7 @@ You only need to click button to block domain.
 | Content         | `$inbody('foo')`<br>`example.com$inbody('foo')`                                                                                               | middle |
 | Title + Content | `$intext('foo')`<br>`example.com$intext('foo')`                                                                                               | middle |
 | URL             | `$inurl('/wp-content/uploads/')`<br>`example.com$inurl('/wp-content/uploads/')`                                                               | middle |
-| Pathname Prefix | `$prefix('/search')`<br>`example.com$inurl('/wp-content/uploads/')`                                                                           | middle |
+| Pathname Prefix | `$prefix('/search')`                                                                      | middle |
 | Pathname Suffix | `$suffix('.pdf')`                                                                                                                             | middle |
 | Script          | `$script('~$.indexOf("bar")')`<br>`example.com$script('~$.indexOf("bar")')`                                                                   | slow   |
 | Regex           | `$intitle('foo','')`<br>`example.com$intitle('foo','')`<br>`$inbody('foo','i')`<br>`$intext('w3schools','m')`<br>`$inurl('w3schools','igmy')` | slow   |
@@ -51,6 +51,22 @@ You only need to click button to block domain.
 
 #### Usage
 ```js
+//this rule blocks `foo.example.com` too. but not blocks `fooexample.com`
+example.com
+foo.example.com
+
+// `*example.com/content*`
+example.com$prefix('/content')
+
+foo.example.com$intitle('download')
+
+// regex, ignore case
+$inurl('foo','i')
+
+//block all
+$script('true')
+
+// complex logical operators are allowed
 $xor(or(and(intitle('foo', 'i'), not(inbody('bar'))), prefix('/content')), suffix('.html'))
 ```
 
