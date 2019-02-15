@@ -606,6 +606,37 @@
                 return url_obj.pathname.endsWith(...args);
             });
         };
+        const domain = function (...args) {
+            return (function (element, url, url_obj) {
+                const domain = url_obj.host,
+                    domain_length = domain.length,
+                    rule_domain = args[0],
+                    rule_domain_length = rule_domain.length;
+                return domain.endsWith(args[0]) && (rule_domain_length === domain_length ||
+                    domain.charAt(domain_length - rule_domain_length - 1) === '.');
+            });
+        };
+        const domainp = function (...args) {
+            return (function (element, url, url_obj) {
+                return url_obj.host.startsWith(...args);
+            });
+        };
+        const domains = function (...args) {
+            return (function (element, url, url_obj) {
+                return url_obj.host.endsWith(...args);
+            });
+        };
+        const indomain = function (...args) {
+            if (args[1])
+                var re = new RegExp(...args);
+            return (function (element, url, url_obj) {
+                if(re){
+                    return re.test(url_obj.host);
+                }else{
+                    return ~url_obj.host.indexOf(args[0]);
+                }
+            });
+        };
         Rule.prototype.commands = function (element, url, url_obj) {
             try {
                 if (this.iscomment) {
