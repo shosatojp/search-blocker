@@ -2,7 +2,7 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      0.13.4
+// @version      0.13.5
 // @description  Block undesired sites from google search results!
 // @author       Sho Sato
 // @match        https://www.google.com/search?*
@@ -15,6 +15,7 @@
 // @resource     selectors    ./selectors.html?
 // @resource     environments ./environments.json?
 // @resource     languages    ./languages.json?
+// @resource     button_blocked_rule    ./button_blocked_rule.html?
 // @updateURL    https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js?
 // @downloadURL  https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js?
 // @grant        GM_setValue
@@ -630,9 +631,9 @@
             if (args[1])
                 var re = new RegExp(...args);
             return (function (element, url, url_obj) {
-                if(re){
+                if (re) {
                     return re.test(url_obj.host);
-                }else{
+                } else {
                     return ~url_obj.host.indexOf(args[0]);
                 }
             });
@@ -702,6 +703,7 @@
             const link_ = e.querySelector(SETTINGS.second);
             let removed_ = false;
             if (link_) {
+                const fragment=document.createDocumentFragment();
                 e.style['background-color'] = '';
                 const url_ = link_.getAttribute('href');
                 if (!url_.startsWith('http')) return;
@@ -716,7 +718,7 @@
                         removed_ = block_pattern_;
                         if (!~blocked_patterns_.indexOf(block_pattern_)) {
                             blocked_patterns_.push(block_pattern_);
-                            if (R.blocked) GoogleSearchBlock.createButton(block_pattern_);
+                            if (R.blocked) GoogleSearchBlock.createButton(block_pattern_,fragment);
                         }
                         COUNT++;
                         if (R.count) R.count.textContent = COUNT;
@@ -724,6 +726,7 @@
                         break;
                     }
                 }
+                if (R.blocked) R.blocked.appendChild(fragment);
                 if (!removed_) e.style.display = 'block';
                 new Controller(e, url_).createButton();
             }
@@ -750,16 +753,18 @@
             while (R.blocked.firstChild) R.blocked.removeChild(R.blocked.firstChild);
 
             //blocked buttons
+            const fragment=document.createDocumentFragment();
             Util.distinct(blocked_patterns_).sort().forEach(e => {
-                GoogleSearchBlock.createButton(e);
+                GoogleSearchBlock.createButton(e,fragment);
             });
+            R.blocked.appendChild(fragment);
 
             R.count.textContent = COUNT;
             R.textarea_domains.value = Patterns.get().map(e => e.source).sort().join('\n');
             R.info.textContent = `${Math.floor(time*10)/10}ms ${BLOCK.length}`;
         };
 
-        GoogleSearchBlock.createButton = function (pattern) {
+        GoogleSearchBlock.createButton_ = function (pattern) {
             const code = document.createElement('code');
             code.textContent = pattern;
 
@@ -778,6 +783,79 @@
             span.appendChild(code);
 
             R.blocked.appendChild(span);
+        };
+
+        const element = document.createElement('span');
+        element.innerHTML = TextResource.get('button_blocked_rule');
+        element.className = 'google_search_block_button';
+        element.setAttribute('oncontextmenu','return false;');
+
+        GoogleSearchBlock.createButton = function (pattern,fragment) {
+            const span = element.cloneNode(true);
+            span.setAttribute('domain', pattern);
+            span.addEventListener('click', GoogleSearchBlock.deleterule);
+
+            const R_ = {
+                commentout: span.querySelector('.google_search_block_button_selector_commentout'),
+                deleterule: span.querySelector('.google_search_block_button_selector_deleterule'),
+                code: span.querySelector('code'),
+                selectors: span.querySelector('.google_search_block_button_selectors'),
+            };
+
+            span.addEventListener('mouseenter', function (e) {
+                span.classList.add('hover');
+                R_.selectors.style.display = 'block';
+            });
+            span.addEventListener('mouseleave', function (e) {
+                span.classList.remove('hover');
+                R_.selectors.style.display = 'none';
+            });
+            let timer = 0;
+            span.addEventListener('touchstart', function (e) {
+                timer = setTimeout(() => {
+                    span.classList.add('hover');
+                    R_.selectors.style.display = 'block';
+                }, 1000);
+                e.stopPropagation();
+            });
+            span.addEventListener('touchend', function (e) {
+                if (timer) clearTimeout(timer);
+                e.stopPropagation();
+            });
+            document.addEventListener('click', function () {
+                span.classList.remove('hover');
+                R_.selectors.style.display = 'none';
+            });
+
+            R_.code.textContent = pattern;
+            R_.commentout.setAttribute('domain', pattern);
+            R_.commentout.addEventListener('click', GoogleSearchBlock.commentout);
+            R_.deleterule.setAttribute('domain', pattern);
+            R_.deleterule.addEventListener('click', GoogleSearchBlock.deleterule);
+
+            fragment.appendChild(span);
+        };
+
+        GoogleSearchBlock.deleterule = function (e) {
+            var domain = this.getAttribute('domain');
+            Patterns.remove(domain);
+            BLOCK = Patterns.get();
+            GoogleSearchBlock.all();
+            SYNC.initSync().then(() => SYNC.push()).catch(() => {
+                SYNC.setModifiedTime(Date.now());
+            });
+            e.stopPropagation();
+        };
+        GoogleSearchBlock.commentout = function (e) {
+            var domain = this.getAttribute('domain');
+            Patterns.remove(domain);
+            Patterns.add('!' + domain);
+            BLOCK = Patterns.get();
+            GoogleSearchBlock.all();
+            SYNC.initSync().then(() => SYNC.push()).catch(() => {
+                SYNC.setModifiedTime(Date.now());
+            });
+            e.stopPropagation();
         };
         return GoogleSearchBlock;
     })();
@@ -1059,10 +1137,8 @@
                 R.signin.style.display = 'block';
                 R.signout.style.display = 'none';
             })).initSync().then(() => SYNC.compare()).catch(() => {
-                R.syncinfo.textContent = LOCAL_STRING.failedtosync;
                 SYNC.setUseSync(false);
             });
-
         });
     }
 

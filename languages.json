@@ -18,7 +18,9 @@
         "addthissite":"このサイトを除外",
         "blocksettings":"除外設定",
         "add_rule":"追加",
-        "ruleisempty":"除外規則を入力してください"
+        "ruleisempty":"除外規則を入力してください",
+        "commentout":"一時的",
+        "deleterule":"解除"
     }
 },{
     "language":["en","en-us"],
@@ -40,6 +42,8 @@
         "addthissite":"Block this site",
         "blocksettings":"Block Settings",
         "add_rule":"Add Rule",
-        "ruleisempty":"Rule is empty!"
+        "ruleisempty":"Rule is empty!",
+        "commentout":"Temporary",
+        "deleterule":"Delete Rule"
     }
 }]

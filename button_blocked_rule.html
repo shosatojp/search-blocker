@@ -1,0 +1,34 @@
+<style>
+    .google_search_block_button.hover{
+        position: relative;
+    }
+    .google_search_block_button .google_search_block_button_selectors{
+        position: absolute;
+        border-radius: 0 0 10px 10px;
+        border: 1px solid darkgray;
+        border-top: 0;
+        width: 100%;
+        left: 0;
+        right: 0;
+        background-color: white;
+        margin-left: -1px;
+        margin-right: -1px;
+    }
+    .google_search_block_button .google_search_block_button_selector{
+        padding: 5px;
+    }
+    .google_search_block_button .google_search_block_button_selector:hover:last-child{
+        border-radius: 0 0 10px 10px;
+    }
+    .google_search_block_button .google_search_block_button_selector:hover{
+        background-color: #eee;
+        transition-duration: 100ms;
+    }
+</style>
+<!-- <span class="google_search_block_button"> -->
+    <code class="google_search_block_button_code"></code>
+    <div class="google_search_block_button_selectors" style="display:none;">
+        <div class="google_search_block_button_selector google_search_block_button_selector_commentout">${commentout}</div>
+        <div class="google_search_block_button_selector google_search_block_button_selector_deleterule">${deleterule}</div>
+    </div>
+<!-- </span> -->

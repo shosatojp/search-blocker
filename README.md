@@ -103,3 +103,7 @@ If you install [Google Search Blocker Tools](https://github.com/shosatojp/google
 ## Available on mobile too (Android Firefox)
 ![](./README/002.png)  
 ![](./README/003.png)  
+
+
+## Scheduled Update
+* Delete from block list when redisplayed.
