@@ -2,7 +2,7 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      0.13.5
+// @version      0.13.6
 // @description  Block undesired sites from google search results!
 // @author       Sho Sato
 // @match        https://www.google.com/search?*
@@ -409,33 +409,43 @@
             div.innerHTML = TextResource.get('selectors');
             const contents_ = div.querySelector('.google_search_block_blockui_contents');
 
-            //candidate list
-            Util.getCandidate(self.target_url).forEach(e => {
-                const code = document.createElement('code');
-                code.textContent = e.alias;
-
-                const span = document.createElement('span');
-                span.className = 'google_search_block_button';
-                span.setAttribute('url', e.regex);
-                span.addEventListener('click', function () {
-                    Patterns.add(this.getAttribute('url'));
-                    BLOCK = Patterns.get();
-                    div.remove();
-                    if (SETTINGS.result_box_style_class) {
-                        self.parent.classList.remove(SETTINGS.result_box_style_class);
-                    }
-                    GoogleSearchBlock.all();
-                    self.open_button_.style.display = 'block';
-                    self.close_button_.style.display = 'none';
-                    SYNC.initSync().then(() => SYNC.push()).catch(() => {
-                        SYNC.setModifiedTime(Date.now());
-                    });
+            if (self.parent.isredisplay && self.parent.blocked) {
+                // overflow-x:auto position:absolute error
+                const fragment = document.createDocumentFragment();
+                GoogleSearchBlock.getMatchRules(self.parent).forEach(rule => {
+                    GoogleSearchBlock.createButton(rule.source, fragment);
                 });
-                span.appendChild(code);
+                contents_.appendChild(fragment);
+                self.parent.appendChild(div);
+            } else {
+                //candidate list
+                Util.getCandidate(self.target_url).forEach(e => {
+                    const code = document.createElement('code');
+                    code.textContent = e.alias;
 
-                contents_.appendChild(span);
-            });
-            self.parent.appendChild(div);
+                    const span = document.createElement('span');
+                    span.className = 'google_search_block_button';
+                    span.setAttribute('url', e.regex);
+                    span.addEventListener('click', function () {
+                        Patterns.add(this.getAttribute('url'));
+                        BLOCK = Patterns.get();
+                        div.remove();
+                        if (SETTINGS.result_box_style_class) {
+                            self.parent.classList.remove(SETTINGS.result_box_style_class);
+                        }
+                        GoogleSearchBlock.all();
+                        self.open_button_.style.display = 'block';
+                        self.close_button_.style.display = 'none';
+                        SYNC.initSync().then(() => SYNC.push()).catch(() => {
+                            SYNC.setModifiedTime(Date.now());
+                        });
+                    });
+                    span.appendChild(code);
+
+                    contents_.appendChild(span);
+                });
+                self.parent.appendChild(div);
+            }
         }
 
         return Controller;
@@ -530,7 +540,12 @@
                 return fns.reduce((a, b) => b(...args) ? !a : a, false);
             });
         };
-        Rule.prototype.match = function (element, url, domain, domain_length, url_obj) {
+        Rule.prototype.match = function (element, url, domain = null, domain_length = null, url_obj = null) {
+            if (!(domain && domain_length && url_obj)) {
+                url_obj = new URL(url);
+                domain = url_obj.host;
+                domain_length = domain.length;
+            }
             if (this.iscomment) {
                 return false;
             } else {
@@ -693,9 +708,26 @@
     //main class for blocking search result.
     const GoogleSearchBlock = (function () {
         const GoogleSearchBlock = {};
+        GoogleSearchBlock.controllers = [];
 
         let blocked_patterns_ = [];
         let time = 0;
+
+        GoogleSearchBlock.getMatchRules = function (e) {
+            const result = [];
+            const link_ = e.querySelector(SETTINGS.second);
+            if (!link_) return result;
+            const url_ = link_.getAttribute('href');
+            if (!url_.startsWith('http')) return result;
+            const url_obj = new URL(url_);
+            const domain = url_obj.host;
+            const domain_length = domain.length;
+            for (const rule of BLOCK) {
+                if (rule.match(e, url_, domain, domain_length, url_obj))
+                    result.push(rule);
+            }
+            return result;
+        };
 
         GoogleSearchBlock.one = function (e) {
             if (FindElement.is_exclude(e)) return false;
@@ -703,8 +735,9 @@
             const link_ = e.querySelector(SETTINGS.second);
             let removed_ = false;
             if (link_) {
-                const fragment=document.createDocumentFragment();
+                const fragment = document.createDocumentFragment();
                 e.style['background-color'] = '';
+                e.blocked = e.isredisplay = false;
                 const url_ = link_.getAttribute('href');
                 if (!url_.startsWith('http')) return;
                 const url_obj = new URL(url_);
@@ -713,12 +746,13 @@
                 for (let i = 0, len = BLOCK.length; i < len; i++) {
                     const block_pattern_ = BLOCK[i].source;
                     if (BLOCK[i].match(e, url_, domain, domain_length, url_obj)) {
+                        e.blocked = true;
                         e.style.display = 'none';
                         e.style['background-color'] = 'rgba(248, 195, 199, 0.884)';
                         removed_ = block_pattern_;
                         if (!~blocked_patterns_.indexOf(block_pattern_)) {
                             blocked_patterns_.push(block_pattern_);
-                            if (R.blocked) GoogleSearchBlock.createButton(block_pattern_,fragment);
+                            if (R.blocked) GoogleSearchBlock.createButton(block_pattern_, fragment);
                         }
                         COUNT++;
                         if (R.count) R.count.textContent = COUNT;
@@ -728,14 +762,19 @@
                 }
                 if (R.blocked) R.blocked.appendChild(fragment);
                 if (!removed_) e.style.display = 'block';
-                new Controller(e, url_).createButton();
+
+                const controller = new Controller(e, url_);
+                GoogleSearchBlock.controllers.push(controller);
+                controller.createButton();
             }
             time += performance.now() - start_;
             return removed_;
         };
 
+
         GoogleSearchBlock.all = function (aggregate = true) {
             const start_ = performance.now();
+            GoogleSearchBlock.controllers=[];
             let count_ = 0;
             blocked_patterns_ = [];
             COUNT = 0;
@@ -751,87 +790,41 @@
 
         GoogleSearchBlock.aggregate = function () {
             while (R.blocked.firstChild) R.blocked.removeChild(R.blocked.firstChild);
-
             //blocked buttons
-            const fragment=document.createDocumentFragment();
+            const fragment = document.createDocumentFragment();
             Util.distinct(blocked_patterns_).sort().forEach(e => {
-                GoogleSearchBlock.createButton(e,fragment);
+                GoogleSearchBlock.createButton(e, fragment);
             });
             R.blocked.appendChild(fragment);
-
+            R.button_show.style.display = 'block';
+            R.button_reblock.style.display = 'none';
             R.count.textContent = COUNT;
             R.textarea_domains.value = Patterns.get().map(e => e.source).sort().join('\n');
             R.info.textContent = `${Math.floor(time*10)/10}ms ${BLOCK.length}`;
         };
 
-        GoogleSearchBlock.createButton_ = function (pattern) {
-            const code = document.createElement('code');
-            code.textContent = pattern;
-
-            const span = document.createElement('span');
-            span.className = 'google_search_block_button';
-            span.setAttribute('domain', pattern);
-            span.addEventListener('click', function () {
-                var domain = this.getAttribute('domain');
-                Patterns.remove(domain);
-                BLOCK = Patterns.get();
-                GoogleSearchBlock.all();
-                SYNC.initSync().then(() => SYNC.push()).catch(() => {
-                    SYNC.setModifiedTime(Date.now());
-                });
-            });
-            span.appendChild(code);
-
-            R.blocked.appendChild(span);
-        };
-
         const element = document.createElement('span');
         element.innerHTML = TextResource.get('button_blocked_rule');
-        element.className = 'google_search_block_button';
-        element.setAttribute('oncontextmenu','return false;');
+        element.className = 'google_search_block_button google_search_block_button2';
+        element.setAttribute('oncontextmenu', 'return false;');
 
-        GoogleSearchBlock.createButton = function (pattern,fragment) {
+        GoogleSearchBlock.createButton = function (pattern, fragment) {
             const span = element.cloneNode(true);
             span.setAttribute('domain', pattern);
             span.addEventListener('click', GoogleSearchBlock.deleterule);
 
             const R_ = {
                 commentout: span.querySelector('.google_search_block_button_selector_commentout'),
-                deleterule: span.querySelector('.google_search_block_button_selector_deleterule'),
+                redisplay: span.querySelector('.google_search_block_button_selector_redisplay'),
                 code: span.querySelector('code'),
                 selectors: span.querySelector('.google_search_block_button_selectors'),
             };
 
-            span.addEventListener('mouseenter', function (e) {
-                span.classList.add('hover');
-                R_.selectors.style.display = 'block';
-            });
-            span.addEventListener('mouseleave', function (e) {
-                span.classList.remove('hover');
-                R_.selectors.style.display = 'none';
-            });
-            let timer = 0;
-            span.addEventListener('touchstart', function (e) {
-                timer = setTimeout(() => {
-                    span.classList.add('hover');
-                    R_.selectors.style.display = 'block';
-                }, 1000);
-                e.stopPropagation();
-            });
-            span.addEventListener('touchend', function (e) {
-                if (timer) clearTimeout(timer);
-                e.stopPropagation();
-            });
-            document.addEventListener('click', function () {
-                span.classList.remove('hover');
-                R_.selectors.style.display = 'none';
-            });
-
             R_.code.textContent = pattern;
             R_.commentout.setAttribute('domain', pattern);
             R_.commentout.addEventListener('click', GoogleSearchBlock.commentout);
-            R_.deleterule.setAttribute('domain', pattern);
-            R_.deleterule.addEventListener('click', GoogleSearchBlock.deleterule);
+            R_.redisplay.setAttribute('domain', pattern);
+            R_.redisplay.addEventListener('click', GoogleSearchBlock.redisplay);
 
             fragment.appendChild(span);
         };
@@ -857,95 +850,129 @@
             });
             e.stopPropagation();
         };
+        GoogleSearchBlock.redisplay = function (event) {
+            var domain = this.getAttribute('domain');
+            const rule = new Rule(domain);
+            document.querySelectorAll(SETTINGS.first).forEach(e => {
+                var link_, url_;
+                if ((link_ = e.querySelector(SETTINGS.second)) &&
+                    (url_ = link_.getAttribute('href')) &&
+                    url_.startsWith('http') && rule.match(e, url_)) {
+                    if (event.target.redisplayed) {
+                        e.isredisplay = event.target.redisplayed = false;
+                        e.style.display = 'none';
+                        event.target.textContent = 'D';
+                    } else {
+                        e.isredisplay = event.target.redisplayed = true;
+                        e.style.display = 'block';
+                        event.target.textContent = 'B';
+                    }
+                    return;
+                }
+            });
+            event.stopPropagation();
+        };
         return GoogleSearchBlock;
     })();
 
-    //initialize form (bottom of the page)
-    function initializeForm(container) {
-        const e = document.createElement('div');
-        e.innerHTML = TextResource.get('form');
-        e.addEventListener('click', function (e) {
-            e.stopPropagation();
-        });
-        container.appendChild(e);
 
-        R.form = document.querySelector('#google_search_block');
-        Object.assign(R, {
-            button_showlist: R.form.querySelector('#google_search_block_button_showlist'),
-            count: R.form.querySelector('#google_search_block_count'),
-            button_reblock: R.form.querySelector('#google_search_block_button_reblock'),
-            button_show: R.form.querySelector('#google_search_block_button_show'),
-            button_hidelist: R.form.querySelector('#google_search_block_button_hidelist'),
-            button_complete: R.form.querySelector('#google_search_block_button_complete'),
-            button_edit: R.form.querySelector('#google_search_block_button_edit'),
-            contents: R.form.querySelector('#google_search_block_contents'),
-            textarea_domains: R.form.querySelector('#google_search_block_textarea_domains'),
-            blocked: R.form.querySelector('#google_search_block_blocked'),
-            info: R.form.querySelector('#google_search_block_info'),
-            signin: R.form.querySelector('#google_search_block_button_signin'),
-            signout: R.form.querySelector('#google_search_block_button_signout'),
-            syncinfo: R.form.querySelector('#google_search_block_button_syncinfo'),
-            modal: R.form.querySelector('#google_search_block_modal'),
-        });
-        R.form.classList.add(...SETTINGS.container_class.split(' '));
-        R.button_complete.addEventListener('click', function () {
-            R.textarea_domains.disabled = true;
-            R.textarea_domains.style.overflow = 'hidden';
-            const list_ = Util.distinct(R.textarea_domains.value.split('\n').map(e => e.trim()).filter(e => e));
-            Patterns.set(list_);
-            BLOCK = Patterns.get();
-            GoogleSearchBlock.all();
-            SYNC.initSync().then(() => SYNC.push()).catch(() => {
-                SYNC.setModifiedTime(Date.now());
+    const Form = (function () {
+        const Form = {};
+        //initialize form (bottom of the page)
+        Form.init = function (container) {
+            const e = document.createElement('div');
+            e.innerHTML = TextResource.get('form');
+            e.addEventListener('click', function (e) {
+                e.stopPropagation();
             });
-        });
-        R.button_edit.addEventListener('click', function () {
-            R.textarea_domains.disabled = false;
-            R.textarea_domains.style.overflow = 'unset';
-        });
-        R.button_show.addEventListener('click', function () {
-            document.querySelectorAll(SETTINGS.first).forEach(e => e.style.display = 'block');
-            R.button_reblock.style.display = 'block';
-            R.button_show.style.display = 'none';
-        });
-        R.button_reblock.addEventListener('click', function () {
-            GoogleSearchBlock.all();
-            R.button_reblock.style.display = 'none';
-            R.button_show.style.display = 'block';
-        });
-        R.button_hidelist.addEventListener('click', function () {
-            R.button_showlist.style.display = 'block';
-            R.button_hidelist.style.display = 'none';
-            R.contents.style.display = 'none';
-        });
-        R.button_showlist.addEventListener('click', function () {
+            container.appendChild(e);
+
+            R.form = document.querySelector('#google_search_block');
+            Object.assign(R, {
+                button_showlist: R.form.querySelector('#google_search_block_button_showlist'),
+                count: R.form.querySelector('#google_search_block_count'),
+                button_reblock: R.form.querySelector('#google_search_block_button_reblock'),
+                button_show: R.form.querySelector('#google_search_block_button_show'),
+                button_hidelist: R.form.querySelector('#google_search_block_button_hidelist'),
+                button_complete: R.form.querySelector('#google_search_block_button_complete'),
+                button_edit: R.form.querySelector('#google_search_block_button_edit'),
+                contents: R.form.querySelector('#google_search_block_contents'),
+                textarea_domains: R.form.querySelector('#google_search_block_textarea_domains'),
+                blocked: R.form.querySelector('#google_search_block_blocked'),
+                info: R.form.querySelector('#google_search_block_info'),
+                signin: R.form.querySelector('#google_search_block_button_signin'),
+                signout: R.form.querySelector('#google_search_block_button_signout'),
+                syncinfo: R.form.querySelector('#google_search_block_button_syncinfo'),
+                modal: R.form.querySelector('#google_search_block_modal'),
+            });
+            R.form.classList.add(...SETTINGS.container_class.split(' '));
+            R.button_complete.addEventListener('click', function () {
+                R.textarea_domains.disabled = true;
+                R.textarea_domains.style.overflow = 'hidden';
+                const list_ = Util.distinct(R.textarea_domains.value.split('\n').map(e => e.trim()).filter(e => e));
+                Patterns.set(list_);
+                BLOCK = Patterns.get();
+                GoogleSearchBlock.all();
+                SYNC.initSync().then(() => SYNC.push()).catch(() => {
+                    SYNC.setModifiedTime(Date.now());
+                });
+            });
+            R.button_edit.addEventListener('click', function () {
+                R.textarea_domains.disabled = false;
+                R.textarea_domains.style.overflow = 'unset';
+            });
+            R.button_show.addEventListener('click', function () {
+                document.querySelectorAll(SETTINGS.first).forEach(e => {
+                    e.isredisplay = true;
+                    e.style.display = 'block';
+                });
+                R.button_reblock.style.display = 'block';
+                R.button_show.style.display = 'none';
+            });
+            R.button_reblock.addEventListener('click', function () {
+                GoogleSearchBlock.all();
+                R.button_reblock.style.display = 'none';
+                R.button_show.style.display = 'block';
+            });
+            R.button_hidelist.addEventListener('click', Form.close_list);
+            R.button_showlist.addEventListener('click', Form.open_list);
+            R.signin.addEventListener('click', function () {
+                R.syncinfo.textContent = '';
+                SYNC.setUseSync(true);
+                SYNC.initSync().then(() => {
+                    SYNC.compare();
+                }).catch(() => {
+                    R.syncinfo.textContent = LOCAL_STRING.failedtosync;
+                    SYNC.setUseSync(false);
+                });
+            });
+            R.signout.addEventListener('click', function () {
+                R.syncinfo.textContent = '';
+                SYNC.setUseSync(false);
+                SYNC.signOut();
+            });
+            R.modal.addEventListener('change', function () {
+                Modal.set(this.checked);
+                location.reload();
+            });
+            R.modal.checked = Modal.get();
+            R.textarea_domains.disabled = true;
+        };
+        Form.open_list = function () {
             R.button_showlist.style.display = 'none';
             R.button_hidelist.style.display = 'block';
             R.contents.style.display = 'block';
             R.textarea_domains.value = Patterns.get().map(e => e.source).sort().join('\n');
-        });
-        R.signin.addEventListener('click', function () {
-            R.syncinfo.textContent = '';
-            SYNC.setUseSync(true);
-            SYNC.initSync().then(() => {
-                SYNC.compare();
-            }).catch(() => {
-                R.syncinfo.textContent = LOCAL_STRING.failedtosync;
-                SYNC.setUseSync(false);
-            });
-        });
-        R.signout.addEventListener('click', function () {
-            R.syncinfo.textContent = '';
-            SYNC.setUseSync(false);
-            SYNC.signOut();
-        });
-        R.modal.addEventListener('change', function () {
-            Modal.set(this.checked);
-            location.reload();
-        });
-        R.modal.checked = Modal.get();
-        R.textarea_domains.disabled = true;
-    }
+        };
+        Form.close_list = function () {
+            R.button_showlist.style.display = 'block';
+            R.button_hidelist.style.display = 'none';
+            R.contents.style.display = 'none';
+        };
+
+        return Form;
+    })();
+
 
     const Modal = (function () {
         const Modal = {};
@@ -955,16 +982,8 @@
             Modal.button_open = document.querySelector('#google_search_block_modal_button_open');
             Modal.button_close = document.querySelector('#google_search_block_modal_button_close');
             Modal.container = document.querySelector('#google_search_block_modal_container');
-            Modal.button_open.addEventListener('click', function () {
-                Modal.button_close.style.display = 'block';
-                Modal.button_open.style.display = 'none';
-                Modal.container.style.display = 'flex';
-            });
-            Modal.button_close.addEventListener('click', function () {
-                Modal.button_open.style.display = 'block';
-                Modal.button_close.style.display = 'none';
-                Modal.container.style.display = 'none';
-            });
+            Modal.button_open.addEventListener('click', Modal.open);
+            Modal.button_close.addEventListener('click', Modal.close);
             Modal.container.addEventListener('click', function () {
                 Modal.button_open.style.display = 'block';
                 Modal.button_close.style.display = 'none';
@@ -980,6 +999,21 @@
         Modal.get = function () {
             return !!parseInt(GM_getValue('modal', '0'));
         };
+        Modal.open = function () {
+            Form.open_list();
+            Modal.button_close.style.display = 'block';
+            Modal.button_open.style.display = 'none';
+            Modal.container.style.display = 'flex';
+            Modal.isopen = true;
+        };
+        Modal.close = function () {
+            Form.close_list();
+            Modal.button_open.style.display = 'block';
+            Modal.button_close.style.display = 'none';
+            Modal.container.style.display = 'none';
+            Modal.isopen = false;
+        };
+        Modal.isopen = false;
         return Modal;
     })();
 
@@ -1078,9 +1112,18 @@
             COUNT = 0;
             if (Modal.get()) {
                 Modal.init();
-                initializeForm(Modal.getContainer());
+                Form.init(Modal.getContainer());
+
+                { //key bindings
+                    document.addEventListener('keydown', function (e) {
+                        if (e.altKey && e.which === 13) {
+                            Modal.isopen ? Modal.close() : Modal.open();
+                        }
+                    });
+                }
+
             } else {
-                initializeForm(R.result_container);
+                Form.init(R.result_container);
             }
             GoogleSearchBlock.all();
 
@@ -1103,6 +1146,7 @@
                     });
                 }
             }
+
         });
 
         window.addEventListener('load', function () {
