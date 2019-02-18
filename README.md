@@ -110,4 +110,4 @@ If you install [Google Search Blocker Tools](https://github.com/shosatojp/google
 
 
 ## Scheduled Update
-* Delete from block list when redisplayed.
+None. Please request for new features via issues.
