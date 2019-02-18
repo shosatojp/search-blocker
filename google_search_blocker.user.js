@@ -643,7 +643,7 @@
             });
         };
         const indomain = function (...args) {
-            if (args[1])
+            if (args[1]||args[1]==='')
                 var re = new RegExp(...args);
             return (function (element, url, url_obj) {
                 if (re) {
