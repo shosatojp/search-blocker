@@ -643,7 +643,7 @@
             });
         };
         const indomain = function (...args) {
-            if (args[1]||args[1]==='')
+            if (args[1] || args[1] === '')
                 var re = new RegExp(...args);
             return (function (element, url, url_obj) {
                 if (re) {
@@ -729,10 +729,11 @@
             return result;
         };
 
-        GoogleSearchBlock.one = function (e) {
+        GoogleSearchBlock.one = function (e, second_selector) {
             if (FindElement.is_exclude(e)) return false;
             const start_ = performance.now();
-            const link_ = e.querySelector(SETTINGS.second);
+            // const link_ = e.querySelector('a');
+            const link_ = e.querySelector(second_selector || SETTINGS.second);
             let removed_ = false;
             if (link_) {
                 const fragment = document.createDocumentFragment();
@@ -756,7 +757,6 @@
                         }
                         COUNT++;
                         if (R.count) R.count.textContent = COUNT;
-                        console.log('one', COUNT);
                         break;
                     }
                 }
@@ -774,15 +774,27 @@
 
         GoogleSearchBlock.all = function (aggregate = true) {
             const start_ = performance.now();
-            GoogleSearchBlock.controllers=[];
+            GoogleSearchBlock.controllers = [];
             let count_ = 0;
             blocked_patterns_ = [];
             COUNT = 0;
-            document.querySelectorAll(SETTINGS.first).forEach(e => {
-                if (GoogleSearchBlock.one(e)) count_++;
+            // document.querySelectorAll(SETTINGS.first)
+            const l = [];
+            if (SETTINGS.targets) {
+                SETTINGS.targets.forEach(t => {
+                    document.querySelectorAll(t.first).forEach(e => {
+                        l.push({
+                            element: e,
+                            target: t
+                        });
+                    });
+                });
+            }
+            l.forEach(e => {
+                if (GoogleSearchBlock.one(e.element, e.target.second)) count_++;
             });
             COUNT = count_;
-            console.log('all', count_);
+            // console.log('all', count_);
             time = performance.now() - start_;
             if (aggregate)
                 GoogleSearchBlock.aggregate();
@@ -1018,13 +1030,13 @@
     })();
 
     //select function for observer by environment
-    function getObserverFunction() {
+    function getObserverFunction(target) {
         const walkAddedNodesInRecords = function (compare) {
-            return (function (classname) {
+            return (function (...args) {
                 return (function (records, callback) {
                     for (const record of records) {
                         for (const node of record.addedNodes) {
-                            if (compare(node, classname)) {
+                            if (compare(node, ...args)) {
                                 callback(node);
                             }
                         }
@@ -1033,13 +1045,22 @@
             });
         };
         const observer_functions = {
-            containsInClassListWhenAdded: walkAddedNodesInRecords((node, classname) => node instanceof Element && node.classList.contains(classname)),
+            containsInClassListWhenAdded: walkAddedNodesInRecords((node, classname) => {
+                const result = node instanceof Element && node.classList.contains(classname);
+                // if (result && classname === 'w8TE8') {
+                //     console.log(node);
+                // }
+                return result;
+            }),
             equalsClassNameWhenAdded: walkAddedNodesInRecords((node, classname) => node instanceof Element && node.className === classname),
+            firstChildElementIs: walkAddedNodesInRecords((node, firstchildtagname) => node instanceof Element && node.firstElementChild && node.firstElementChild.tagName === firstchildtagname),
+            hasAttribute: walkAddedNodesInRecords((node, attribute_name, value) => node instanceof Element && ('hasAttribute' in node) && (value ? node.getAttribute(attribute_name) === value : node.hasAttribute(attribute_name))),
         };
-        return observer_functions[SETTINGS.observer_function](...SETTINGS.observer_fn_arguments);
+        return observer_functions[target.observer_function](...target.observer_fn_arguments);
     }
     //initializer
     function init() {
+        unsafeWindow.GoogleSearchBlock = GoogleSearchBlock;
         let environment_ = null;
 
         { //detect environment
@@ -1086,18 +1107,22 @@
 
         //use MutationObserver from document-start
         const mutation_processed_ = [];
-        const onMutated = getObserverFunction();
-        const observer_ = new MutationObserver(function (records) {
-            onMutated(records, (element) => {
-                if (!~mutation_processed_.indexOf(element)) {
-                    GoogleSearchBlock.one(element);
-                    mutation_processed_.push(element);
-                }
-            });
-        });
-        observer_.observe(document.documentElement, {
-            childList: true,
-            subtree: true
+        SETTINGS.targets.forEach(target => {
+            if (target.observer_function) {
+                const onMutated = getObserverFunction(target);
+                const observer_ = new MutationObserver(function (records) {
+                    onMutated(records, (element) => {
+                        if (!~mutation_processed_.indexOf(element)) {
+                            GoogleSearchBlock.one(element, target.second);
+                            mutation_processed_.push(element);
+                        }
+                    });
+                });
+                observer_.observe(document.documentElement, {
+                    childList: true,
+                    subtree: true
+                });
+            }
         });
 
         window.addEventListener('DOMContentLoaded', function () {
@@ -1151,6 +1176,8 @@
 
         window.addEventListener('load', function () {
             console.log('%c----------------load----------------', `color:${Colors.LightGreen};`);
+
+            GoogleSearchBlock.all();
 
             Element.prototype.insertBefore = Element_prototype_insertBefore;
             Element.prototype.appendChild = Element_prototype_appendChild;

@@ -14,64 +14,103 @@
             "has_ancestor_of": {
                 "classList": ["xpdopen"]
             }
-        }
+        },
+        "targets": [{
+            "first": "[jsslot]>div>*",
+            "second": "a",
+            "observer_function": "hasAttribute",
+            "observer_fn_arguments": ["data-init-vis"]
+        }, {
+            "first": "ul>li.sbct",
+            "second": "a",
+            "observer_function": "containsInClassListWhenAdded",
+            "observer_fn_arguments": ["g"]
+        }, {
+            "first": "#search .g",
+            "second": ".r>a",
+            "observer_function": "containsInClassListWhenAdded",
+            "observer_fn_arguments": ["g"]
+
+        }]
     },
     "google_mobile": {
-        "first": ".xpd",
-        "second": "a",
         "container_class": "mnr-c",
         "result_container": "#main",
         "observer_target": "#botstuff",
-        "observer_function": "containsInClassListWhenAdded",
-        "observer_fn_arguments": ["xpd"],
         "title": "a>div",
         "body": "hr + div",
-        "info": ""
+        "info": "",
+        "targets": [{
+            "first": "div[jsslot]>div>ul>*",
+            "second": "a",
+            "observer_function": "containsInClassListWhenAdded",
+            "observer_fn_arguments": ["w8TE8"]
+        }, {
+            "first": ".xpd",
+            "second": "a",
+            "observer_function": "containsInClassListWhenAdded",
+            "observer_fn_arguments": ["xpd"]
+        }, {
+            "first": "g-tray-header+div[data-hveid]>div",
+            "second": "a"
+        }]
     },
     "bing_pc": {
-        "first": ".b_algo",
-        "second": "a",
         "container_class": "google_search_block_form",
         "result_container": "#b_results",
         "result_box_style_class": "bing_pc_result_box",
-        "observer_function": "equalsClassNameWhenAdded",
-        "observer_fn_arguments": ["b_algo"],
         "title": "h2",
         "body": "p",
-        "info": ""
+        "info": "",
+        "targets": [{
+
+            "first": ".b_algo",
+            "second": "a",
+            "observer_function": "equalsClassNameWhenAdded",
+            "observer_fn_arguments": ["b_algo"]
+        }]
     },
     "bing_mobile": {
-        "first": ".b_algo",
-        "second": "a",
         "container_class": "b_algo form_bing_mobile",
         "result_container": "#b_results",
-        "observer_function": "equalsClassNameWhenAdded",
-        "observer_fn_arguments": ["b_algo"],
         "title": "h2",
         "body": ".b_caption",
-        "info": ""
+        "info": "",
+        "targets": [{
+            "first": ".b_algo",
+            "second": "a",
+            "observer_function": "equalsClassNameWhenAdded",
+            "observer_fn_arguments": ["b_algo"]
+
+        }]
     },
     "yahoo_co_jp_pc": {
-        "first": ".w",
-        "second": "a",
         "container_class": "google_search_block_form form_yahoo_pc",
         "result_container": "#WS2m",
         "result_box_style_class": "yahoo_co_jp_result_box",
-        "observer_function": "equalsClassNameWhenAdded",
-        "observer_fn_arguments": ["w"],
         "title": "a",
         "body": "p",
-        "info": "span.r"
+        "info": "span.r",
+        "targets": [{
+
+            "first": ".w",
+            "second": "a",
+            "observer_function": "equalsClassNameWhenAdded",
+            "observer_fn_arguments": ["w"]
+        }]
     },
     "yahoo_co_jp_mobile": {
-        "first": ".sw-CardBase",
-        "second": "a",
         "container_class": "sw-CardBase form_yahoo_mobile",
         "result_container": "#contentsInner",
-        "observer_function": "equalsClassNameWhenAdded",
-        "observer_fn_arguments": ["sw-CardBase"],
         "title": "h3",
         "body": "p",
-        "info": ""
+        "info": "",
+        "targets": [{
+            "first": ".sw-CardBase",
+            "second": "a",
+            "observer_function": "equalsClassNameWhenAdded",
+            "observer_fn_arguments": ["sw-CardBase"]
+
+        }]
     }
 }
