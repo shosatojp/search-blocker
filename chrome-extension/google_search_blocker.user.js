@@ -25,6 +25,13 @@
 // @noframes
 // ==/UserScript==
 
+// const GM_setValue=GM_setValue||
+
+// chrome.storage.local.set({
+//     key: 1
+// }, e => console.log(e));
+// console.log(chrome.storage.local.get(['key'], e => console.log(e)));
+
 (function () {
     'use strict';
     console.log(`%cGoogle Search Blocker ${GM_info.script.version}`, 'color:lightseagreen;font-size:large;');
@@ -472,7 +479,7 @@
             });
         };
         Patterns._set_basic = function (obj) {
-            GM_setValue('rules_v03', obj)
+            GM_setValue('rules_v03', obj);
         };
         Patterns.resolve_inherit = function (target_env_id, environment) {
             const env = environment[target_env_id];

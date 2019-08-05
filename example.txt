@@ -1,3 +1,4 @@
+==main==
 #\.pdf$
 #https?://[^/]+\.xn--[^/]+/
 #https?://xn--[^/]+/
@@ -286,6 +287,9 @@ weblio.jp
 wepli-dot2.hatenablog.com
 wiki.chakuriki.net
 www.nttpc.co.jp$prefix('/yougo')
-xn--n8j6dph8b8px95su40akj9f.com
 yahoo-help.jp
 yu8mada.com$prefix('/2018')
+==実験レポート用(main)==
+ac.jp
+==Academic==
+$not(or(domain('ac.jp'),domain('edu'),domain('go.jp'), domain('gov')))

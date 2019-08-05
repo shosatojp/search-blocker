@@ -1,9 +1,29 @@
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css"
+    integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
 <style>
     .pc_result_box {
         margin: -11px -21px 20px -21px;
         border: 1px solid #dfe1e5;
         border-radius: 8px;
         padding: 10px 20px 0 20px;
+    }
+
+    .qmv19b>div.pc_result_box {
+        margin: inherit;
+        border: unset;
+        border-top: 1px solid #ebebeb;
+        border-radius: unset;
+        padding: inherit;
+    }
+
+    .qmv19b .google_search_block_hr {
+        width: 90%;
+        margin: 10px auto;
+    }
+
+    [jsslot]>div>div.pc_result_box {
+        padding: 4px;
+        margin: -1px;
     }
 
     .bing_pc_result_box {
@@ -20,6 +40,7 @@
     }
 
     .google_search_block_form {
+        text-align: left;
         box-shadow: none;
         border: 1px solid #dfe1e5;
         border-radius: 8px;
@@ -149,6 +170,21 @@
 
     #google_search_block_info {
         font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
+    }
+
+    #google_search_block_select_env {
+        color: #444;
+        border-color: #ddd;
+        outline: none;
+        border-width: 1px;
+        border-style: solid;
+        border-radius: 10px;
+        padding: 5px 0 5px 11px;
+        line-height: 1.6;
+    }
+
+    #google_search_block_select_env:hover {
+        border-color: darkgray;
     }
 </style>
 <div class="google_search_block_form" id="google_search_block">

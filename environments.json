@@ -1,12 +1,8 @@
 {
     "google_pc": {
-        "first": "#search .g",
-        "second": ".r>a",
         "container_class": "google_search_block_form",
         "result_container": "#search",
         "result_box_style_class": "pc_result_box",
-        "observer_function": "containsInClassListWhenAdded",
-        "observer_fn_arguments": ["g"],
         "title": "h3",
         "body": ".st",
         "info": ".w",
@@ -34,8 +30,8 @@
         }, {
             "first": ".qmv19b>div",
             "second": "a",
-            "observer_function":"parentClassContains",
-            "observer_fn_arguments":["qmv19b"]
+            "observer_function": "parentClassContains",
+            "observer_fn_arguments": ["qmv19b"]
         }]
     },
     "google_mobile": {
@@ -68,11 +64,15 @@
         "body": "p",
         "info": "",
         "targets": [{
-
             "first": ".b_algo",
             "second": "a",
             "observer_function": "equalsClassNameWhenAdded",
             "observer_fn_arguments": ["b_algo"]
+        }, {
+            "first": ".vidr",
+            "second": "a",
+            "observer_function": "containsInClassListWhenAdded",
+            "observer_fn_arguments": ["vidr"]
         }]
     },
     "bing_mobile": {
