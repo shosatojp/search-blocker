@@ -2,7 +2,7 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      0.13.7
+// @version      0.14
 // @description  Block undesired sites from google search results!
 // @author       Sho Sato
 // @match        https://www.google.com/search?*
@@ -1172,6 +1172,7 @@
                 // }
                 return result;
             }),
+            parentClassContains: walkAddedNodesInRecords((node, classname) => node instanceof Element && node.parentElement.classList.contains(classname)),
             equalsClassNameWhenAdded: walkAddedNodesInRecords((node, classname) => node instanceof Element && node.className === classname),
             firstChildElementIs: walkAddedNodesInRecords((node, firstchildtagname) => node instanceof Element && node.firstElementChild && node.firstElementChild.tagName === firstchildtagname),
             hasAttribute: walkAddedNodesInRecords((node, attribute_name, value) => node instanceof Element && ('hasAttribute' in node) && (value ? node.getAttribute(attribute_name) === value : node.hasAttribute(attribute_name))),
