@@ -566,11 +566,11 @@
             return environments;
         };
 
-        { //互換性
-            const old_rule = GM_getValue('rules');
-            if (old_rule) {
+        { //互換性 for <= 0.13.7 to 1.0.1
+            const old_rules = GM_getValue('rules', undefined);
+            if (old_rules && old_rules instanceof Array && old_rules.length) {
                 const e = Patterns._get_basic();
-                e['main'].rules = old_rule;
+                e['main'].rules = old_rules;
                 Patterns._set_basic(e);
                 GM_setValue('rules', []);
             }
