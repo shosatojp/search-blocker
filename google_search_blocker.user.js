@@ -2,7 +2,7 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      0.14
+// @version      1.0
 // @description  Block undesired sites from google search results!
 // @author       Sho Sato
 // @match        https://www.google.com/search?*
@@ -567,12 +567,12 @@
         };
 
         { //互換性
-            const old_rule = localStorage.getItem('rule');
+            const old_rule = GM_getValue('rule');
             if (old_rule) {
                 const e = Patterns._get_basic();
                 e['main'].rules = old_rule;
                 Patterns._set_basic(e);
-                localStorage.removeItem('rule');
+                GM_setValue('rule', []);
             }
         }
         return Patterns;
@@ -1165,13 +1165,7 @@
             });
         };
         const observer_functions = {
-            containsInClassListWhenAdded: walkAddedNodesInRecords((node, classname) => {
-                const result = node instanceof Element && node.classList.contains(classname);
-                // if (result && classname === 'w8TE8') {
-                //     console.log(node);
-                // }
-                return result;
-            }),
+            containsInClassListWhenAdded: walkAddedNodesInRecords((node, classname) => node instanceof Element && node.classList.contains(classname)),
             parentClassContains: walkAddedNodesInRecords((node, classname) => node instanceof Element && node.parentElement.classList.contains(classname)),
             equalsClassNameWhenAdded: walkAddedNodesInRecords((node, classname) => node instanceof Element && node.className === classname),
             firstChildElementIs: walkAddedNodesInRecords((node, firstchildtagname) => node instanceof Element && node.firstElementChild && node.firstElementChild.tagName === firstchildtagname),
