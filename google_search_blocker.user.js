@@ -248,6 +248,7 @@
         signout: undefined,
         syncinfo: undefined,
         modal: undefined,
+        select: undefined,
     }
 
     const LANGUAGE = (window.navigator.languages && window.navigator.languages[0]) ||
@@ -456,8 +457,12 @@
      * envに対応させる setenv後にblockに代入する
      */
     const Patterns = (function () {
+        //互換性対応 inherit
         const Patterns = {};
-        let current_env = localStorage.getItem('env') || 'main';
+        let current_env_id = localStorage.getItem('env') || 'main';
+        Patterns.get_current_env_id = function () {
+            return current_env_id;
+        };
         Patterns._get_basic = function () {
             return GM_getValue('rules_v03', {
                 main: {
@@ -468,13 +473,22 @@
         Patterns._set_basic = function (obj) {
             GM_setValue('rules_v03', obj)
         };
+        Patterns.resolve_inherit = function (target_env_id, environment) {
+            const env = environment[target_env_id];
+            if (env.inherits) env.inherits.forEach(env_id => {
+                env.rules = [...env.rules, ...Patterns.resolve_inherit(env_id, environment).rules];
+            });
+            return environment[target_env_id];
+        };
         Patterns.get = function () {
-            const rules = Patterns._get_basic()[current_env].rules;
+            const envs = Patterns._get_basic();
+            const env = envs[current_env_id];
+            const rules = (env && Patterns.resolve_inherit(current_env_id, envs).rules) || [];
             return rules.map(e => Object.setPrototypeOf(e, Rule.prototype)).map(e => (e.make_command_function(), e));
         };
-        Patterns.get_json = function () {
-            return JSON.stringify(Patterns.get());
-        };
+        // Patterns.get_json = function () {
+        //     return JSON.stringify(Patterns.get());
+        // };
         Patterns.set = function (list) {
             Patterns._set_basic(Patterns.parse_env(list));
         };
@@ -483,17 +497,17 @@
         };
         Patterns.add = function (src) {
             const e = Patterns._get_basic();
-            e[current_env].rules.push(new Rule(src));
+            e[current_env_id].rules.push(new Rule(src));
             Patterns._set_basic(e);
         };
         Patterns.remove = function (src) {
             const e = Patterns._get_basic();
-            e[current_env].rules = e[current_env].rules.filter(e => e.source !== src);
+            e[current_env_id].rules = e[current_env_id].rules.filter(e => e.source !== src);
             Patterns._set_basic(e);
         };
-        Patterns.set_env = function (env) {
-            current_env = env;
-            localStorage.setItem('env', env);
+        Patterns.set_env = function (env_id) {
+            current_env_id = env_id;
+            localStorage.setItem('env', env_id);
         };
         Patterns.get_all = function () {
             const result = [];
@@ -506,8 +520,13 @@
             }
             return result;
         };
-        //get_allと同時に
-        Patterns.get_envs = function () {
+        Patterns.count_per_env = function (env_id) {
+            return Patterns._get_basic()[env_id].rules.length;
+        };
+        Patterns.count_all_env = function () {
+            return Patterns.get_env_ids().map(env_id => Patterns.count_per_env(env_id)).reduce((a, b) => a + b, 0);
+        };
+        Patterns.get_env_ids = function () {
             const result = [];
             const object = Patterns._get_basic();
             for (const key in object) {
@@ -518,9 +537,10 @@
             return result;
         };
         Patterns.parse_env = function (list) {
-            const env_head = new RegExp('^==(.*)==$');
+            const env_head = new RegExp('^==(.+)==$');
             let current = 'main';
             const environments = {};
+            const inherit_wait = [];
             environments[current] = {};
             let temp = [];
             for (let line of list) {
@@ -531,15 +551,30 @@
                     temp = [];
                     current = regexparray[1];
                     environments[current] = {
-                        rules: []
+                        rules: [],
+                        inherits: [],
                     };
+                    // inherit
+                    const m = current.match(/\((.*)\)$/);
+                    if (m && m[1]) environments[current].inherits = m[1].split(',');
                 } else {
                     if (line) temp.push(new Rule(line));
                 }
             }
             environments[current].rules = temp;
+            inherit_wait.forEach(e => e());
             return environments;
         };
+
+        { //互換性
+            const old_rule = localStorage.getItem('rule');
+            if (old_rule) {
+                const e = Patterns._get_basic();
+                e['main'].rules = old_rule;
+                Patterns._set_basic(e);
+                localStorage.removeItem('rule');
+            }
+        }
         return Patterns;
     })();
 
@@ -877,6 +912,8 @@
             R.count.textContent = COUNT;
             R.textarea_domains.value = Patterns.get_all().join('\n');
             R.info.textContent = `${Math.floor(time*10)/10}ms ${BLOCK.length}`;
+            Form.create_env_options(Patterns.get_env_ids());
+            R.select.value = Patterns.get_current_env_id();
         };
 
         const element = document.createElement('span');
@@ -980,6 +1017,7 @@
                 signout: R.form.querySelector('#google_search_block_button_signout'),
                 syncinfo: R.form.querySelector('#google_search_block_button_syncinfo'),
                 modal: R.form.querySelector('#google_search_block_modal'),
+                select: R.form.querySelector('#google_search_block_select_env'),
             });
             R.form.classList.add(...SETTINGS.container_class.split(' '));
             R.button_complete.addEventListener('click', function () {
@@ -1031,6 +1069,14 @@
                 Modal.set(this.checked);
                 location.reload();
             });
+            R.select.addEventListener('change', function () {
+                const value = this.value;
+                Patterns.set_env(value);
+                BLOCK = Patterns.get();
+                GoogleSearchBlock.all();
+                this.value = value;
+            });
+            R.select.value = Patterns.get_current_env_id();
             R.modal.checked = Modal.get();
             R.textarea_domains.disabled = true;
         };
@@ -1039,13 +1085,23 @@
             R.button_hidelist.style.display = 'block';
             R.contents.style.display = 'block';
             R.textarea_domains.value = Patterns.get_all().join('\n');
+            Form.create_env_options(Patterns.get_env_ids());
+            R.select.value = Patterns.get_current_env_id();
         };
         Form.close_list = function () {
             R.button_showlist.style.display = 'block';
             R.button_hidelist.style.display = 'none';
             R.contents.style.display = 'none';
         };
-
+        Form.create_env_options = function (envs) {
+            while (R.select.firstElementChild) R.select.firstElementChild.remove();
+            envs.forEach(e => {
+                const option = document.createElement('option');
+                option.textContent = e;
+                option.value = e;
+                R.select.appendChild(option);
+            });
+        };
         return Form;
     })();
 
@@ -1258,8 +1314,8 @@
                 console.log('%cDOWNLOAD', `color:${Colors.Pink};`, BLOCK.length);
                 GoogleSearchBlock.all();
             }, () => {
-                const patterns = Patterns.get();
-                console.log('%cUPLOAD', `color:${Colors.Blue};`, patterns.length);
+                const patterns = Patterns._get_basic();
+                console.log('%cUPLOAD', `color:${Colors.Blue};`, Patterns.count_all_env());
                 return JSON.stringify(patterns);
             }, function usesync() {
                 return !!parseInt(GM_getValue('usesync', '0'));
