@@ -1166,7 +1166,7 @@
         };
         const observer_functions = {
             containsInClassListWhenAdded: walkAddedNodesInRecords((node, classname) => node instanceof Element && node.classList.contains(classname)),
-            parentClassContains: walkAddedNodesInRecords((node, classname) => node instanceof Element && node.parentElement.classList.contains(classname)),
+            parentClassContains: walkAddedNodesInRecords((node, classname) => node instanceof Element && node.parentElement && node.parentElement.classList.contains(classname)),
             equalsClassNameWhenAdded: walkAddedNodesInRecords((node, classname) => node instanceof Element && node.className === classname),
             firstChildElementIs: walkAddedNodesInRecords((node, firstchildtagname) => node instanceof Element && node.firstElementChild && node.firstElementChild.tagName === firstchildtagname),
             hasAttribute: walkAddedNodesInRecords((node, attribute_name, value) => node instanceof Element && ('hasAttribute' in node) && (value ? node.getAttribute(attribute_name) === value : node.hasAttribute(attribute_name))),
