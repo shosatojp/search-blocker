@@ -6,13 +6,13 @@
         padding: 10px 20px 0 20px;
     }
 
-    .bing_pc_result_box{
+    .bing_pc_result_box {
         margin: -1px -1px 5px -1px !important;
         border: 1px solid #dfe1e5;
         border-radius: 8px;
     }
 
-    .yahoo_co_jp_result_box{
+    .yahoo_co_jp_result_box {
         margin: -11px -1px 14px 2px !important;
         border: 1px solid #dfe1e5;
         border-radius: 8px;
@@ -75,15 +75,15 @@
     }
 
 
-    .google_search_block_button code{
+    .google_search_block_button code {
         font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
     }
 
-    .google_search_block_button:hover{
+    .google_search_block_button:hover {
         border-color: darkgray;
     }
 
-    .google_search_block_button2{
+    .google_search_block_button2 {
         display: inline-flex;
     }
 
@@ -115,7 +115,7 @@
         justify-content: flex-end;
         padding: 0 10px 10px
     }
-    
+
 
     .google_search_block_domain {
         margin: 10px;
@@ -144,9 +144,10 @@
         font-size: small;
         margin: 10px;
     }
-#google_search_block_info{
-    font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
-}
+
+    #google_search_block_info {
+        font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
+    }
 </style>
 <div class="google_search_block_form" id="google_search_block">
     <div id="google_search_block_header">
@@ -173,17 +174,26 @@
                 <button class="google_search_block_button" id="google_search_block_button_edit">${edit}</button>
             </div>
         </div>
+        <div>
+            <select id="google_search_block_select_env">
+                <option>main</option>
+            </select>
+        </div>
         <div class="google_search_block_hr"></div>
     </div>
     <div style="display: flex;flex-direction: row;justify-content: space-between;flex-wrap: wrap;">
         <div id="google_search_block_button_syncinfo"></div>
         <div id="google_search_block_buttons">
             <button class="google_search_block_button" id="google_search_block_button_signin">${signin}</button>
-            <button class="google_search_block_button" id="google_search_block_button_signout" style="display: none;">${signout}</button>
+            <button class="google_search_block_button" id="google_search_block_button_signout"
+                style="display: none;">${signout}</button>
             <button class="google_search_block_button" id="google_search_block_button_show">${redisplay}</button>
-            <button class="google_search_block_button" id="google_search_block_button_reblock" style="display: none;">${reblock}</button>
-            <button class="google_search_block_button" id="google_search_block_button_hidelist" style="display: none;">${hide_list}</button>
-            <button class="google_search_block_button" id="google_search_block_button_showlist" style="display: block;">${show_list}</button>
+            <button class="google_search_block_button" id="google_search_block_button_reblock"
+                style="display: none;">${reblock}</button>
+            <button class="google_search_block_button" id="google_search_block_button_hidelist"
+                style="display: none;">${hide_list}</button>
+            <button class="google_search_block_button" id="google_search_block_button_showlist"
+                style="display: block;">${show_list}</button>
         </div>
     </div>
 </div>

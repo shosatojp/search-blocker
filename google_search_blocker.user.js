@@ -452,29 +452,93 @@
     })();
 
     //Pattern manager
+    /**
+     * envに対応させる setenv後にblockに代入する
+     */
     const Patterns = (function () {
         const Patterns = {};
+        let current_env = localStorage.getItem('env') || 'main';
+        Patterns._get_basic = function () {
+            return GM_getValue('rules_v03', {
+                main: {
+                    rules: []
+                }
+            });
+        };
+        Patterns._set_basic = function (obj) {
+            GM_setValue('rules_v03', obj)
+        };
         Patterns.get = function () {
-            return GM_getValue('rules', []).map(e => Object.setPrototypeOf(e, Rule.prototype)).map(e => (e.make_command_function(), e));
+            const rules = Patterns._get_basic()[current_env].rules;
+            return rules.map(e => Object.setPrototypeOf(e, Rule.prototype)).map(e => (e.make_command_function(), e));
         };
         Patterns.get_json = function () {
             return JSON.stringify(Patterns.get());
         };
         Patterns.set = function (list) {
-            GM_setValue('rules', list.map(src => new Rule(src)));
+            Patterns._set_basic(Patterns.parse_env(list));
         };
         Patterns.set_json = function (json) {
-            GM_setValue('rules', JSON.parse(json));
+            Patterns._set_basic(JSON.parse(json));
         };
         Patterns.add = function (src) {
-            const list_ = Patterns.get();
-            if (src && !list_.filter(e => e.source === src).length) list_.push(new Rule(src));
-            GM_setValue('rules', list_);
+            const e = Patterns._get_basic();
+            e[current_env].rules.push(new Rule(src));
+            Patterns._set_basic(e);
         };
         Patterns.remove = function (src) {
-            let list_ = Patterns.get();
-            let newlist_ = list_.filter(e => e.source !== src);
-            GM_setValue('rules', newlist_);
+            const e = Patterns._get_basic();
+            e[current_env].rules = e[current_env].rules.filter(e => e.source !== src);
+            Patterns._set_basic(e);
+        };
+        Patterns.set_env = function (env) {
+            current_env = env;
+            localStorage.setItem('env', env);
+        };
+        Patterns.get_all = function () {
+            const result = [];
+            const object = Patterns._get_basic();
+            for (const key in object) {
+                if (object.hasOwnProperty(key)) {
+                    result.push(`==${key}==`);
+                    object[key].rules.forEach(e => result.push(e.source));
+                }
+            }
+            return result;
+        };
+        //get_allと同時に
+        Patterns.get_envs = function () {
+            const result = [];
+            const object = Patterns._get_basic();
+            for (const key in object) {
+                if (object.hasOwnProperty(key)) {
+                    result.push(key);
+                }
+            }
+            return result;
+        };
+        Patterns.parse_env = function (list) {
+            const env_head = new RegExp('^==(.*)==$');
+            let current = 'main';
+            const environments = {};
+            environments[current] = {};
+            let temp = [];
+            for (let line of list) {
+                line = line.trim();
+                var regexparray;
+                if (regexparray = env_head.exec(line)) {
+                    environments[current].rules = temp;
+                    temp = [];
+                    current = regexparray[1];
+                    environments[current] = {
+                        rules: []
+                    };
+                } else {
+                    if (line) temp.push(new Rule(line));
+                }
+            }
+            environments[current].rules = temp;
+            return environments;
         };
         return Patterns;
     })();
@@ -811,7 +875,7 @@
             R.button_show.style.display = 'block';
             R.button_reblock.style.display = 'none';
             R.count.textContent = COUNT;
-            R.textarea_domains.value = Patterns.get().map(e => e.source).sort().join('\n');
+            R.textarea_domains.value = Patterns.get_all().join('\n');
             R.info.textContent = `${Math.floor(time*10)/10}ms ${BLOCK.length}`;
         };
 
@@ -974,7 +1038,7 @@
             R.button_showlist.style.display = 'none';
             R.button_hidelist.style.display = 'block';
             R.contents.style.display = 'block';
-            R.textarea_domains.value = Patterns.get().map(e => e.source).sort().join('\n');
+            R.textarea_domains.value = Patterns.get_all().join('\n');
         };
         Form.close_list = function () {
             R.button_showlist.style.display = 'block';
@@ -1061,6 +1125,7 @@
     //initializer
     function init() {
         unsafeWindow.GoogleSearchBlock = GoogleSearchBlock;
+        unsafeWindow.Patterns = Patterns;
         let environment_ = null;
 
         { //detect environment
