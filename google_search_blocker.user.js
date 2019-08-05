@@ -567,12 +567,12 @@
         };
 
         { //互換性
-            const old_rule = GM_getValue('rule');
+            const old_rule = GM_getValue('rules');
             if (old_rule) {
                 const e = Patterns._get_basic();
                 e['main'].rules = old_rule;
                 Patterns._set_basic(e);
-                GM_setValue('rule', []);
+                GM_setValue('rules', []);
             }
         }
         return Patterns;
