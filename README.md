@@ -31,14 +31,15 @@ You only need to click button to block domain.
 | Content         | `$inbody('foo')`<br>`example.com$inbody('foo')`                                                                                               | middle |
 | Title + Content | `$intext('foo')`<br>`example.com$intext('foo')`                                                                                               | middle |
 | URL             | `$inurl('/wp-content/uploads/')`<br>`example.com$inurl('/wp-content/uploads/')`                                                               | middle |
+| Pathname        | `$pathname('/')`                                                                      | middle |
 | Pathname Prefix | `$prefix('/search')`                                                                      | middle |
 | Pathname Suffix | `$suffix('.pdf')`                                                                                                                             | middle |
-| Domain | `$domain('jp')`                                                                                                                             | middle |
-| Domain Prefix | `$domainp('shop.')`                                                                                                                             | middle |
-| Domain Suffix| `$domains('.jp')`                                                                                                                             | middle |
-| Domain String| `$indomain('xn--')`<br>`$indomain('[a-z]{2}','')`                                                                                                 | middle |
+| Domain          | `$domain('jp')`                                                                                                                             | middle |
+| Domain Prefix   | `$domainp('shop.')`                                                                                                                             | middle |
+| Domain Suffix   | `$domains('.jp')`                                                                                                                             | middle |
+| Domain String   | `$indomain('xn--')`<br>`$indomain('[a-z]{2}','')`                                                                                                 | middle |
 | Script          | `$script('~$.indexOf("bar")')`<br>`example.com$script('~$.indexOf("bar")')`                                                                   | slow   |
-| Regex           | `$intitle('foo','')`<br>`example.com$intitle('foo','')`<br>`$inbody('foo','i')`<br>`$intext('w3schools','m')`<br>`$inurl('w3schools','igmy')` | slow   |
+| Regex           | `#https?.+`<br>`$intitle('foo','')`<br>`example.com$intitle('foo','')`<br>`$inbody('foo','i')`<br>`$intext('w3schools','m')`<br>`$inurl('w3schools','igmy')` | slow   |
 | (Comment)       | `!example.com`                                                                                                                                |        |
 
 `#...` is alias of `$inurl(...,'')`
@@ -74,8 +75,22 @@ $script('true')
 $xor(or(and(intitle('foo', 'i'), not(inbody('bar'))), prefix('/content')), suffix('.html'))
 ```
 
+## Environment
+You can change block list by what you are searching. For example, you are writing reports, you can apply block list which blocks sites except for such as .edu .gov, but you can apply a slightly more loose block list when surfing the net.
+```js
+==<Environment name>(...Base Environments)==
+```
+```js
+==main== // Optional, added automatically
+example.com
 
+==report== // Environment for writing report. Environment name is arbitrary.
+$nor(domain('edu'),domain('gov'),domain('ac.jp'),domain('go.jp'))
 
+==sub(main,report)== // Inherits `main` and `report` environments.
+hoge.com
+foo.com
+```
 ## Sync
 You need google account to sync block list. This script sync using your google drive storage. After sync a file named `GoogleSearchBlocker.txt` will be created at the root of your storage, but you can move this file anywhere excludes trash box.
 
@@ -110,5 +125,6 @@ If you install [Google Search Blocker Tools](https://github.com/shosatojp/google
 
 
 ## Scheduled Update
-* multiple environments
-None. Please request for new features via issues.
+* 
+
+Please request for new features via 'issue'.
