@@ -717,6 +717,11 @@
                 return url_obj.pathname.startsWith(...args);
             });
         };
+        const pathname = function (...args) {
+            return (function (element, url, url_obj) {
+                return args.length && url_obj.pathname === args[0];
+            });
+        };
         const suffix = function (...args) {
             return (function (element, url, url_obj) {
                 return url_obj.pathname.endsWith(...args);
@@ -1040,9 +1045,11 @@
                 R.textarea_domains.style.overflow = 'unset';
             });
             R.button_show.addEventListener('click', function () {
-                document.querySelectorAll(SETTINGS.first).forEach(e => {
-                    e.isredisplay = true;
-                    e.style.display = 'block';
+                SETTINGS.targets.forEach(target => {
+                    document.querySelectorAll(target.first).forEach(e => {
+                        e.isredisplay = true;
+                        e.style.display = 'block';
+                    });
                 });
                 R.button_reblock.style.display = 'block';
                 R.button_show.style.display = 'none';
@@ -1222,7 +1229,8 @@
         };
 
         //if there are any elements before observe, block these elements.
-        console.log(document.querySelectorAll(SETTINGS.first).length + ' elements was found before start MutationObserver');
+        const count_before_mo = SETTINGS.targets.map(t => document.querySelectorAll(t.first).length).reduce((a, b) => a + b, 0);
+        console.log(count_before_mo + ' elements was found before start MutationObserver');
         GoogleSearchBlock.all(false);
 
         //use MutationObserver from document-start
