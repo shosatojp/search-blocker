@@ -3,8 +3,6 @@
         "container_class": "google_search_block_form",
         "result_container": "#search",
         "result_box_style_class": "pc_result_box",
-        "title": "h3",
-        "body": ".st",
         "info": ".w",
         "excludes": {
             "has_ancestor_of": {
@@ -15,23 +13,38 @@
             "first": "[jsslot]>div>*",
             "second": "a",
             "observer_function": "hasAttribute",
-            "observer_fn_arguments": ["data-init-vis"]
+            "observer_fn_arguments": ["data-init-vis"],
+            "title": "a",
+            "body": "a"
         }, {
             "first": "ul>li.sbct",
             "second": "a",
             "observer_function": "containsInClassListWhenAdded",
-            "observer_fn_arguments": ["g"]
+            "observer_fn_arguments": ["g"],
+            "title": "h3",
+            "body": ".st"
         }, {
             "first": "#search .g",
             "second": ".r>a",
             "observer_function": "containsInClassListWhenAdded",
-            "observer_fn_arguments": ["g"]
-
+            "observer_fn_arguments": ["g"],
+            "title": "h3",
+            "body": ".st"
         }, {
             "first": ".qmv19b>div",
             "second": "a",
             "observer_function": "parentClassContains",
-            "observer_fn_arguments": ["qmv19b"]
+            "observer_fn_arguments": ["qmv19b"],
+            "title": "a",
+            "body": "a"
+        }, {
+            "first": ".brs_col>p",
+            "second": "a",
+            "observer_function": "parentClassContains",
+            "observer_fn_arguments": ["nVcaUb"],
+            "title": "a",
+            "body": "a",
+            "type": "text"
         }]
     },
     "google_mobile": {

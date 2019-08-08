@@ -24,16 +24,129 @@
 // @run-at       document-start
 // @noframes
 // ==/UserScript==
+var CODE;
+(async function code() {
+    if (typeof CODE !== 'undefined') {
+        const script = document.createElement('script');
+        script.id = 'hogehoge';
+        script.textContent = `(${code.toString()})();`;
+        document.documentElement.appendChild(script);
+    }
 
-(function () {
+    const Sequential = (function () {
+        const Sequential = function () {
+            this.running = false, this.promisees = [];
+        };
+        /**
+         * @param {()=>Promise} f promiseを返す関数
+         */
+        Sequential.prototype.push = function (f) {
+            const self = this;
+            this.promisees.push(() => f().then(() => this._next()));
+            this.running || self._next();
+        };
+        Sequential.prototype._next = function () {
+            if (this.running = !!this.promisees.length) this.promisees.shift()();
+        };
+        return Sequential;
+    })();
+
+    /**
+     * Chrome/Tampermonkeyに対応させるためのインターフェイス
+     */
+    const ExtensionIO = await (async function () {
+        const ExtensionIO = {};
+        ExtensionIO.isTampermonkey = (typeof GM_info !== 'undefined');
+        /**
+         * unsafeWindow
+         */
+        ExtensionIO.unsafeWindow = ExtensionIO.isTampermonkey ? unsafeWindow : window;
+        /**
+         * getValue, setValue
+         */
+        const sequential = new Sequential();
+        let tempValue = {};
+
+        function chrome_storage_local_set_all() {
+            return new Promise((res) => {
+                chrome.storage.local.set({
+                    tempValue
+                }, () => {
+
+                    console.log(tempValue)
+                });
+            });
+        }
+
+        function chrome_storage_local_get_all() {
+            return new Promise((res) => chrome.storage.local.get(['tempValue'], result => res(result['tempValue'])));
+        }
+
+        ExtensionIO.setValue = ExtensionIO.isTampermonkey ? GM_setValue : function (key, value) {
+            tempValue[key] = value;
+            // sequential.push(chrome_storage_local_set_all);
+            chrome_storage_local_set_all();
+        };
+
+        ExtensionIO.getValue = ExtensionIO.isTampermonkey ? GM_getValue : function (key, defaultvalue) {
+            return tempValue[key] || defaultvalue;
+        };
+
+        ExtensionIO.getValuesOnInit = async function () {
+            tempValue = await chrome_storage_local_get_all();
+            console.log(tempValue);
+        };
+        /**
+         * Resource
+         */
+        ExtensionIO.resources = {};
+        ExtensionIO.getResourceText = ExtensionIO.isTampermonkey ? GM_getResourceText : function (key) {
+            return ExtensionIO.resources[key];
+        };
+        ExtensionIO.loadResources = async function (resources_map) {
+            for (const key in resources_map) {
+                if (resources_map.hasOwnProperty(key)) {
+                    const url = chrome.runtime.getURL(resources_map[key]);
+                    this.resources[key] = await (await fetch(url)).text();
+                }
+            }
+        };
+        ExtensionIO.resources_map = {
+            form: 'form.html',
+            modal: 'modal.html',
+            buttons: 'buttons.html',
+            selectors: 'selectors.html',
+            environments: 'environments.json',
+            languages: 'languages.json',
+            button_blocked_rule: 'button_blocked_rule.html',
+        };
+        /**
+         * Extenstion Info
+         */
+        ExtensionIO.info = {
+            version: '1.0.1'
+        };
+        return ExtensionIO;
+    })();
+
+    if (!ExtensionIO.isTampermonkey) {
+        chrome.runtime.sendMessage({
+            method: 'initSync'
+        }, e => {
+            console.log(e);
+        });
+        await ExtensionIO.loadResources(ExtensionIO.resources_map);
+        await ExtensionIO.getValuesOnInit();
+    }
+
     'use strict';
-    console.log(`%cGoogle Search Blocker ${GM_info.script.version}`, 'color:lightseagreen;font-size:large;');
+    console.log(`%cGoogle Search Blocker ${ExtensionIO.info.version}`, 'color:lightseagreen;font-size:large;');
     console.log(`%cCopyright © 2019 Sho Sato. All Rights Reserved.`, 'color:lightseagreen;');
     console.log(`%chttps://github.com/shosatojp/google_search_blocker`, 'color:lightseagreen;');
 
     //For bing.com. (bing overrides these functions.)
-    const Element_prototype_appendChild = Element.prototype.appendChild;
-    const Element_prototype_insertBefore = Element.prototype.insertBefore;
+    const Element_prototype_appendChild = ExtensionIO.unsafeWindow.Element.prototype.appendChild;
+    const Element_prototype_insertBefore = ExtensionIO.unsafeWindow.Element.prototype.insertBefore;
 
     const Colors = {
         Red: '#F44336',
@@ -71,11 +184,12 @@
             this.onsignin = onsignin;
             this.onsignout = onsignout;
         };
-
+        //--
         DriveSync.prototype.request = async function (e) {
+            console.log(e);
             return await gapi.client.request(e);
         }
-
+        //
         DriveSync.prototype.authenticate = function () {
             return gapi.auth2.getAuthInstance()
                 .signIn({
@@ -167,7 +281,7 @@
                 console.error('%ccannot sync file', `color:${Colors.Red};`);
             }
         };
-
+        //
         DriveSync.prototype.signIn = function () {
             return new Promise((res, rej) => {
                 if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
@@ -187,7 +301,7 @@
                 }
             });
         }
-
+        //
         DriveSync.prototype.initSync = function () {
             const self = this;
             return new Promise(((res, rej) => {
@@ -196,6 +310,24 @@
                     return;
                 }
                 if (!('gapi' in window)) {
+
+                    // fetch('https://apis.google.com/js/api.js').then(value => {
+                    //     value.text().then(text => {
+                    //         eval(text);
+                    //         console.log(gapi);
+                    //         gapi.load("client:auth2", async function () {
+                    //             gapi.auth2.init({
+                    //                 client_id: CLIENT_ID
+                    //             }).then(() => {
+                    //                 console.log('here');
+                    //                 self.signIn().then(res, rej);
+                    //             }).catch((e) => {
+                    //                 console.log(e);
+                    //                 rej();
+                    //             });
+                    //         });
+                    //     });
+                    // }).catch(rej);
                     const script = document.createElement('script');
                     script.setAttribute('src', 'https://apis.google.com/js/api.js');
                     document.body.appendChild(script);
@@ -219,7 +351,7 @@
                 }
             }));
         }
-
+        //
         DriveSync.prototype.signOut = function () {
             gapi.auth2.getAuthInstance().signOut();
             this.onsignout();
@@ -256,7 +388,7 @@
         window.navigator.language ||
         window.navigator.userLanguage ||
         window.navigator.browserLanguage;
-    const LOCAL_STRING = JSON.parse(GM_getResourceText('languages'))
+    const LOCAL_STRING = JSON.parse(ExtensionIO.getResourceText('languages'))
         .filter(x => ~x.language.indexOf(LANGUAGE.toLowerCase()) || ~x.language.indexOf('en'))[0].ui;
 
     //Resource manager
@@ -267,8 +399,8 @@
 
         TextResource.get = function (name) {
             if (!(name in _resource)) {
-                let src = GM_getResourceText(name);
-                let obj = JSON.parse(GM_getResourceText('languages'))
+                let src = ExtensionIO.getResourceText(name);
+                let obj = JSON.parse(ExtensionIO.getResourceText('languages'))
                     .filter(x => ~x.language.indexOf(LANGUAGE.toLowerCase()) || ~x.language.indexOf('en'))[0].ui; //english must be last.
                 for (const key in obj) {
                     if (obj.hasOwnProperty(key)) {
@@ -357,14 +489,16 @@
 
     //Controller for each result element.
     const Controller = (function () {
-        const Controller = function (parent, target_url) {
+        const Controller = function (parent, target_url, target_settings) {
             this.parent = parent;
             this.target_url = target_url;
             this.open_button_ = undefined;
             this.close_button_ = undefined;
+            this.target_settings = target_settings;
         };
 
         Controller.prototype.createButton = function () {
+            if (this.target_settings.type && this.target_settings.type === 'text') return;
             if (!this.parent.querySelector('.google_search_block_buttons_form')) {
                 const container_ = document.createElement('div');
                 container_.className = 'google_search_block_buttons_form';
@@ -414,7 +548,7 @@
             if (self.parent.isredisplay && self.parent.blocked) {
                 // overflow-x:auto position:absolute error
                 const fragment = document.createDocumentFragment();
-                GoogleSearchBlock.getMatchRules(self.parent).forEach(rule => {
+                GoogleSearchBlock.getMatchRules(self.parent, this.target_settings).forEach(rule => {
                     GoogleSearchBlock.createButton(rule.source, fragment);
                 });
                 contents_.appendChild(fragment);
@@ -465,14 +599,14 @@
             return current_env_id;
         };
         Patterns._get_basic = function () {
-            return GM_getValue('rules_v03', {
+            return ExtensionIO.getValue('rules_v03', {
                 main: {
                     rules: []
                 }
             });
         };
         Patterns._set_basic = function (obj) {
-            GM_setValue('rules_v03', obj)
+            ExtensionIO.setValue('rules_v03', obj)
         };
         Patterns.resolve_inherit = function (target_env_id, environment) {
             const env = environment[target_env_id];
@@ -568,12 +702,12 @@
         };
 
         { //互換性 for <= 0.13.7 to 1.0.1
-            const old_rules = GM_getValue('rules', undefined);
+            const old_rules = ExtensionIO.getValue('rules', undefined);
             if (old_rules && old_rules instanceof Array && old_rules.length) {
                 const e = Patterns._get_basic();
                 e['main'].rules = old_rules;
                 Patterns._set_basic(e);
-                GM_setValue('rules', []);
+                ExtensionIO.setValue('rules', []);
             }
         }
         return Patterns;
@@ -640,8 +774,8 @@
                 return fns.reduce((a, b) => b(...args) ? !a : a, false);
             });
         };
-        Rule.prototype.match = function (element, url, domain = null, domain_length = null, url_obj = null) {
-            if (!(domain && domain_length && url_obj)) {
+        Rule.prototype.match = function (element, url, target_settings, domain = null, domain_length = null, url_obj = null) {
+            if (url && !(domain && domain_length && url_obj)) {
                 url_obj = new URL(url);
                 domain = url_obj.host;
                 domain_length = domain.length;
@@ -649,18 +783,18 @@
             if (this.iscomment) {
                 return false;
             } else {
-                return this.match_domain(domain, domain_length) && this.commands(element, url, url_obj);
+                return this.match_domain(domain, domain_length) && this.commands(element, url, url_obj, target_settings);
             }
         };
         Rule.prototype.match_domain = function (domain, domain_length) {
-            return !this.domain || domain.endsWith(this.domain) && (this.domain_length === domain_length || domain.charAt(domain_length - this.domain_length - 1) === '.');
+            return !this.domain || domain && domain.endsWith(this.domain) && (this.domain_length === domain_length || domain.charAt(domain_length - this.domain_length - 1) === '.');
         };
 
         const intitle = function (...args) {
             if (args[1] || args[1] === '')
                 var re = new RegExp(...args);
-            return (function (element, url, url_obj) {
-                const title = element.querySelector(SETTINGS.title);
+            return (function (element, url, url_obj, target_settings) {
+                const title = element.querySelector(target_settings.title);
                 if (title) {
                     if (re) {
                         return re.test(title.textContent);
@@ -675,8 +809,8 @@
         const inbody = function (...args) {
             if (args[1] || args[1] === '')
                 var re = new RegExp(...args);
-            return (function (element, url, url_obj) {
-                const body = element.querySelector(SETTINGS.body);
+            return (function (element, url, url_obj, target_settings) {
+                const body = element.querySelector(target_settings.body);
                 if (body) {
                     if (re) {
                         return re.test(body.textContent);
@@ -691,8 +825,8 @@
         const intext = function (...args) {
             const intitle_ = intitle(...args);
             const inbody_ = inbody(...args);
-            return (function (element, url, url_obj) {
-                return intitle_(element, url) || inbody_(element, url);
+            return (function (...args) {
+                return intitle_(...args) || inbody_(...args);
             });
         };
         const inurl = function (...args) {
@@ -758,12 +892,12 @@
                 }
             });
         };
-        Rule.prototype.commands = function (element, url, url_obj) {
+        Rule.prototype.commands = function (element, url, url_obj, target_settings) {
             try {
                 if (this.iscomment) {
                     return false;
                 } else {
-                    return !this.command || this.command_function(element, url, url_obj);
+                    return !this.command || this.command_function(element, url, url_obj, target_settings);
                 }
             } catch (error) {
                 console.log(error);
@@ -818,39 +952,55 @@
         let blocked_patterns_ = [];
         let time = 0;
 
-        GoogleSearchBlock.getMatchRules = function (e) {
+        GoogleSearchBlock.getMatchRules = function (e, target_settings) {
             const result = [];
-            const link_ = e.querySelector(SETTINGS.second);
+            const link_ = e.querySelector(target_settings.second);
             if (!link_) return result;
             const url_ = link_.getAttribute('href');
+            // switch (target_settings.type) {
+            //     case 'text':
+            //         for (const rule of BLOCK) {
+            //             if (rule.match(e, undefined, target_settings, undefined, undefined, undefined))
+            //                 result.push(rule);
+            //         }
+            //         break;
+            //     default:
             if (!url_.startsWith('http')) return result;
             const url_obj = new URL(url_);
             const domain = url_obj.host;
             const domain_length = domain.length;
             for (const rule of BLOCK) {
-                if (rule.match(e, url_, domain, domain_length, url_obj))
+                if (rule.match(e, url_, target_settings, domain, domain_length, url_obj))
                     result.push(rule);
             }
+            // }
             return result;
         };
 
-        GoogleSearchBlock.one = function (e, second_selector) {
+        GoogleSearchBlock.one = function (e, target_settings) {
             if (FindElement.is_exclude(e)) return false;
             const start_ = performance.now();
-            const link_ = e.querySelector(second_selector);
+            const link_ = e.querySelector(target_settings.second);
             let removed_ = false;
             if (link_) {
                 const fragment = document.createDocumentFragment();
                 e.style['background-color'] = '';
                 e.blocked = e.isredisplay = false;
-                const url_ = link_.getAttribute('href');
-                if (!url_.startsWith('http')) return;
-                const url_obj = new URL(url_);
-                const domain = url_obj.host;
-                const domain_length = domain.length;
+                var url_, url_obj, domain, domain_length;
+                switch (target_settings.type) {
+                    case 'text':
+
+                        break;
+                    default:
+                        url_ = link_.getAttribute('href');
+                        if (!url_ || !url_.startsWith('http')) return;
+                        url_obj = new URL(url_);
+                        domain = url_obj.host;
+                        domain_length = domain.length;
+                }
                 for (let i = 0, len = BLOCK.length; i < len; i++) {
                     const block_pattern_ = BLOCK[i].source;
-                    if (BLOCK[i].match(e, url_, domain, domain_length, url_obj)) {
+                    if (BLOCK[i].match(e, url_, target_settings, domain, domain_length, url_obj)) {
                         e.blocked = true;
                         e.style.display = 'none';
                         e.style['background-color'] = 'rgba(248, 195, 199, 0.884)';
@@ -867,7 +1017,7 @@
                 if (R.blocked) R.blocked.appendChild(fragment);
                 if (!removed_) e.style.display = 'block';
 
-                const controller = new Controller(e, url_);
+                const controller = new Controller(e, url_, target_settings);
                 GoogleSearchBlock.controllers.push(controller);
                 controller.createButton();
             }
@@ -895,7 +1045,7 @@
                 });
             }
             l.forEach(e => {
-                if (GoogleSearchBlock.one(e.element, e.target.second)) count_++;
+                if (GoogleSearchBlock.one(e.element, e.target)) count_++;
             });
             COUNT = count_;
             // console.log('all', count_);
@@ -977,7 +1127,7 @@
                     var link_, url_;
                     if ((link_ = e.querySelector(target.second)) &&
                         (url_ = link_.getAttribute('href')) &&
-                        url_.startsWith('http') && rule.match(e, url_)) {
+                        url_.startsWith('http') && rule.match(e, url_, target)) {
                         if (self.redisplayed) {
                             e.isredisplay = false;
                             e.style.display = 'none';
@@ -1066,7 +1216,8 @@
                 SYNC.setUseSync(true);
                 SYNC.initSync().then(() => {
                     SYNC.compare();
-                }).catch(() => {
+                }).catch((r) => {
+                    console.log(r);
                     R.syncinfo.textContent = LOCAL_STRING.failedtosync;
                     SYNC.setUseSync(false);
                 });
@@ -1137,10 +1288,10 @@
             return Modal.container;
         };
         Modal.set = function (bool) {
-            GM_setValue('modal', (+bool).toString());
+            ExtensionIO.setValue('modal', (+bool).toString());
         };
         Modal.get = function () {
-            return !!parseInt(GM_getValue('modal', '0'));
+            return !!parseInt(ExtensionIO.getValue('modal', '0'));
         };
         Modal.open = function () {
             Form.open_list();
@@ -1186,8 +1337,8 @@
     }
     //initializer
     function init() {
-        unsafeWindow.GoogleSearchBlock = GoogleSearchBlock;
-        unsafeWindow.Patterns = Patterns;
+        ExtensionIO.unsafeWindow.GoogleSearchBlock = GoogleSearchBlock;
+        ExtensionIO.unsafeWindow.Patterns = Patterns;
         let environment_ = null;
 
         { //detect environment
@@ -1215,11 +1366,11 @@
         }
 
         // import from tools
-        unsafeWindow.google_search_blocker_import = function (imports) {
+        ExtensionIO.unsafeWindow.google_search_blocker_import = function (imports) {
             try {
                 imports.forEach(e => Patterns.add(e));
                 BLOCK = Patterns.get();
-                GM_setValue('modified', Date.now().toString());
+                ExtensionIO.setValue('modified', Date.now().toString());
                 console.log(`%cimported ${imports.length} rules`, `color:${Colors.Purple}`);
                 return true;
             } catch (error) {
@@ -1241,7 +1392,7 @@
                 const observer_ = new MutationObserver(function (records) {
                     onMutated(records, (element) => {
                         if (!~mutation_processed_.indexOf(element)) {
-                            GoogleSearchBlock.one(element, target.second);
+                            GoogleSearchBlock.one(element, target);
                             mutation_processed_.push(element);
                         }
                     });
@@ -1253,7 +1404,7 @@
             }
         });
 
-        window.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
             console.log('%c----------DOMContentLoaded----------', `color:${Colors.LightBlue};`);
 
             //check if ...
@@ -1312,9 +1463,9 @@
 
             //initialize sync feature.
             (SYNC = new DriveSync(CLIENT_ID, LIST_FILE_NAME, (time) => {
-                GM_setValue('modified', time.toString());
+                ExtensionIO.setValue('modified', time.toString());
             }, () => {
-                return parseInt(GM_getValue('modified', '0'));
+                return parseInt(ExtensionIO.getValue('modified', '0'));
             }, data => {
                 Patterns.set_json(data);
                 BLOCK = Patterns.get();
@@ -1325,9 +1476,9 @@
                 console.log('%cUPLOAD', `color:${Colors.Blue};`, Patterns.count_all_env());
                 return JSON.stringify(patterns);
             }, function usesync() {
-                return !!parseInt(GM_getValue('usesync', '0'));
+                return !!parseInt(ExtensionIO.getValue('usesync', '0'));
             }, function setusesync(bool) {
-                GM_setValue('usesync', (+bool).toString());
+                ExtensionIO.setValue('usesync', (+bool).toString());
             }, function onsignin() {
                 R.signin.style.display = 'none';
                 R.signout.style.display = 'block';
@@ -1339,6 +1490,8 @@
                 SYNC.setUseSync(false);
             });
         });
+
+        document.hoge = 'hoge';
     }
 
     //client id of this application.

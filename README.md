@@ -22,25 +22,25 @@ https://github.com/shosatojp/google_search_blocker/raw/master/google_search_bloc
 You only need to click button to block domain.
 
 ## How to write rules
-| Block by:       | Rule                                                                                                                                          |        |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| Domain          | `example.com`<br>`foo.example.com`                                                                                                            | fast   |
-| PDF             | `#\.pdf`                                                                                                                                      | slow   |
-| IDN             | `#https?://xn--[0-9a-z.]+/`                                                                                                                   | slow   |
-| Title           | `$intitle('foo')`<br>`example.com$intitle('foo')`                                                                                             | middle |
-| Content         | `$inbody('foo')`<br>`example.com$inbody('foo')`                                                                                               | middle |
-| Title + Content | `$intext('foo')`<br>`example.com$intext('foo')`                                                                                               | middle |
-| URL             | `$inurl('/wp-content/uploads/')`<br>`example.com$inurl('/wp-content/uploads/')`                                                               | middle |
-| Pathname        | `$pathname('/')`                                                                      | middle |
-| Pathname Prefix | `$prefix('/search')`                                                                      | middle |
-| Pathname Suffix | `$suffix('.pdf')`                                                                                                                             | middle |
-| Domain          | `$domain('jp')`                                                                                                                             | middle |
-| Domain Prefix   | `$domainp('shop.')`                                                                                                                             | middle |
-| Domain Suffix   | `$domains('.jp')`                                                                                                                             | middle |
-| Domain String   | `$indomain('xn--')`<br>`$indomain('[a-z]{2}','')`                                                                                                 | middle |
-| Script          | `$script('~$.indexOf("bar")')`<br>`example.com$script('~$.indexOf("bar")')`                                                                   | slow   |
+| Block by:       | Rule                                                                                                                                                         | Speed  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| Domain          | `example.com`<br>`foo.example.com`                                                                                                                           | fast   |
+| PDF             | `#\.pdf`                                                                                                                                                     | slow   |
+| IDN             | `#https?://xn--[0-9a-z.]+/`                                                                                                                                  | slow   |
+| Title           | `$intitle('foo')`<br>`example.com$intitle('foo')`                                                                                                            | middle |
+| Content         | `$inbody('foo')`<br>`example.com$inbody('foo')`                                                                                                              | middle |
+| Title + Content | `$intext('foo')`<br>`example.com$intext('foo')`                                                                                                              | middle |
+| URL             | `$inurl('/wp-content/uploads/')`<br>`example.com$inurl('/wp-content/uploads/')`                                                                              | middle |
+| Pathname        | `$pathname('/')`                                                                                                                                             | middle |
+| Pathname Prefix | `$prefix('/search')`                                                                                                                                         | middle |
+| Pathname Suffix | `$suffix('.pdf')`                                                                                                                                            | middle |
+| Domain          | `$domain('jp')`                                                                                                                                              | middle |
+| Domain Prefix   | `$domainp('shop.')`                                                                                                                                          | middle |
+| Domain Suffix   | `$domains('.jp')`                                                                                                                                            | middle |
+| Domain String   | `$indomain('xn--')`<br>`$indomain('[a-z]{2}','')`                                                                                                            | middle |
+| Script          | `$script('~$.indexOf("bar")')`<br>`example.com$script('~$.indexOf("bar")')`                                                                                  | slow   |
 | Regex           | `#https?.+`<br>`$intitle('foo','')`<br>`example.com$intitle('foo','')`<br>`$inbody('foo','i')`<br>`$intext('w3schools','m')`<br>`$inurl('w3schools','igmy')` | slow   |
-| (Comment)       | `!example.com`                                                                                                                                |        |
+| (Comment)       | `!example.com`                                                                                                                                               |        |
 
 `#...` is alias of `$inurl(...,'')`
 
