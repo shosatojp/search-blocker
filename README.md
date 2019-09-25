@@ -39,7 +39,7 @@ You only need to click button to block domain.
 | Domain Suffix   | `$domains('.jp')`                                                                                                                                            | middle |
 | Domain String   | `$indomain('xn--')`<br>`$indomain('[a-z]{2}','')`                                                                                                            | middle |
 | Script          | `$script('~$.indexOf("bar")')`<br>`example.com$script('~$.indexOf("bar")')`                                                                                  | slow   |
-| Regex           | `#https?.+`<br>`$intitle('foo','')`<br>`example.com$intitle('foo','')`<br>`$inbody('foo','i')`<br>`$intext('w3schools','m')`<br>`$inurl('w3schools','igmy')` | slow   |
+| Regex           | `#https?.+`<br>`$intitle('foo','')`<br>`example.com$intitle('foo','')`<br>`$inbody('foo','i')`<br>`$intext('w3schools','m')`<br>`$inurl('w3schools','igmy')`<br>`$pathname('.*/issues/','')` | slow   |
 | (Comment)       | `!example.com`                                                                                                                                               |        |
 
 `#...` is alias of `$inurl(...,'')`

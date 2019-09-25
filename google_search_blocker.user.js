@@ -2,7 +2,7 @@
 // @name         Google Search Blocker
 // @namespace    https://github.com/shosatojp/google_search_blocker/raw/master/google_search_blocker.user.js
 // @homepage     https://github.com/shosatojp/google_search_blocker
-// @version      1.0.1
+// @version      1.0.2
 // @description  Block undesired sites from google search results!
 // @author       Sho Sato
 // @match        https://www.google.com/search?*
@@ -718,7 +718,7 @@ var CODE;
         const Rule = function (str) {
             this.source = str;
             if (str.startsWith('#')) {
-                str = `$inurl('${str.substring(1).replace('\'','\\\'')}','')`;
+                str = `$inurl('${str.substring(1).replace('\'', '\\\'')}','')`;
             }
             if (this.iscomment = str.startsWith('!')) return;
             const index = str.indexOf('$');
@@ -852,8 +852,14 @@ var CODE;
             });
         };
         const pathname = function (...args) {
+            if (args[1] || args[1] === '')
+                var re = new RegExp(...args);
             return (function (element, url, url_obj) {
-                return args.length && url_obj.pathname === args[0];
+                if (re) {
+                    return re.test(url_obj.pathname);
+                } else {
+                    return args[0] && url_obj.pathname === args[0];
+                }
             });
         };
         const suffix = function (...args) {
@@ -1066,7 +1072,7 @@ var CODE;
             R.button_reblock.style.display = 'none';
             R.count.textContent = COUNT;
             R.textarea_domains.value = Patterns.get_all().join('\n');
-            R.info.textContent = `${Math.floor(time*10)/10}ms ${BLOCK.length}`;
+            R.info.textContent = `${Math.floor(time * 10) / 10}ms ${BLOCK.length}`;
             Form.create_env_options(Patterns.get_env_ids());
             R.select.value = Patterns.get_current_env_id();
         };
@@ -1435,8 +1441,8 @@ var CODE;
                 if (environment_ === 'google_mobile') {
                     const observer_ = new MutationObserver(function (records) {
                         if (records.filter(x => {
-                                return ('getAttribute' in x.target) && x.target.getAttribute('data-graft-type') === 'insert';
-                            }).length) {
+                            return ('getAttribute' in x.target) && x.target.getAttribute('data-graft-type') === 'insert';
+                        }).length) {
                             COUNT = 0;
                             GoogleSearchBlock.all();
                         }
