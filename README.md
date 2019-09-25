@@ -68,7 +68,7 @@ foo.example.com$intitle('download')
 // regex, ignore case
 $inurl('foo','i')
 
-//block all
+// blocks all sites (joke)
 $script('true')
 
 // complex logical operators are allowed
