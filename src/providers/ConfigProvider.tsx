@@ -13,23 +13,28 @@ let save: (config: Config) => Promise<void>;
 
 export interface ConfigProviderProps {
     configLoader: ConfigLoader,
+    config?: Config,
     children: React.ReactElement | React.ReactElement[]
 }
 
 export const ConfigProvider: React.FC<ConfigProviderProps> = (props: ConfigProviderProps) => {
-    console.log('ConfigProvider');
     const [modified, setModified] = useState<number>(0);
     notify = () => {
         setModified(v => v + 1);
     };
     save = props.configLoader.save;
 
+    if (props.config)
+        config = props.config;
+
     useEffect(() => {
-        props.configLoader.load(Config.default())
-            .then(c => {
-                config = c;
-                notify();
-            }).catch(e => console.error(e));
+        if (!props.config) {
+            props.configLoader.load(Config.default())
+                .then(c => {
+                    config = c;
+                    notify();
+                }).catch(e => console.error(e));
+        }
     }, [props.configLoader]);
 
     return <ConfigContext.Provider value={{}}>

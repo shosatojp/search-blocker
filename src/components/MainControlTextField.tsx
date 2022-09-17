@@ -9,8 +9,6 @@ export interface MainControlTextFieldProps {
 }
 
 export const MainControlTextField: React.FC<MainControlTextFieldProps> = (props: MainControlTextFieldProps) => {
-    console.log("MainControlTextField");
-
     const [configText, setConfigText] = useState('');
 
     return <Stack>

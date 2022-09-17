@@ -1,4 +1,4 @@
-import { BlockTarget, BlockTargetGenerator } from './blocker';
+import { BlockTarget, SiteSetting } from './blocker';
 
 export class GoogleBlockTarget extends BlockTarget {
     constructor(root: HTMLElement) {
@@ -32,9 +32,22 @@ export class GoogleBlockTarget extends BlockTarget {
     }
 }
 
-export class GoogleBlockTargetGenerator extends BlockTargetGenerator {
-    constructor() {
-        super()
+export class GoogleSiteSetting extends SiteSetting {
+    public name(): string {
+        return 'google';
+    }
+
+    public match(): boolean {
+        return location.hostname.split('.').includes('google');
+    }
+
+    public createRootContainer(): HTMLElement {
+        const searchElement = document.querySelector('#search');
+        const container = document.createElement('div');
+
+        searchElement!.appendChild(container);
+
+        return container;
     }
 
     *getTargets(): Generator<HTMLElement> {
@@ -53,5 +66,36 @@ export class GoogleBlockTargetGenerator extends BlockTargetGenerator {
 
             yield element.parentElement;
         }
+    }
+
+    public createBlockTarget(root: HTMLElement): BlockTarget {
+        return new GoogleBlockTarget(root);
+    }
+
+    public observeMutate(onAdded: (blockTarget: BlockTarget) => void): void {
+        let observer = new MutationObserver((records: MutationRecord[]) => {
+            for (const record of records) {
+                for (const node of Array.from(record.addedNodes)) {
+                    if (!(node instanceof HTMLElement)) continue;
+                    if (!node.classList.contains('g')) continue;
+                    if (!(node.parentElement instanceof HTMLElement)) continue;
+
+                    try {
+                        /**
+                         * 子孫要素が構築される前に呼び出された場合はスキップする
+                         */
+                        const blockTarget = this.createBlockTarget(node.parentElement);
+                        onAdded(blockTarget);
+                    } catch (error) {
+                        console.warn(error);
+                    }
+                }
+            }
+        });
+
+        observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true,
+        });
     }
 }

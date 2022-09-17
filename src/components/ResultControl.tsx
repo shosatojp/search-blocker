@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
+import { RuleChip } from './RuleChip';
 import { useConfig, useSetConfig } from "../providers/ConfigProvider";
 import { Rule } from "../rule";
 import { BlockTarget } from "../blockers/blocker";
@@ -34,22 +34,17 @@ export const ResultControl: React.FC<ResultControlProps> = (props: ResultControl
 
     return <>
         <Stack direction='row'>
-            <Stack direction='row'>
+            <div style={{ overflowX: 'auto', whiteSpace: 'nowrap' }}>
                 {openDetail &&
                     candidates.map((rule: Rule) =>
-                        <Tooltip
+                        <RuleChip
                             key={rule.toString()}
-                            title={`block '${rule.toString()}'`}>
-                            <Chip
-                                onClick={() => blockHandler(rule)}
-                                sx={{ m: 1 }}
-                                variant="outlined"
-                                label={rule.toString()}
-                            />
-                        </Tooltip>
+                            onBlock={() => blockHandler(rule)}
+                            rule={rule}
+                        />
                     )
                 }
-            </Stack>
+            </div>
             <div style={{ flexGrow: 1 }}></div>
             {openDetail ?
                 <IconButton size="small" onClick={() => setOpenDetail(false)}><ExpandLessIcon /></IconButton> :

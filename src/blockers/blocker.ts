@@ -1,9 +1,9 @@
 export abstract class BlockTarget {
-    protected root: HTMLElement;
+    protected _root: HTMLElement;
     protected _url: URL;
 
     constructor(root: HTMLElement) {
-        this.root = root;
+        this._root = root;
         const url = this.getUrl();
         if (!url)
             throw new Error('failed to get url');
@@ -18,10 +18,21 @@ export abstract class BlockTarget {
     public get url(): URL {
         return this._url;
     }
+
+    public get root(): HTMLElement {
+        return this._root;
+    }
 }
 
-export abstract class BlockTargetGenerator {
+export abstract class SiteSetting {
     constructor() { }
 
+    public abstract name(): string;
+    public abstract match(): boolean;
+    public abstract createRootContainer(): HTMLElement;
     public abstract getTargets(): Generator<HTMLElement>;
+    public abstract createBlockTarget(root: HTMLElement): BlockTarget;
+    public observeMutate(onAdded: (blockTarget: BlockTarget) => void): void {
+        console.debug('not impremented');
+    }
 }

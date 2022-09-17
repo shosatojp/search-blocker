@@ -1,22 +1,23 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
-import Chip from "@mui/material/Chip";
 import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/system/Stack";
 
 import { Config } from '../config';
 import { ResultControl } from './ResultControl';
-import { GoogleBlockTarget } from '../blockers/google';
 import { useConfig, useSetConfig } from "../providers/ConfigProvider";
 import { MainControlTextField } from './MainControlTextField';
 import { Rule } from "../rule";
-import { BlockTargetGenerator } from "../blockers/blocker";
+import { BlockTarget, SiteSetting } from "../blockers/blocker";
 import './MainControl.css';
+import { RuleChip } from "./RuleChip";
 
 
 export interface MainControlProps {
-    targetGenerator: BlockTargetGenerator
+    siteSetting: SiteSetting
+    /* created by MutationObserver before MainControl */
+    earlyBlockTargets: BlockTarget[]
 }
 
 export const MainControl: React.FC<MainControlProps> = (props: MainControlProps) => {
@@ -33,8 +34,17 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
     const matchedRules: Set<Rule> = new Set();
     const portals: React.ReactPortal[] = [];
 
-    for (const e of props.targetGenerator.getTargets()) {
-        const blockTarget = new GoogleBlockTarget(e);
+    const earlyBlockTargetElements: Map<HTMLElement, BlockTarget>
+        = new Map<HTMLElement, BlockTarget>(props.earlyBlockTargets.map(e => [e.root, e]));
+
+    for (const e of props.siteSetting.getTargets()) {
+        const blockTarget = (() => {
+            if (earlyBlockTargetElements.has(e)) {
+                return earlyBlockTargetElements.get(e)!;
+            } else {
+                return props.siteSetting.createBlockTarget(e);
+            }
+        })();
         const matchedRule = config.match(blockTarget);
         const matched = matchedRule !== null;
         const blocked = enabled && matched;
@@ -75,19 +85,17 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
                 {matchedCount === 1 && 'Matched 1 item'}
                 {matchedCount > 1 && `Matched ${matchedCount} items`}
             </Typography>
-            <Stack direction='row'>
+            <div style={{ overflowX: 'auto', whiteSpace: 'nowrap' }}>
                 {matchedRules.size > 0 &&
                     Array.from(matchedRules).map((rule: Rule) =>
-                        <Chip
-                            sx={{ m: 1 }}
+                        <RuleChip
                             key={rule.toString()}
-                            label={rule.toString()}
-                            variant='outlined'
-                            onClick={() => handleDeleteRule(rule)}
+                            rule={rule}
+                            onDelete={() => handleDeleteRule(rule)}
                         />
                     )
                 }
-            </Stack>
+            </div>
             <MainControlTextField
                 text={config.dumpString()}
                 onChange={(text: string) => setConfig(Config.loadString(text))}
