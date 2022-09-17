@@ -1,2 +1,4 @@
-*.min.js
-test/
+dist/
+node_modules/
+
+tampermonkey/wrapper.user.js

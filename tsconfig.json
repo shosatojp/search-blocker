@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "noImplicitAny": true,
+        "module": "CommonJS",
+        "lib": [
+            "ES2017",
+            "DOM",
+        ],
+        "target": "ES2016",
+        "allowJs": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "moduleResolution": "node",
+        "outDir": "build",
+        "jsx": "react",
+    },
+    "files": [
+        "src/index.tsx"
+    ]
+}
