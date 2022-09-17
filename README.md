@@ -1,3 +1,5 @@
+# ⚠️ v1.x is deprecated. Try to move out to v2.x ⚠️
+
 # Google Search Blocker
 Google Search Blocker blocks sites you don't want to see in google results. You can use this script not only on **google.com** but **bing.com** and **yahoo.co.jp**. This script is also available on **mobile** (Android Firefox (changing useragent to Android Chrome is recommended.)). 
 
