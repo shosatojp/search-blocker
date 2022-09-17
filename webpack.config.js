@@ -11,9 +11,7 @@ const config = {
         filename: '[name].user.js',
         path: path.resolve(__dirname, "dist"),
     },
-    plugins: [
-        new BannerPlugin({ banner: banner, raw: true }),
-    ],
+    plugins: [],
     module: {
         rules: [
             {
