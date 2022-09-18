@@ -6,8 +6,13 @@
         "url": "https://github.com/shosatojp/search-blocker"
     },
     "scripts": {
-        "build": "webpack --mode=production --node-env=production",
-        "watch": "webpack --watch",
+        "build": "npm run build:tm && npm run build:chrome && npm run build:firefox",
+        "build:tm": "webpack -c webpack.config.tampermonkey.js --mode=production --node-env=production",
+        "build:chrome": "webpack -c webpack.config.chrome.js --mode=production --node-env=production",
+        "build:firefox": "webpack -c webpack.config.firefox.js --mode=production --node-env=production",
+        "watch:tm": "webpack -c webpack.config.tampermonkey.js --watch",
+        "watch:chrome": "webpack -c webpack.config.chrome.js --watch",
+        "watch:firefox": "webpack -c webpack.config.firefox.js --watch",
         "lint": "eslint src/ --max-warnings=0"
     },
     "author": "Sho Sato",

@@ -2,7 +2,6 @@ import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { MainControl } from './components/MainControl';
 import { ConfigProvider } from './providers/ConfigProvider';
-import { detectPlatform } from './platform';
 import { ChromeExtensionConfigLoader } from './config/chrome';
 import { TamperMonkeyConfigLoader } from './config/tampermonkey';
 import { BlockTarget, SiteSetting } from './blockers/blocker';
@@ -11,16 +10,21 @@ import { BingSiteSetting } from './blockers/bing';
 import { YahooComSiteSetting } from './blockers/yahoo.com';
 import { YahooCoJpComSiteSetting } from './blockers/yahoo.co.jp';
 import { Config } from './config/config';
+import { FirefoxExtensionConfigLoader } from './config/firefox';
 
 console.debug('===========Load Started============');
 
 const configLoader = (() => {
-    const platform = detectPlatform();
+    const platform = process.env.PLATFORM;
     switch (platform) {
         case 'tampermonkey':
             return new TamperMonkeyConfigLoader();
         case 'chrome-extension':
             return new ChromeExtensionConfigLoader();
+        case 'firefox-extension':
+            return new FirefoxExtensionConfigLoader();
+        default:
+            throw new Error('Unsupported Platform');
     }
 })();
 
