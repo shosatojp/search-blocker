@@ -43,7 +43,7 @@ export class Rule {
     }
 
     private static isComment(line: string) {
-        return line.startsWith('!');
+        return line.startsWith('#');
     }
 
     private static isEmpty(line: string) {
