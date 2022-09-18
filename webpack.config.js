@@ -1,6 +1,7 @@
 const path = require("path");
 const { BannerPlugin } = require("webpack");
 const fs = require("fs");
+const TerserPlugin = require('terser-webpack-plugin');
 
 /* header for tampermonkey */
 const banner = fs.readFileSync("tampermonkey/header.js", { encoding: 'utf-8' });
@@ -33,6 +34,14 @@ const config = {
         extensions: [".tsx", ".ts", ".jsx", ".js", "..."],
     },
     mode: process.env.NODE_ENV || "development",
+    optimization: {
+        minimize: true,
+        minimizer: [
+            new TerserPlugin({
+                extractComments: false,
+            }),
+        ],
+    }
 };
 
 module.exports = config;
