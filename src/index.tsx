@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { MainControl } from './components/MainControl';
 import { ConfigProvider } from './providers/ConfigProvider';
 import { detectPlatform } from './platform';
-import { TamperMonkeyConfigLoader } from './configLoader';
+import { ChromeExtensionConfigLoader } from './config/chrome';
+import { TamperMonkeyConfigLoader } from './config/tampermonkey';
 import { BlockTarget, SiteSetting } from './blockers/blocker';
 import { GoogleSiteSetting } from './blockers/google';
 import { BingSiteSetting } from './blockers/bing';
 import { YahooComSiteSetting } from './blockers/yahoo.com';
 import { YahooCoJpComSiteSetting } from './blockers/yahoo.co.jp';
-import { Config } from './config';
+import { Config } from './config/config';
 
 console.debug('===========Load Started============');
 
@@ -18,6 +19,8 @@ const configLoader = (() => {
     switch (platform) {
         case 'tampermonkey':
             return new TamperMonkeyConfigLoader();
+        case 'chrome-extension':
+            return new ChromeExtensionConfigLoader();
     }
 })();
 
@@ -30,7 +33,6 @@ const SITE_SETTINGS = [
 
 const siteSetting = (() => {
     const site = SITE_SETTINGS.find((setting: SiteSetting) => setting.match());
-    console.log(site);
     if (!site) {
         throw new Error('Unsupported Site');
     }
@@ -49,9 +51,7 @@ const siteSetting = (() => {
         earlyBlockTargets.push(blockTarget);
     });
 
-    document.addEventListener('DOMContentLoaded', () => {
-        console.debug('===========DOMContentLoaded============');
-
+    function main() {
         /**
          * render main UI
          */
@@ -59,16 +59,27 @@ const siteSetting = (() => {
         const root = createRoot(container);
         root.render(
             <>
-                <ConfigProvider
-                    configLoader={configLoader}
-                    config={config ?? undefined}
-                >
-                    <MainControl
-                        siteSetting={siteSetting}
-                        earlyBlockTargets={earlyBlockTargets} />
-                </ConfigProvider>
+                <StrictMode>
+                    <ConfigProvider
+                        configLoader={configLoader}
+                        config={config ?? undefined}
+                    >
+                        <MainControl
+                            siteSetting={siteSetting}
+                            earlyBlockTargets={earlyBlockTargets} />
+                    </ConfigProvider>
+                </StrictMode>
             </>
         );
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            console.debug('===========DOMContentLoaded============');
+            main();
+        });
+    } else {
+        main();
+    }
 
 })();

@@ -4,7 +4,7 @@ import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/system/Stack';
 
-import { Config } from '../config';
+import { Config } from '../config/config';
 import { ResultControl } from './ResultControl';
 import { useConfig, useSetConfig } from '../providers/ConfigProvider';
 import { MainControlTextField } from './MainControlTextField';
@@ -21,8 +21,6 @@ export interface MainControlProps {
 }
 
 export const MainControl: React.FC<MainControlProps> = (props: MainControlProps) => {
-    console.log('MainControl');
-
     const { config } = useConfig();
     const { setConfig } = useSetConfig();
     const [enabled, setEnabled] = useState(true);

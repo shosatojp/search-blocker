@@ -1,9 +1,6 @@
 import { Config } from './config';
+import { ConfigLoader } from './configLoader';
 
-export abstract class ConfigLoader {
-    public abstract load(defaultConfig: Config): Promise<Config>;
-    public abstract save(config: Config): Promise<void>;
-}
 
 // https://www.tampermonkey.net/documentation.php
 declare function GM_setValue(name: string, config: Config): Config;

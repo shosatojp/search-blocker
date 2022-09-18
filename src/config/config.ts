@@ -1,5 +1,5 @@
-import { Rule } from './rule';
-import { BlockTarget } from './blockers/blocker';
+import { Rule } from '../rule';
+import { BlockTarget } from '../blockers/blocker';
 
 export class Config {
     rules: Rule[];

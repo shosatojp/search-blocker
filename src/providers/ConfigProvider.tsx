@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Config } from '../config';
-import { ConfigLoader } from '../configLoader';
+import { Config } from '../config/config';
+import { ConfigLoader } from '../config/configLoader';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ConfigContextValue { }
@@ -23,7 +23,7 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = (props: ConfigProvi
     notify = () => {
         setModified(v => v + 1);
     };
-    save = props.configLoader.save;
+    save = props.configLoader.save.bind(props.configLoader);
 
     if (props.config)
         config = props.config;

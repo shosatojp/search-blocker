@@ -1,0 +1,30 @@
+{
+    "name": "Search Blocker",
+    "description": "Search Blocker",
+    "version": "1.0",
+    "manifest_version": 3,
+    "content_scripts": [
+        {
+            "matches": [
+                "https://www.google.com/search*"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_start"
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "search-blocker.js"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ],
+    "permissions": [
+        "storage"
+    ]
+}
