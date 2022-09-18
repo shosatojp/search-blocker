@@ -1,7 +1,7 @@
 const path = require("path");
-const { BannerPlugin } = require("webpack");
 const fs = require("fs");
 const TerserPlugin = require('terser-webpack-plugin');
+const TampermonkeyBannerPlugin = require("./webpack/tampermonkeyBannerPlugin");
 
 /* header for tampermonkey */
 const banner = fs.readFileSync("tampermonkey/header.js", { encoding: 'utf-8' });
@@ -9,10 +9,12 @@ const banner = fs.readFileSync("tampermonkey/header.js", { encoding: 'utf-8' });
 const config = {
     entry: "./src/index.tsx",
     output: {
-        filename: '[name].user.js',
+        filename: 'search-blocker.user.js',
         path: path.resolve(__dirname, "dist"),
     },
-    plugins: [],
+    plugins: [
+        new TampermonkeyBannerPlugin(banner),
+    ],
     module: {
         rules: [
             {
