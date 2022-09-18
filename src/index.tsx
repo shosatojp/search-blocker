@@ -58,18 +58,16 @@ const siteSetting = (() => {
         const container = siteSetting.createRootContainer();
         const root = createRoot(container);
         root.render(
-            <>
-                <StrictMode>
-                    <ConfigProvider
-                        configLoader={configLoader}
-                        config={config ?? undefined}
-                    >
-                        <MainControl
-                            siteSetting={siteSetting}
-                            earlyBlockTargets={earlyBlockTargets} />
-                    </ConfigProvider>
-                </StrictMode>
-            </>
+            <StrictMode>
+                <ConfigProvider
+                    configLoader={configLoader}
+                    config={config ?? undefined}
+                >
+                    <MainControl
+                        siteSetting={siteSetting}
+                        earlyBlockTargets={earlyBlockTargets} />
+                </ConfigProvider>
+            </StrictMode>
         );
     }
 

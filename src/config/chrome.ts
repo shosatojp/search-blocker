@@ -4,12 +4,17 @@ import { Messenger } from '../messenger';
 
 export type ChromeExtensionMessageType = 'save' | 'load';
 
+export interface ChromeExtensionMessageContent {
+    type: ChromeExtensionMessageType
+    config?: Config
+}
+
 export class ChromeExtensionConfigLoader extends ConfigLoader {
-    messenger: Messenger;
+    messenger: Messenger<ChromeExtensionMessageContent>;
 
     constructor() {
         super();
-        this.messenger = new Messenger(process.env.REPOSITORY_URL as string, 'injected', (content) => {
+        this.messenger = new Messenger(process.env.REPOSITORY_URL as string, 'injected', () => {
             throw new Error('not impremented');
         });
     }
@@ -18,6 +23,7 @@ export class ChromeExtensionConfigLoader extends ConfigLoader {
         const ret = await this.messenger.post({
             type: 'load',
         }) as Config;
+        console.debug('loaded', ret);
         if (ret) {
             try {
                 return Config.loadObject(ret);
@@ -35,5 +41,6 @@ export class ChromeExtensionConfigLoader extends ConfigLoader {
             type: 'save',
             config: _config,
         });
+        console.debug('saved', _config, ret);
     }
 }
