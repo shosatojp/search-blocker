@@ -43,5 +43,5 @@ python tools/tampermonkey.py header > tampermonkey/header.js
 
 npm run build
 
-python tools/tampermonkey.py wrapper --path dist/main.user.js > tampermonkey/wrapper.user.js
+python tools/tampermonkey.py wrapper --path dist/search-blocker.user.js > tampermonkey/wrapper.user.js
 ```

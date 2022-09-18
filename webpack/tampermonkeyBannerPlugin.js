@@ -1,23 +1,32 @@
 const { Compilation, sources: { ConcatSource } } = require("webpack");
 
 class TampermonkeyBannerPlugin {
-    constructor(banner) {
-        this.banner = banner;
+    constructor(options = {
+        banner: '',
+        regex: undefined,
+    }) {
+        options.regex = options.regex || new RegExp('.*');
+        options.banner = options.banner || '';
+
+        this.options = options;
     }
 
     apply(compiler) {
-        const banner = this.banner;
+        const banner = this.options.banner;
 
-        compiler.hooks.compilation.tap("BannerPlugin", compilation => {
+        compiler.hooks.compilation.tap("TampermonkeyBannerPlugin", compilation => {
             compilation.hooks.processAssets.tap(
                 {
-                    name: "BannerPlugin",
+                    name: "TampermonkeyBannerPlugin",
                     stage: Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER
                 },
                 () => {
                     for (const chunk of compilation.chunks) {
                         for (const file of chunk.files) {
-                            console.log(file);
+                            if (!this.options.regex.test(file)) {
+                                continue;
+                            }
+
                             if (!chunk.canBeInitial()) {
                                 continue;
                             }
