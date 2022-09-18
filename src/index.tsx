@@ -19,7 +19,7 @@ const configLoader = (() => {
         case 'tampermonkey':
             return new TamperMonkeyConfigLoader();
     }
-})()!;
+})();
 
 const SITE_SETTINGS = [
     new GoogleSiteSetting(),
@@ -44,7 +44,7 @@ const siteSetting = (() => {
     const earlyBlockTargets: BlockTarget[] = [];
 
     siteSetting.observeMutate((blockTarget: BlockTarget) => {
-        blockTarget.hide(Boolean(config!.match(blockTarget)));
+        blockTarget.hide(Boolean(config.match(blockTarget)));
         earlyBlockTargets.push(blockTarget);
     });
 
@@ -55,7 +55,7 @@ const siteSetting = (() => {
          * render main UI
          */
         const container = siteSetting.createRootContainer();
-        const root = createRoot(container!);
+        const root = createRoot(container);
         root.render(
             <>
                 <ConfigProvider

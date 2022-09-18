@@ -86,13 +86,14 @@ export class Rule {
     }
 
     private static matchFunction(target: BlockTarget, script: string): boolean {
-        const inlineFunctions: Object = this.createFunctions(target);
+        const inlineFunctions: object = this.createFunctions(target);
         const fn = new Function(...Object.keys(inlineFunctions), `return (${script})`);
         const ret = fn(...Object.values(inlineFunctions));
 
         return Boolean(ret);
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
     private static createFunctions(target: BlockTarget): { [key: string]: Function } {
         const intitle = (text: string) => {
             const title = target.getTitle();

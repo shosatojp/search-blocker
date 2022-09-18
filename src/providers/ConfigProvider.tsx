@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { Config } from "../config";
 import { ConfigLoader } from "../configLoader";
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ConfigContextValue { }
 
 const ConfigContext = createContext<ConfigContextValue>({});
@@ -18,7 +19,7 @@ export interface ConfigProviderProps {
 }
 
 export const ConfigProvider: React.FC<ConfigProviderProps> = (props: ConfigProviderProps) => {
-    const [modified, setModified] = useState<number>(0);
+    const [, setModified] = useState<number>(0);
     notify = () => {
         setModified(v => v + 1);
     };
@@ -46,7 +47,7 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = (props: ConfigProvi
  * receiver
  */
 export const useConfig = () => {
-    const { } = useContext(ConfigContext);
+    useContext(ConfigContext);
 
     return { config };
 };

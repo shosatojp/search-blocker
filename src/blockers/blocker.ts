@@ -25,14 +25,12 @@ export abstract class BlockTarget {
 }
 
 export abstract class SiteSetting {
-    constructor() { }
-
     public abstract name(): string;
     public abstract match(): boolean;
     public abstract createRootContainer(): HTMLElement;
     public abstract getTargets(): Generator<HTMLElement>;
     public abstract createBlockTarget(root: HTMLElement): BlockTarget;
-    public observeMutate(onAdded: (blockTarget: BlockTarget) => void): void {
+    public observeMutate(_onAdded: (blockTarget: BlockTarget) => void): void {
         console.debug('not impremented');
     }
 }

@@ -43,10 +43,12 @@ export class GoogleSiteSetting extends SiteSetting {
 
     public createRootContainer(): HTMLElement {
         const searchElement = document.querySelector('#search');
+        if (!searchElement) {
+            throw new Error("couldn't find parent element");
+        }
+
         const container = document.createElement('div');
-
-        searchElement!.appendChild(container);
-
+        searchElement.appendChild(container);
         return container;
     }
 
@@ -73,7 +75,7 @@ export class GoogleSiteSetting extends SiteSetting {
     }
 
     public observeMutate(onAdded: (blockTarget: BlockTarget) => void): void {
-        let observer = new MutationObserver((records: MutationRecord[]) => {
+        const observer = new MutationObserver((records: MutationRecord[]) => {
             for (const record of records) {
                 for (const node of Array.from(record.addedNodes)) {
                     if (!(node instanceof HTMLElement)) continue;
