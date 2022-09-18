@@ -1,15 +1,12 @@
 {
-    "name": "workdir",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
+    "name": "search-blocker",
+    "version": "2.0.0",
+    "private": true,
     "scripts": {
         "build": "webpack --mode=production --node-env=production",
         "watch": "webpack --watch"
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
+    "author": "Sho Sato",
     "devDependencies": {
         "@types/node": "^18.7.18",
         "@types/react": "^18.0.20",
