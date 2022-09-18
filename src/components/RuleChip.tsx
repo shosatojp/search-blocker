@@ -1,8 +1,8 @@
-import React from "react";
+import React from 'react';
 import { Rule } from '../rule';
 import DeleteIcon from '@mui/icons-material/Delete';
 import BlockIcon from '@mui/icons-material/Block';
-import IconButton from "@mui/material/IconButton";
+import IconButton from '@mui/material/IconButton';
 
 
 export interface RuleChipProps {

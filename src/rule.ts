@@ -1,4 +1,4 @@
-import { BlockTarget } from "./blockers/blocker";
+import { BlockTarget } from './blockers/blocker';
 
 export interface RuleOptions {
     hostname?: string;

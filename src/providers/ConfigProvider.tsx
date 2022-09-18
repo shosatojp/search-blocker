@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { Config } from "../config";
-import { ConfigLoader } from "../configLoader";
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Config } from '../config';
+import { ConfigLoader } from '../configLoader';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ConfigContextValue { }

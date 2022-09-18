@@ -1,4 +1,4 @@
-import { Rule } from "./rule";
+import { Rule } from './rule';
 import { BlockTarget } from './blockers/blocker';
 
 export class Config {

@@ -1,4 +1,5 @@
 import { BlockTarget, SiteSetting } from './blocker';
+import * as util from '../util';
 
 export class GoogleBlockTarget extends BlockTarget {
     constructor(root: HTMLElement) {
@@ -38,13 +39,14 @@ export class GoogleSiteSetting extends SiteSetting {
     }
 
     public match(): boolean {
-        return location.hostname.split('.').includes('google');
+        return location.hostname.split('.').includes('google') &&
+            !util.isMobile();
     }
 
     public createRootContainer(): HTMLElement {
         const searchElement = document.querySelector('#search');
         if (!searchElement) {
-            throw new Error("couldn't find parent element");
+            throw new Error('couldn\'t find parent element');
         }
 
         const container = document.createElement('div');

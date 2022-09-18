@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { RuleChip } from './RuleChip';
-import { useConfig, useSetConfig } from "../providers/ConfigProvider";
-import { Rule } from "../rule";
-import { BlockTarget } from "../blockers/blocker";
+import { useConfig, useSetConfig } from '../providers/ConfigProvider';
+import { Rule } from '../rule';
+import { BlockTarget } from '../blockers/blocker';
 
 export interface ResultControlProps {
     blockTarget: BlockTarget,

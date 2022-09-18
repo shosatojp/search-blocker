@@ -1,17 +1,17 @@
-import React, { useState } from "react";
-import ReactDOM from "react-dom";
-import Switch from "@mui/material/Switch";
-import Typography from "@mui/material/Typography";
-import Stack from "@mui/system/Stack";
+import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
+import Switch from '@mui/material/Switch';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/system/Stack';
 
 import { Config } from '../config';
 import { ResultControl } from './ResultControl';
-import { useConfig, useSetConfig } from "../providers/ConfigProvider";
+import { useConfig, useSetConfig } from '../providers/ConfigProvider';
 import { MainControlTextField } from './MainControlTextField';
-import { Rule } from "../rule";
-import { BlockTarget, SiteSetting } from "../blockers/blocker";
+import { Rule } from '../rule';
+import { BlockTarget, SiteSetting } from '../blockers/blocker';
 import './MainControl.css';
-import { RuleChip } from "./RuleChip";
+import { RuleChip } from './RuleChip';
 
 
 export interface MainControlProps {
@@ -21,7 +21,7 @@ export interface MainControlProps {
 }
 
 export const MainControl: React.FC<MainControlProps> = (props: MainControlProps) => {
-    console.log("MainControl");
+    console.log('MainControl');
 
     const { config } = useConfig();
     const { setConfig } = useSetConfig();
@@ -49,7 +49,7 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
                 matched={matched}
                 blocked={blocked}
             />,
-            e,
+            e
         )
         portals.push(portal);
         if (matchedRule)

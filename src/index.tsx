@@ -1,15 +1,15 @@
-import React from "react";
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { MainControl } from './components/MainControl';
 import { ConfigProvider } from './providers/ConfigProvider';
 import { detectPlatform } from './platform';
-import { TamperMonkeyConfigLoader } from "./configLoader";
-import { BlockTarget, SiteSetting } from "./blockers/blocker";
-import { GoogleSiteSetting } from "./blockers/google";
-import { BingSiteSetting } from "./blockers/bing";
-import { YahooComSiteSetting } from "./blockers/yahoo.com";
-import { YahooCoJpComSiteSetting } from "./blockers/yahoo.co.jp";
-import { Config } from "./config";
+import { TamperMonkeyConfigLoader } from './configLoader';
+import { BlockTarget, SiteSetting } from './blockers/blocker';
+import { GoogleSiteSetting } from './blockers/google';
+import { BingSiteSetting } from './blockers/bing';
+import { YahooComSiteSetting } from './blockers/yahoo.com';
+import { YahooCoJpComSiteSetting } from './blockers/yahoo.co.jp';
+import { Config } from './config';
 
 console.debug('===========Load Started============');
 
@@ -30,6 +30,7 @@ const SITE_SETTINGS = [
 
 const siteSetting = (() => {
     const site = SITE_SETTINGS.find((setting: SiteSetting) => setting.match());
+    console.log(site);
     if (!site) {
         throw new Error('Unsupported Site');
     }
