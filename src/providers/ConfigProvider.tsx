@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { Config } from '../config/config';
 import { ConfigLoader } from '../config/configLoader';
 
@@ -7,14 +7,14 @@ interface ConfigContextValue { }
 
 const ConfigContext = createContext<ConfigContextValue>({});
 
-let config: Config = new Config([]);
+let config: Config;
 
 let notify: () => void;
 let save: (config: Config) => Promise<void>;
 
 export interface ConfigProviderProps {
     configLoader: ConfigLoader,
-    config?: Config,
+    config: Config,
     children: React.ReactElement | React.ReactElement[]
 }
 
@@ -25,18 +25,8 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = (props: ConfigProvi
     };
     save = props.configLoader.save.bind(props.configLoader);
 
-    if (props.config)
+    if (!config)
         config = props.config;
-
-    useEffect(() => {
-        if (!props.config) {
-            props.configLoader.load(Config.default())
-                .then(c => {
-                    config = c;
-                    notify();
-                }).catch(e => console.error(e));
-        }
-    }, [props.configLoader]);
 
     return <ConfigContext.Provider value={{}}>
         {props.children}
