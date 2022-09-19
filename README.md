@@ -7,6 +7,7 @@
 - [Bing](https://www.bing.com/)
 - [Yahoo!](https://search.yahoo.com/)
 - [Yahoo! Japan](https://search.yahoo.co.jp/)
+- [DuckDuckGo](https://duckduckgo.com/)
 
 ## Get Started
 
