@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     strategy:
       matrix:
@@ -23,7 +23,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - name: Run apt
-      run: sudo apt install inkscape imagemagick
+      run: sudo apt update && sudo apt install -yq inkscape imagemagick
 
     - name: Make images
       run: make images
