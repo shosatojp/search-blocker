@@ -15,6 +15,7 @@ export const MainControlTextField: React.FC<MainControlTextFieldProps> = (props:
         <TextField
             multiline
             fullWidth
+            spellCheck={false}
             inputProps={{ style: { fontFamily: 'monospace', fontSize: 'medium', whiteSpace: 'nowrap' } }}
             rows={10}
             value={configText.length > 0 ? configText : props.text}
