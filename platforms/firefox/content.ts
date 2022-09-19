@@ -1,6 +1,6 @@
-import { FirefoxExtensionMessageContent } from '../src/config/firefox';
-import { Config } from '../src/config/config';
-import { Messenger } from '../src/messenger';
+import { FirefoxExtensionMessageContent } from '../../src/config/firefox';
+import { Config } from '../../src/config/config';
+import { Messenger } from '../../src/messenger';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const browser: any;

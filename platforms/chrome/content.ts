@@ -1,6 +1,6 @@
-import { ChromeExtensionMessageContent } from '../src/config/chrome';
-import { Config } from '../src/config/config';
-import { Messenger } from '../src/messenger';
+import { ChromeExtensionMessageContent } from '../../src/config/chrome';
+import { Config } from '../../src/config/config';
+import { Messenger } from '../../src/messenger';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const chrome: any;

@@ -4,4 +4,4 @@ images/*.png
 !images/MainControl.png
 !images/ResultControl.png
 
-tampermonkey/wrapper.user.js
+platforms/tampermonkey/wrapper.user.js
