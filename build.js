@@ -32,7 +32,7 @@ const commonOptions = {
     banner: {
         js: `/* Search Blocker v${version} */`,
     },
-}
+};
 
 const tasks = {
     /**
@@ -114,13 +114,13 @@ const tasks = {
             outfile: path.join(outdir, 'firefox/content.js'),
         });
     },
-}
+};
 
 /* use threads */
 if (isMainThread) {
     fs.rmSync(outdir, { recursive: true, force: true });
     for (const taskName of Object.keys(tasks)) {
-        new Worker(__filename, { workerData: taskName })
+        new Worker(__filename, { workerData: taskName });
     }
 } else {
     const taskName = workerData;
