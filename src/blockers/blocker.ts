@@ -30,7 +30,7 @@ export abstract class SiteSetting {
     public abstract createRootContainer(): HTMLElement;
     public abstract getTargets(): Generator<HTMLElement>;
     public abstract createBlockTarget(root: HTMLElement): BlockTarget;
-    public observeMutate(_onAdded: (blockTarget: BlockTarget) => void): void {
+    public observeMutate(_onAdded: (blockTargets: BlockTarget[]) => void): void {
         console.debug('not impremented');
     }
 }

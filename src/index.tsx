@@ -11,6 +11,7 @@ import { YahooComSiteSetting } from './blockers/yahoo.com';
 import { YahooCoJpComSiteSetting } from './blockers/yahoo.co.jp';
 import { Config } from './config/config';
 import { FirefoxExtensionConfigLoader } from './config/firefox';
+import { DuckDuckGoSiteSetting } from './blockers/duckduckgo';
 
 console.debug('===========Load Started============');
 
@@ -33,6 +34,7 @@ const SITE_SETTINGS = [
     new BingSiteSetting(),
     new YahooComSiteSetting(),
     new YahooCoJpComSiteSetting(),
+    new DuckDuckGoSiteSetting(),
 ];
 
 const siteSetting = (() => {
@@ -50,9 +52,11 @@ const siteSetting = (() => {
     const config = await configLoader.load(Config.default());
     const earlyBlockTargets: BlockTarget[] = [];
 
-    siteSetting.observeMutate((blockTarget: BlockTarget) => {
-        blockTarget.hide(Boolean(config.match(blockTarget)));
-        earlyBlockTargets.push(blockTarget);
+    siteSetting.observeMutate((blockTargets: BlockTarget[]) => {
+        for (const blockTarget of blockTargets) {
+            blockTarget.hide(Boolean(config.match(blockTarget)));
+            earlyBlockTargets.push(blockTarget);
+        }
     });
 
     function main() {

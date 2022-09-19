@@ -34,6 +34,8 @@ export class GoogleBlockTarget extends BlockTarget {
 }
 
 export class GoogleSiteSetting extends SiteSetting {
+    private mutationObserver: MutationObserver | null = null;
+
     public name(): string {
         return 'google';
     }
@@ -55,7 +57,7 @@ export class GoogleSiteSetting extends SiteSetting {
     }
 
     *getTargets(): Generator<HTMLElement> {
-        const elements = Array.from(document.querySelectorAll('#search .g'));
+        const elements = Array.from(document.getElementsByClassName('g'));
 
         for (const element of elements) {
             if (!(element instanceof HTMLElement &&
@@ -76,7 +78,15 @@ export class GoogleSiteSetting extends SiteSetting {
         return new GoogleBlockTarget(root);
     }
 
-    public observeMutate(onAdded: (blockTarget: BlockTarget) => void): void {
+    public observeMutate(onAdded: (blockTargets: BlockTarget[]) => void): void {
+        const blockTargets: BlockTarget[] = [];
+
+        /* stop observing if exists */
+        if (this.mutationObserver) {
+            this.mutationObserver.disconnect();
+            this.mutationObserver = null;
+        }
+
         const observer = new MutationObserver((records: MutationRecord[]) => {
             for (const record of records) {
                 for (const node of Array.from(record.addedNodes)) {
@@ -89,11 +99,16 @@ export class GoogleSiteSetting extends SiteSetting {
                          * 子孫要素が構築される前に呼び出された場合はスキップする
                          */
                         const blockTarget = this.createBlockTarget(node.parentElement);
-                        onAdded(blockTarget);
+                        blockTargets.push(blockTarget);
                     } catch (error) {
                         console.warn(error);
                     }
                 }
+            }
+
+            if (blockTargets.length > 0) {
+                console.log(blockTargets);
+                onAdded(blockTargets);
             }
         });
 
