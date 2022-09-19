@@ -9,6 +9,14 @@
 - [Yahoo! Japan](https://search.yahoo.co.jp/)
 - [DuckDuckGo](https://duckduckgo.com/)
 
+## Features
+
+![](images/MainControl.png)
+
+block rule candidates
+
+![](images/ResultControl.png)
+
 ## Get Started
 
 1. Install Tampermonkey on your browser
