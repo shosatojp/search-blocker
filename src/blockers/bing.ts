@@ -60,8 +60,4 @@ export class BingSiteSetting extends SiteSetting {
 
         return blockTargets;
     }
-
-    public createBlockTarget(root: HTMLElement): BlockTarget {
-        return new BingBlockTarget(root);
-    }
 }

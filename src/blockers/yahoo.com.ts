@@ -64,8 +64,4 @@ export class YahooComSiteSetting extends SiteSetting {
 
         return blockTargets;
     }
-
-    public createBlockTarget(root: HTMLElement): BlockTarget {
-        return new YahooComBlockTarget(root);
-    }
 }

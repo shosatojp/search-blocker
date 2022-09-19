@@ -77,10 +77,6 @@ export class GoogleSiteSetting extends SiteSetting {
         return blockTargets;
     }
 
-    public createBlockTarget(root: HTMLElement): BlockTarget {
-        return new GoogleBlockTarget(root);
-    }
-
     public observeMutate(onAdded: (blockTargets: BlockTarget[]) => void): void {
         const blockTargets: BlockTarget[] = [];
 
@@ -97,20 +93,11 @@ export class GoogleSiteSetting extends SiteSetting {
                     if (!node.classList.contains('g')) continue;
                     if (!(node.parentElement instanceof HTMLElement)) continue;
 
-                    try {
-                        /**
-                         * 子孫要素が構築される前に呼び出された場合はスキップする
-                         */
-                        const blockTarget = this.createBlockTarget(node.parentElement);
-                        blockTargets.push(blockTarget);
-                    } catch (error) {
-                        console.warn(error);
-                    }
+                    blockTargets.push(new GoogleBlockTarget(node.parentElement));
                 }
             }
 
             if (blockTargets.length > 0) {
-                console.log(blockTargets);
                 onAdded(blockTargets);
             }
         });

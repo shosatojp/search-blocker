@@ -65,10 +65,6 @@ export class DuckDuckGoSiteSetting extends SiteSetting {
         return blockTargets;
     }
 
-    public createBlockTarget(root: HTMLElement): BlockTarget {
-        return new DuckDuckGoBlockTarget(root);
-    }
-
     public observeMutate(onAdded: (blockTargets: BlockTarget[]) => void): void {
         /* stop observing if exists */
         if (this.mutationObserver) {
@@ -87,15 +83,7 @@ export class DuckDuckGoSiteSetting extends SiteSetting {
                     if (!(!ancestorElement || ancestorElement.contains(node))) continue;
                     if (!(node.parentElement instanceof HTMLElement)) continue;
 
-                    try {
-                        /**
-                         * 子孫要素が構築される前に呼び出された場合はスキップする
-                         */
-                        const blockTarget = this.createBlockTarget(node.parentElement);
-                        blockTargets.push(blockTarget);
-                    } catch (error) {
-                        console.warn(error);
-                    }
+                    blockTargets.push(new DuckDuckGoBlockTarget(node.parentElement));
                 }
             }
 
