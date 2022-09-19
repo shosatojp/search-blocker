@@ -13,6 +13,8 @@ import { Config } from './config/config';
 import { FirefoxExtensionConfigLoader } from './config/firefox';
 import { DuckDuckGoSiteSetting } from './blockers/duckduckgo';
 
+console.log('Search Blocker v' + process.env.VERSION);
+
 console.debug('===========Load Started============');
 
 const configLoader = (() => {

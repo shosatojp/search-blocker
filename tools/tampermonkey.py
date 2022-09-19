@@ -7,7 +7,7 @@ TM_HEADER_TEMPLATE = """\
 // @name         Search Blocker
 // @namespace    https://github.com/shosatojp/search-blocker
 // @homepage     https://github.com/shosatojp/search-blocker
-// @version      2.0.0
+// @version      process.env.VERSION
 // @description  Block undesired sites from google search results!
 // @author       Sho Sato
 {}

@@ -11,6 +11,7 @@ const {
 } = require('worker_threads');
 const { build } = require('esbuild');
 
+const version = '2.0.0';
 const mode = process.env.NODE_ENV || 'production';
 const outdir = path.join(__dirname, 'dist');
 
@@ -21,11 +22,15 @@ const commonOptions = {
     sourcemap: mode === 'development',
     define: {
         'process.env.REPOSITORY_URL': JSON.stringify(packageJson.repository.url),
+        'process.env.VERSION': JSON.stringify(version),
     },
     watch: mode === 'development' && {
         onRebuild: (error, result) => {
             console.log('----------------------');
         },
+    },
+    banner: {
+        js: `/* Search Blocker v${version} */`,
     },
 }
 
@@ -34,14 +39,13 @@ const tasks = {
      * TamperMonkey User Script
      */
     buildTamperMonkey: async () => {
-        const banner = await fsPromises.readFile('tampermonkey/header.js', { encoding: 'utf-8' });
+        let banner = await fsPromises.readFile('tampermonkey/header.js', { encoding: 'utf-8' });
+        banner = banner.replace(/process.env.VERSION/g, version);
         await build({
             ...commonOptions,
             entryPoints: ['src/index.tsx'],
             outfile: path.join(outdir, 'search-blocker.user.js'),
-            banner: {
-                js: banner,
-            },
+            banner: { js: banner },
             define: {
                 ...commonOptions.define,
                 'process.env.PLATFORM': JSON.stringify('tampermonkey'),
@@ -61,7 +65,10 @@ const tasks = {
                 'process.env.PLATFORM': JSON.stringify('tampermonkey'),
             },
         });
-        await fsPromises.copyFile('chrome/manifest.json', path.join(outdir, 'chrome/manifest.json'));
+        const manifest = JSON.parse(await fsPromises.readFile('chrome/manifest.json'));
+        manifest.version = version;
+        await fsPromises.writeFile(path.join(outdir, 'chrome/manifest.json'),
+            JSON.stringify(manifest), { encoding: 'utf-8' });
     },
     buildChromeExtensionContentScript: async () => {
         await build({
@@ -83,7 +90,10 @@ const tasks = {
                 'process.env.PLATFORM': JSON.stringify('firefox'),
             },
         });
-        await fsPromises.copyFile('firefox/manifest.json', path.join(outdir, 'firefox/manifest.json'));
+        const manifest = JSON.parse(await fsPromises.readFile('firefox/manifest.json'));
+        manifest.version = version;
+        await fsPromises.writeFile(path.join(outdir, 'firefox/manifest.json'),
+            JSON.stringify(manifest), { encoding: 'utf-8' });
     },
     buildFirefoxExtensionContentScript: async () => {
         await build({
