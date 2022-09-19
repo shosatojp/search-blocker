@@ -8,6 +8,7 @@
     "scripts": {
         "build": "node build.js",
         "watch": "NODE_ENV=development node build.js",
+        "type": "tsc --noEmit",
         "lint": "eslint src/ --max-warnings=0"
     },
     "author": "Sho Sato",
