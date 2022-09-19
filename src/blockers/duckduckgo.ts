@@ -30,7 +30,7 @@ export class DuckDuckGoBlockTarget extends BlockTarget {
 export class DuckDuckGoSiteSetting extends SiteSetting {
     private mutationObserver: MutationObserver | null = null;
 
-    public name(): string {
+    public get name(): string {
         return 'duckduckgo';
     }
 
@@ -50,16 +50,19 @@ export class DuckDuckGoSiteSetting extends SiteSetting {
         return container;
     }
 
-    *getTargets(): Generator<HTMLElement> {
+    getTargets(): BlockTarget[] {
         const elements = Array.from(document.querySelectorAll('#links article'));
+        const blockTargets: BlockTarget[] = [];
 
         for (const element of elements) {
             if (!(element instanceof HTMLElement && element.parentElement instanceof HTMLElement)) {
                 continue;
             }
 
-            yield element.parentElement;
+            blockTargets.push(new DuckDuckGoBlockTarget(element.parentElement));
         }
+
+        return blockTargets;
     }
 
     public createBlockTarget(root: HTMLElement): BlockTarget {

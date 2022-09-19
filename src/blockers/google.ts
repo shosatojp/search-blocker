@@ -36,7 +36,7 @@ export class GoogleBlockTarget extends BlockTarget {
 export class GoogleSiteSetting extends SiteSetting {
     private mutationObserver: MutationObserver | null = null;
 
-    public name(): string {
+    public get name(): string {
         return 'google';
     }
 
@@ -56,8 +56,9 @@ export class GoogleSiteSetting extends SiteSetting {
         return container;
     }
 
-    *getTargets(): Generator<HTMLElement> {
+    getTargets(): BlockTarget[] {
         const elements = Array.from(document.getElementsByClassName('g'));
+        const blockTargets: BlockTarget[] = [];
 
         for (const element of elements) {
             if (!(element instanceof HTMLElement &&
@@ -70,8 +71,10 @@ export class GoogleSiteSetting extends SiteSetting {
 
             element.style.marginBottom = '0px';
 
-            yield element.parentElement;
+            blockTargets.push(new GoogleBlockTarget(element.parentElement));
         }
+
+        return blockTargets;
     }
 
     public createBlockTarget(root: HTMLElement): BlockTarget {

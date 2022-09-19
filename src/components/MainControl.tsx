@@ -36,8 +36,7 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
         = new Map<HTMLElement, BlockTarget>(props.earlyBlockTargets.map(e => [e.root, e]));
 
     for (const e of props.siteSetting.getTargets()) {
-        const blockTarget = earlyBlockTargetElements.get(e)
-            || props.siteSetting.createBlockTarget(e);
+        const blockTarget = earlyBlockTargetElements.get(e.root) || e;
         const matchedRule = config.match(blockTarget);
         const matched = matchedRule !== null;
         const blocked = enabled && matched;
@@ -47,7 +46,7 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
                 matched={matched}
                 blocked={blocked}
             />,
-            e
+            e.root
         )
         portals.push(portal);
         if (matchedRule)

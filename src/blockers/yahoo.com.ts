@@ -27,7 +27,7 @@ export class YahooComBlockTarget extends BlockTarget {
 }
 
 export class YahooComSiteSetting extends SiteSetting {
-    public name(): string {
+    public get name(): string {
         return 'yahoo.com';
     }
 
@@ -46,8 +46,9 @@ export class YahooComSiteSetting extends SiteSetting {
         return container;
     }
 
-    *getTargets(): Generator<HTMLElement> {
+    getTargets(): BlockTarget[] {
         const elements = Array.from(document.querySelectorAll('#web ol.reg > li'));
+        const blockTargets: BlockTarget[] = [];
 
         for (const element of elements) {
             if (!(element instanceof HTMLElement)) {
@@ -58,8 +59,10 @@ export class YahooComSiteSetting extends SiteSetting {
                 continue;
             }
 
-            yield element;
+            blockTargets.push(new YahooComBlockTarget(element));
         }
+
+        return blockTargets;
     }
 
     public createBlockTarget(root: HTMLElement): BlockTarget {

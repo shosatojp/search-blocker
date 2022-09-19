@@ -27,7 +27,7 @@ export class YahooCoJpBlockTarget extends BlockTarget {
 }
 
 export class YahooCoJpComSiteSetting extends SiteSetting {
-    public name(): string {
+    public get name(): string {
         return 'yahoo.co.jp';
     }
 
@@ -46,16 +46,19 @@ export class YahooCoJpComSiteSetting extends SiteSetting {
         return container;
     }
 
-    *getTargets(): Generator<HTMLElement> {
+    getTargets(): BlockTarget[] {
         const elements = Array.from(document.querySelectorAll('#contents .Contents__inner .Contents__innerGroupBody .sw-CardBase .sw-Card'));
+        const blockTargets: BlockTarget[] = [];
 
         for (const element of elements) {
             if (!(element instanceof HTMLElement)) {
                 continue;
             }
 
-            yield element;
+            blockTargets.push(new YahooCoJpBlockTarget(element));
         }
+
+        return blockTargets;
     }
 
     public createBlockTarget(root: HTMLElement): BlockTarget {
