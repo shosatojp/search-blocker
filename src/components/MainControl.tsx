@@ -47,7 +47,7 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
                 blocked={blocked}
             />,
             e.root
-        )
+        );
         portals.push(portal);
         if (matchedRule)
             matchedRules.add(matchedRule);
@@ -58,7 +58,7 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
     const handleDeleteRule = (rule: Rule) => {
         config.deleteRule(rule);
         setConfig(config);
-    }
+    };
 
     useEffect(() => {
         /**
@@ -105,5 +105,5 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
             />
         </Stack>
         {portals}
-    </div>
+    </div>;
 };
