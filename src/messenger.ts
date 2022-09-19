@@ -1,27 +1,27 @@
 // export type MessageContent = object;
 
-export interface Message {
+export interface Message<T> {
     id: number
     tag: string
-    content: unknown
+    content: T
     reply: boolean
     sender: string
 }
 
-export interface PendingMessage {
-    resolve: (content: unknown) => void
-    reject: (content: unknown) => void
-    message: Message
+export interface PendingMessage<T> {
+    resolve: (content: T) => void
+    reject: (content: T) => void
+    message: Message<T>
 }
 
-export class Messenger<T> {
+export class Messenger<T, R = unknown> {
     applicationTag: string;
     senderTag: string;
     messageId: number;
-    messagesPending: Map<number, PendingMessage> = new Map();
+    messagesPending: Map<number, PendingMessage<T>> = new Map();
 
     constructor(application_tag: string, sender_tag: string,
-        onMessage: (content: T) => Promise<unknown>) {
+        onMessage: (content: T) => Promise<R>) {
 
         this.applicationTag = application_tag;
         this.senderTag = sender_tag;
@@ -61,10 +61,10 @@ export class Messenger<T> {
         });
     }
 
-    post(content: unknown) {
+    post(content: T) {
         return new Promise((resolve, reject) => {
             const mid = this.messageId++;
-            const message: Message = {
+            const message: Message<T> = {
                 id: mid,
                 tag: this.applicationTag,
                 content: content,

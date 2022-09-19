@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/system/Stack';
+import LoadingButton from '@mui/lab/LoadingButton';
+import SyncIcon from '@mui/icons-material/Sync';
 
 import { Config } from '../config/config';
 import { ResultControl } from './ResultControl';
@@ -12,11 +14,14 @@ import { Rule } from '../rule';
 import { BlockTarget, SiteSetting } from '../blockers/blocker';
 import { RuleChip } from './RuleChip';
 
+import { gdriveAuth, gdriveSync } from '../config/google-drive';
+import { ConfigLoader } from '../config/configLoader';
 
 export interface MainControlProps {
     siteSetting: SiteSetting
     /* created by MutationObserver before MainControl */
     earlyBlockTargets: BlockTarget[]
+    configLoader: ConfigLoader
 }
 
 export const MainControl: React.FC<MainControlProps> = (props: MainControlProps) => {
@@ -24,6 +29,8 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
     const { setConfig } = useSetConfig();
     const [enabled, setEnabled] = useState(true);
     const [, setModified] = useState(0);
+
+    const [uploading, setUploading] = useState(false);
 
     /**
      * portals
@@ -55,9 +62,30 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
         matchedCount += Number(matched);
     }
 
-    const handleDeleteRule = (rule: Rule) => {
+    const handleDeleteRule = async (rule: Rule) => {
         config.deleteRule(rule);
-        setConfig(config);
+        await setConfig(config);
+    };
+
+    const handleSync = async () => {
+        try {
+            setUploading(true);
+            await gdriveAuth();
+            const result = await gdriveSync('SearchBlocker.txt', config.dumpString(),
+                await props.configLoader.getModifiedDate());
+            switch (result.operation) {
+                case 'download':
+                    setConfig(Config.loadString(result.content), result.remoteModifiedDate);
+                    break;
+                case 'upload':
+                    props.configLoader.setModifiedDate(result.remoteModifiedDate);
+                    break;
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setUploading(false);
+        }
     };
 
     useEffect(() => {
@@ -94,15 +122,23 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
                         <RuleChip
                             key={rule.toString()}
                             rule={rule}
-                            onDelete={() => handleDeleteRule(rule)}
+                            onDelete={async () => await handleDeleteRule(rule)}
                         />
                     )
                 }
             </div>
             <MainControlTextField
                 text={config.dumpString()}
-                onChange={(text: string) => setConfig(Config.loadString(text))}
+                onChange={async (text: string) => await setConfig(Config.loadString(text))}
             />
+            <Stack direction='row'>
+                <LoadingButton
+                    startIcon={<SyncIcon />}
+                    onClick={handleSync}
+                    loading={uploading}
+                    variant='outlined'
+                >Google Drive Sync</LoadingButton>
+            </Stack>
         </Stack>
         {portals}
     </div>;

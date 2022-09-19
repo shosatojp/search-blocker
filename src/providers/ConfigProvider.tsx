@@ -10,7 +10,7 @@ const ConfigContext = createContext<ConfigContextValue>({});
 let config: Config;
 
 let notify: () => void;
-let save: (config: Config) => Promise<void>;
+let configLoader: ConfigLoader;
 
 export interface ConfigProviderProps {
     configLoader: ConfigLoader,
@@ -23,7 +23,7 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = (props: ConfigProvi
     notify = () => {
         setModified(v => v + 1);
     };
-    save = props.configLoader.save.bind(props.configLoader);
+    configLoader = props.configLoader;
 
     if (!config)
         config = props.config;
@@ -47,10 +47,11 @@ export const useConfig = () => {
  */
 export const useSetConfig = () => {
     return {
-        setConfig: (_config: Config) => {
+        setConfig: async (_config: Config, modifiedDate?: Date) => {
             config = _config;
             notify();
-            save(config);
+            await configLoader.save(config);
+            await configLoader.setModifiedDate(modifiedDate || new Date());
         },
     };
 };

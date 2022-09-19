@@ -1,6 +1,5 @@
-import { ChromeExtensionMessageContent } from '../src/config/chrome';
-import { Config } from '../src/config/config';
-import { Messenger } from '../src/messenger';
+import { FirefoxExtensionMessageContent } from '../../src/config/firefox';
+import { Messenger } from '../../src/messenger';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const chrome: any;
@@ -17,18 +16,18 @@ s.onload = () => s.remove();
 /**
  * message
  */
-interface ChromeStorageLocal {
-    config: Config
+interface FirefoxStorageLocal {
+    [key: string]: unknown
 }
 
-new Messenger(process.env.REPOSITORY_URL as string, 'content.js', (message: ChromeExtensionMessageContent) => {
+new Messenger(process.env.REPOSITORY_URL as string, 'content.js', (message: FirefoxExtensionMessageContent) => {
     return new Promise((resolve, reject) => {
         switch (message.type) {
             case 'save':
-                chrome.storage.local.set({ config: message.config }, () => resolve(true));
+                chrome.storage.local.set({ [message.key]: message.content }, () => resolve(true));
                 break;
             case 'load':
-                chrome.storage.local.get(['config'], (result: ChromeStorageLocal) => resolve(result.config));
+                chrome.storage.local.get([message.key], (result: FirefoxStorageLocal) => resolve(result[message.key]));
                 break;
             default:
                 reject('unsupported type');

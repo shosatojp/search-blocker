@@ -1,4 +1,13 @@
 dist/
 node_modules/
 
-tampermonkey/wrapper.user.js
+# assets
+images/*.png
+!images/MainControl.png
+!images/ResultControl.png
+
+platforms/tampermonkey/wrapper.user.js
+
+# vscode
+.vscode/
+.devcontainer/

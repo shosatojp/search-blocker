@@ -14,6 +14,7 @@ const { build } = require('esbuild');
 const version = '2.0.0';
 const mode = process.env.NODE_ENV || 'production';
 const outdir = path.join(__dirname, 'dist');
+const GOOGLE_CLIENT_ID = '531665009269-96fvecl3pj4717mj2e6if6oaph7eu8ar.apps.googleusercontent.com';
 
 const packageJson = JSON.parse(fs.readFileSync('package.json', { encoding: 'utf-8' }));
 const commonOptions = {
@@ -23,6 +24,7 @@ const commonOptions = {
     define: {
         'process.env.REPOSITORY_URL': JSON.stringify(packageJson.repository.url),
         'process.env.VERSION': JSON.stringify(version),
+        'process.env.GOOGLE_CLIENT_ID': JSON.stringify(GOOGLE_CLIENT_ID),
     },
     watch: mode === 'development' && {
         onRebuild: (error, result) => {
@@ -32,14 +34,14 @@ const commonOptions = {
     banner: {
         js: `/* Search Blocker v${version} */`,
     },
-}
+};
 
 const tasks = {
     /**
      * TamperMonkey User Script
      */
     buildTamperMonkey: async () => {
-        let banner = await fsPromises.readFile('tampermonkey/header.js', { encoding: 'utf-8' });
+        let banner = await fsPromises.readFile('platforms/tampermonkey/header.js', { encoding: 'utf-8' });
         banner = banner.replace(/process.env.VERSION/g, version);
         await build({
             ...commonOptions,
@@ -59,22 +61,34 @@ const tasks = {
         await build({
             ...commonOptions,
             entryPoints: ['src/index.tsx'],
-            outfile: path.join(outdir, 'chrome/search-blocker.js'),
+            outfile: path.join(outdir, 'chrome/search-blocker/search-blocker.js'),
             define: {
                 ...commonOptions.define,
-                'process.env.PLATFORM': JSON.stringify('tampermonkey'),
+                'process.env.PLATFORM': JSON.stringify('chrome'),
             },
         });
-        const manifest = JSON.parse(await fsPromises.readFile('chrome/manifest.json'));
+
+        /* build manifest */
+        const manifest = JSON.parse(await fsPromises.readFile('platforms/chrome/manifest.json'));
+        const matches = JSON.parse(fs.readFileSync('platforms/chrome/matches.json'));
         manifest.version = version;
-        await fsPromises.writeFile(path.join(outdir, 'chrome/manifest.json'),
+        manifest.name = packageJson.name;
+        manifest.description = packageJson.description;
+        for (const content_script of manifest.content_scripts) {
+            content_script.matches = matches;
+        }
+        await fsPromises.writeFile(path.join(outdir, 'chrome/search-blocker/manifest.json'),
             JSON.stringify(manifest), { encoding: 'utf-8' });
+        await fsPromises.copyFile('images/icon16.png', path.join(outdir, 'chrome/search-blocker/icon16.png'));
+        await fsPromises.copyFile('images/icon32.png', path.join(outdir, 'chrome/search-blocker/icon32.png'));
+        await fsPromises.copyFile('images/icon96.png', path.join(outdir, 'chrome/search-blocker/icon96.png'));
+        await fsPromises.copyFile('images/icon128.png', path.join(outdir, 'chrome/search-blocker/icon128.png'));
     },
     buildChromeExtensionContentScript: async () => {
         await build({
             ...commonOptions,
-            entryPoints: ['chrome/content.ts'],
-            outfile: path.join(outdir, 'chrome/content.js'),
+            entryPoints: ['platforms/chrome/content.ts'],
+            outfile: path.join(outdir, 'chrome/search-blocker/content.js'),
         });
     },
     /**
@@ -90,7 +104,7 @@ const tasks = {
                 'process.env.PLATFORM': JSON.stringify('firefox'),
             },
         });
-        const manifest = JSON.parse(await fsPromises.readFile('firefox/manifest.json'));
+        const manifest = JSON.parse(await fsPromises.readFile('platforms/firefox/manifest.json'));
         manifest.version = version;
         await fsPromises.writeFile(path.join(outdir, 'firefox/manifest.json'),
             JSON.stringify(manifest), { encoding: 'utf-8' });
@@ -98,17 +112,17 @@ const tasks = {
     buildFirefoxExtensionContentScript: async () => {
         await build({
             ...commonOptions,
-            entryPoints: ['firefox/content.ts'],
+            entryPoints: ['platforms/firefox/content.ts'],
             outfile: path.join(outdir, 'firefox/content.js'),
         });
     },
-}
+};
 
 /* use threads */
 if (isMainThread) {
     fs.rmSync(outdir, { recursive: true, force: true });
     for (const taskName of Object.keys(tasks)) {
-        new Worker(__filename, { workerData: taskName })
+        new Worker(__filename, { workerData: taskName });
     }
 } else {
     const taskName = workerData;

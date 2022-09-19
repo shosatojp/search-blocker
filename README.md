@@ -46,6 +46,7 @@ example.com$intitle('foobar')
 
 ```sh
 python tools/tampermonkey.py header > tampermonkey/header.js
+python tools/tampermonkey.py matches > chrome/matches.json
 
 npm run build
 

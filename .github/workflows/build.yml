@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     strategy:
       matrix:
@@ -22,6 +22,12 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
+    - name: Run apt
+      run: sudo apt update && sudo apt install -yq inkscape imagemagick
+
+    - name: Make images
+      run: make images
+
     - name: Install
       run: npm ci
 
@@ -33,3 +39,6 @@ jobs:
 
     - name: Build
       run: npm run build
+
+    - name: Make chrome extension zip
+      run: make chrome

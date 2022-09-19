@@ -2,11 +2,13 @@ import { Config } from './config';
 import { ConfigLoader } from './configLoader';
 import { Messenger } from '../messenger';
 
-export type ChromeExtensionMessageType = 'save' | 'load';
-
-export interface ChromeExtensionMessageContent {
-    type: ChromeExtensionMessageType
-    config?: Config
+export type ChromeExtensionMessageContent = {
+    type: 'save'
+    key: string
+    content: unknown
+} | {
+    type: 'load'
+    key: string
 }
 
 export class ChromeExtensionConfigLoader extends ConfigLoader {
@@ -22,8 +24,8 @@ export class ChromeExtensionConfigLoader extends ConfigLoader {
     public async load(_defaultConfig: Config): Promise<Config> {
         const ret = await this.messenger.post({
             type: 'load',
+            key: 'config',
         }) as Config;
-        console.debug('loaded', ret);
         if (ret) {
             try {
                 return Config.loadObject(ret);
@@ -36,11 +38,27 @@ export class ChromeExtensionConfigLoader extends ConfigLoader {
         }
     }
 
-    public async save(_config: Config): Promise<void> {
-        const ret = await this.messenger.post({
+    public async save(config: Config): Promise<void> {
+        await this.messenger.post({
             type: 'save',
-            config: _config,
+            key: 'config',
+            content: config,
         });
-        console.debug('saved', _config, ret);
+    }
+
+    public async setModifiedDate(modifiedDate: Date): Promise<void> {
+        await this.messenger.post({
+            type: 'save',
+            key: 'modifiedDate',
+            content: modifiedDate.toJSON(),
+        });
+    }
+
+    public async getModifiedDate(): Promise<Date | null> {
+        const ret = await this.messenger.post({
+            type: 'load',
+            key: 'modifiedDate',
+        }) as (string | null);
+        return ret ? new Date(ret) : null;
     }
 }

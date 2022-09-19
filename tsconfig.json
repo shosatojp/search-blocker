@@ -16,9 +16,5 @@
         "moduleResolution": "Node",
         "outDir": "dist",
         "jsx": "react",
-    },
-    "include": [
-        "src/",
-        "chrome/",
-    ],
+    }
 }
