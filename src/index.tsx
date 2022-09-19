@@ -22,9 +22,9 @@ const configLoader = (() => {
     switch (platform) {
         case 'tampermonkey':
             return new TamperMonkeyConfigLoader();
-        case 'chrome-extension':
+        case 'chrome':
             return new ChromeExtensionConfigLoader();
-        case 'firefox-extension':
+        case 'firefox':
             return new FirefoxExtensionConfigLoader();
         default:
             throw new Error('Unsupported Platform');
@@ -68,7 +68,7 @@ const siteSetting = (() => {
         }
     });
 
-    function main() {
+    async function main() {
         /**
          * render main UI
          */
@@ -82,19 +82,20 @@ const siteSetting = (() => {
                 >
                     <MainControl
                         siteSetting={siteSetting}
-                        earlyBlockTargets={earlyBlockTargets} />
+                        earlyBlockTargets={earlyBlockTargets}
+                        configLoader={configLoader} />
                 </ConfigProvider>
             </StrictMode>
         );
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             console.debug('===========DOMContentLoaded============');
-            main();
+            await main();
         });
     } else {
-        main();
+        await main();
     }
 
 })();

@@ -25,9 +25,9 @@ export const ResultControl: React.FC<ResultControlProps> = (props: ResultControl
         props.blockTarget.highlight(props.matched, '#ffe7e7');
     }, [props.blocked, props.matched, props.blockTarget]);
 
-    const blockHandler = (rule: Rule) => {
+    const blockHandler = async (rule: Rule) => {
         config.addRule(rule);
-        setConfig(config);
+        await setConfig(config);
     };
     const url = props.blockTarget.url;
     const candidates = url ? Rule.getCandidate(url) : [];
@@ -39,7 +39,7 @@ export const ResultControl: React.FC<ResultControlProps> = (props: ResultControl
                     candidates.map((rule: Rule) =>
                         <RuleChip
                             key={rule.toString()}
-                            onBlock={() => blockHandler(rule)}
+                            onBlock={async () => await blockHandler(rule)}
                             rule={rule}
                         />
                     )

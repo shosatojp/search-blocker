@@ -14,6 +14,7 @@ const { build } = require('esbuild');
 const version = '2.0.0';
 const mode = process.env.NODE_ENV || 'production';
 const outdir = path.join(__dirname, 'dist');
+const GOOGLE_CLIENT_ID = '531665009269-96fvecl3pj4717mj2e6if6oaph7eu8ar.apps.googleusercontent.com';
 
 const packageJson = JSON.parse(fs.readFileSync('package.json', { encoding: 'utf-8' }));
 const commonOptions = {
@@ -23,6 +24,7 @@ const commonOptions = {
     define: {
         'process.env.REPOSITORY_URL': JSON.stringify(packageJson.repository.url),
         'process.env.VERSION': JSON.stringify(version),
+        'process.env.GOOGLE_CLIENT_ID': JSON.stringify(GOOGLE_CLIENT_ID),
     },
     watch: mode === 'development' && {
         onRebuild: (error, result) => {
@@ -62,7 +64,7 @@ const tasks = {
             outfile: path.join(outdir, 'chrome/search-blocker/search-blocker.js'),
             define: {
                 ...commonOptions.define,
-                'process.env.PLATFORM': JSON.stringify('tampermonkey'),
+                'process.env.PLATFORM': JSON.stringify('chrome'),
             },
         });
 
