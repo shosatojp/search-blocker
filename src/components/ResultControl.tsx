@@ -29,7 +29,8 @@ export const ResultControl: React.FC<ResultControlProps> = (props: ResultControl
         config.addRule(rule);
         setConfig(config);
     };
-    const candidates = Rule.getCandidate(props.blockTarget.url);
+    const url = props.blockTarget.url;
+    const candidates = url ? Rule.getCandidate(url) : [];
 
     return <>
         <Stack direction='row'>

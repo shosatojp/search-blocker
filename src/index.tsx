@@ -54,8 +54,15 @@ const siteSetting = (() => {
 
     siteSetting.observeMutate((blockTargets: BlockTarget[]) => {
         for (const blockTarget of blockTargets) {
-            blockTarget.hide(Boolean(config.match(blockTarget)));
-            earlyBlockTargets.push(blockTarget);
+            try {
+                /**
+                 * ignore targets which descendants are not constructed
+                 */
+                blockTarget.hide(Boolean(config.match(blockTarget)));
+                earlyBlockTargets.push(blockTarget);
+            } catch (error) {
+                console.warn(error);
+            }
         }
     });
 

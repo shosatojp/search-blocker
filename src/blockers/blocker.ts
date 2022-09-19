@@ -11,12 +11,11 @@ export abstract class BlockTarget {
     public abstract highlight(on: boolean, color: string): void;
     public abstract hide(hidden: boolean): void;
 
-    public get url(): URL {
+    public get url(): URL | null {
         if (!this._url) {
             const url = this.getUrl();
-            if (!url)
-                throw new Error('failed to get url');
-            this._url = url;
+            if (url)
+                this._url = url;
         }
 
         return this._url;
