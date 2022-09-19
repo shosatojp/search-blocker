@@ -35,7 +35,6 @@ async function getTokenResponseRaw(): Promise<TokenResponse> {
             client_id: CLIENT_ID,
             scope: SCOPES,
             prompt: '',
-            hint: 'shosatojp2001@gmail.com',
             callback: (tokenResponse: TokenResponse) => {
                 resolve(tokenResponse);
             },
