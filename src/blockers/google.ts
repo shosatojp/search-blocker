@@ -35,6 +35,7 @@ export class GoogleBlockTarget extends BlockTarget {
 
 export class GoogleSiteSetting extends SiteSetting {
     private mutationObserver: MutationObserver | null = null;
+    private blockTargetsCache: Set<HTMLElement> = new Set<HTMLElement>();
 
     public get name(): string {
         return 'google';
@@ -71,6 +72,8 @@ export class GoogleSiteSetting extends SiteSetting {
 
             element.style.marginBottom = '0px';
 
+            this.blockTargetsCache.add(element.parentElement);
+
             blockTargets.push(new GoogleBlockTarget(element.parentElement));
         }
 
@@ -78,22 +81,25 @@ export class GoogleSiteSetting extends SiteSetting {
     }
 
     public observeMutate(onAdded: (blockTargets: BlockTarget[]) => void): void {
-        const blockTargets: BlockTarget[] = [];
-
         /* stop observing if exists */
         if (this.mutationObserver) {
             this.mutationObserver.disconnect();
             this.mutationObserver = null;
         }
+        
+        this.mutationObserver = new MutationObserver((records: MutationRecord[]) => {
+            const blockTargets: BlockTarget[] = [];
 
-        const observer = new MutationObserver((records: MutationRecord[]) => {
             for (const record of records) {
                 for (const node of Array.from(record.addedNodes)) {
                     if (!(node instanceof HTMLElement)) continue;
                     if (!node.classList.contains('g')) continue;
                     if (!(node.parentElement instanceof HTMLElement)) continue;
 
-                    blockTargets.push(new GoogleBlockTarget(node.parentElement));
+                    if (!this.blockTargetsCache.has(node.parentElement)) {
+                        this.blockTargetsCache.add(node.parentElement);
+                        blockTargets.push(new GoogleBlockTarget(node.parentElement));
+                    }
                 }
             }
 
@@ -102,7 +108,7 @@ export class GoogleSiteSetting extends SiteSetting {
             }
         });
 
-        observer.observe(document.documentElement, {
+        this.mutationObserver.observe(document.documentElement, {
             childList: true,
             subtree: true,
         });
