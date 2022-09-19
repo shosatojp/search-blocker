@@ -1,4 +1,7 @@
 dist/
 node_modules/
+images/*.png
+!images/MainControl.png
+!images/ResultControl.png
 
 tampermonkey/wrapper.user.js

@@ -1,5 +1,6 @@
 {
     "name": "search-blocker",
+    "description": "Blocks search results you don't want to see from Google, Bing, Yahoo and DuckDuckGo.",
     "version": "2.0.0",
     "private": true,
     "repository": {

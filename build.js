@@ -59,22 +59,34 @@ const tasks = {
         await build({
             ...commonOptions,
             entryPoints: ['src/index.tsx'],
-            outfile: path.join(outdir, 'chrome/search-blocker.js'),
+            outfile: path.join(outdir, 'chrome/search-blocker/search-blocker.js'),
             define: {
                 ...commonOptions.define,
                 'process.env.PLATFORM': JSON.stringify('tampermonkey'),
             },
         });
+
+        /* build manifest */
         const manifest = JSON.parse(await fsPromises.readFile('chrome/manifest.json'));
+        const matches = JSON.parse(fs.readFileSync('chrome/matches.json'))
         manifest.version = version;
-        await fsPromises.writeFile(path.join(outdir, 'chrome/manifest.json'),
+        manifest.name = packageJson.name;
+        manifest.description = packageJson.description;
+        for (const content_script of manifest.content_scripts) {
+            content_script.matches = matches;
+        }
+        await fsPromises.writeFile(path.join(outdir, 'chrome/search-blocker/manifest.json'),
             JSON.stringify(manifest), { encoding: 'utf-8' });
+        await fsPromises.copyFile('images/icon16.png', path.join(outdir, 'chrome/search-blocker/icon16.png'));
+        await fsPromises.copyFile('images/icon32.png', path.join(outdir, 'chrome/search-blocker/icon32.png'));
+        await fsPromises.copyFile('images/icon96.png', path.join(outdir, 'chrome/search-blocker/icon96.png'));
+        await fsPromises.copyFile('images/icon128.png', path.join(outdir, 'chrome/search-blocker/icon128.png'));
     },
     buildChromeExtensionContentScript: async () => {
         await build({
             ...commonOptions,
             entryPoints: ['chrome/content.ts'],
-            outfile: path.join(outdir, 'chrome/content.js'),
+            outfile: path.join(outdir, 'chrome/search-blocker/content.js'),
         });
     },
     /**

@@ -1,6 +1,7 @@
 import argparse
 import requests
 import os
+import json
 
 TM_HEADER_TEMPLATE = """\
 // ==UserScript==
@@ -42,9 +43,9 @@ def generateMatchUrlGoogle():
     for domain in domains:
         yield f"*://www{domain}/search?*"
 
-
-def generateTamperMonkeyMatchSection():
-    matchUrls = [
+def getMatchUrls():
+    # https://developer.chrome.com/docs/extensions/mv3/match_patterns/
+    return [
         "*://www.bing.com/search?*",
         "*://search.yahoo.co.jp/*",
         "*://search.yahoo.com/*",
@@ -52,8 +53,10 @@ def generateTamperMonkeyMatchSection():
         *generateMatchUrlGoogle(),
     ]
 
+def generateTamperMonkeyMatchSection():
+    matches = getMatchUrls()
     lines = []
-    for matchUrl in matchUrls:
+    for matchUrl in matches:
         lines.append("// @match\t" + matchUrl)
 
     return "\n".join(lines)
@@ -74,7 +77,7 @@ def generateTamperMonkeyWrapper(script_path: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--path")
-    parser.add_argument("command", choices=["header", "wrapper"])
+    parser.add_argument("command", choices=["header", "wrapper", "matches"])
     args = parser.parse_args()
 
     if args.command == "header":
@@ -83,3 +86,6 @@ if __name__ == "__main__":
         if not args.path:
             raise RuntimeError("--path is required")
         print(generateTamperMonkeyWrapper(os.path.abspath(args.path)))
+    elif args.command == "matches":
+        matches = getMatchUrls()
+        print(json.dumps(matches, ensure_ascii=False, indent=4))

@@ -1,13 +1,11 @@
 {
-    "name": "Search Blocker",
-    "description": "Search Blocker",
+    "name": "",
+    "description": "",
     "version": "0.0.0",
     "manifest_version": 3,
     "content_scripts": [
         {
-            "matches": [
-                "https://www.google.com/search*"
-            ],
+            "matches": [],
             "js": [
                 "content.js"
             ],
@@ -19,12 +17,16 @@
             "resources": [
                 "search-blocker.js"
             ],
-            "matches": [
-                "<all_urls>"
-            ]
+            "matches": ["<all_urls>"]
         }
     ],
     "permissions": [
         "storage"
-    ]
+    ],
+    "icons": {
+        "16": "icon16.png",
+        "32": "icon32.png",
+        "96": "icon96.png",
+        "128": "icon128.png"
+    }
 }
