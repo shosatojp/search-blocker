@@ -10,7 +10,6 @@ import { useConfig, useSetConfig } from '../providers/ConfigProvider';
 import { MainControlTextField } from './MainControlTextField';
 import { Rule } from '../rule';
 import { BlockTarget, SiteSetting } from '../blockers/blocker';
-import './MainControl.css';
 import { RuleChip } from './RuleChip';
 
 
