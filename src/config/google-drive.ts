@@ -1,5 +1,5 @@
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly';
+const SCOPES = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const google: any;
