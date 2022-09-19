@@ -1,13 +1,9 @@
 export abstract class BlockTarget {
     protected _root: HTMLElement;
-    protected _url: URL;
+    protected _url: URL | null = null;
 
     constructor(root: HTMLElement) {
         this._root = root;
-        const url = this.getUrl();
-        if (!url)
-            throw new Error('failed to get url');
-        this._url = url;
     }
 
     public abstract getTitle(): string | null;
@@ -15,7 +11,13 @@ export abstract class BlockTarget {
     public abstract highlight(on: boolean, color: string): void;
     public abstract hide(hidden: boolean): void;
 
-    public get url(): URL {
+    public get url(): URL | null {
+        if (!this._url) {
+            const url = this.getUrl();
+            if (url)
+                this._url = url;
+        }
+
         return this._url;
     }
 
@@ -25,12 +27,11 @@ export abstract class BlockTarget {
 }
 
 export abstract class SiteSetting {
-    public abstract name(): string;
+    public abstract get name(): string;
     public abstract match(): boolean;
     public abstract createRootContainer(): HTMLElement;
-    public abstract getTargets(): Generator<HTMLElement>;
-    public abstract createBlockTarget(root: HTMLElement): BlockTarget;
-    public observeMutate(_onAdded: (blockTarget: BlockTarget) => void): void {
+    public abstract getTargets(): BlockTarget[];
+    public observeMutate(_onAdded: (blockTargets: BlockTarget[]) => void): void {
         console.debug('not impremented');
     }
 }

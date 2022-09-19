@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
@@ -10,7 +10,6 @@ import { useConfig, useSetConfig } from '../providers/ConfigProvider';
 import { MainControlTextField } from './MainControlTextField';
 import { Rule } from '../rule';
 import { BlockTarget, SiteSetting } from '../blockers/blocker';
-import './MainControl.css';
 import { RuleChip } from './RuleChip';
 
 
@@ -24,6 +23,7 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
     const { config } = useConfig();
     const { setConfig } = useSetConfig();
     const [enabled, setEnabled] = useState(true);
+    const [, setModified] = useState(0);
 
     /**
      * portals
@@ -36,8 +36,7 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
         = new Map<HTMLElement, BlockTarget>(props.earlyBlockTargets.map(e => [e.root, e]));
 
     for (const e of props.siteSetting.getTargets()) {
-        const blockTarget = earlyBlockTargetElements.get(e)
-            || props.siteSetting.createBlockTarget(e);
+        const blockTarget = earlyBlockTargetElements.get(e.root) || e;
         const matchedRule = config.match(blockTarget);
         const matched = matchedRule !== null;
         const blocked = enabled && matched;
@@ -47,8 +46,8 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
                 matched={matched}
                 blocked={blocked}
             />,
-            e
-        )
+            e.root
+        );
         portals.push(portal);
         if (matchedRule)
             matchedRules.add(matchedRule);
@@ -59,7 +58,18 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
     const handleDeleteRule = (rule: Rule) => {
         config.deleteRule(rule);
         setConfig(config);
-    }
+    };
+
+    useEffect(() => {
+        /**
+         * detect search result loading after DOMContentLoaded
+         * - Google US: https://www.google.com/search?q=a&gl=us&hl=en
+         * - DuckDuckGo: https://duckduckgo.com/?q=a
+         */
+        props.siteSetting.observeMutate(() => {
+            setModified(v => v + 1);
+        });
+    }, [props.siteSetting]);
 
     return <div className="MainControl">
         <Stack>
@@ -95,5 +105,5 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
             />
         </Stack>
         {portals}
-    </div>
+    </div>;
 };

@@ -1,17 +1,17 @@
 import { BlockTarget, SiteSetting } from './blocker';
 import * as util from '../util';
 
-export class GoogleBlockTarget extends BlockTarget {
+export class DuckDuckGoBlockTarget extends BlockTarget {
     constructor(root: HTMLElement) {
         super(root);
     }
 
     public getTitle(): string | null {
-        return this.root.querySelector('h3')?.textContent?.trim() ?? null;
+        return this.root.querySelector('h2')?.textContent?.trim() ?? null;
     }
 
     public getUrl(): URL | null {
-        const url = this.root.querySelector('a')?.href ?? null;
+        const url = (this.root.querySelector('h2 a') as HTMLAnchorElement)?.href ?? null;
         if (!url)
             return null;
 
@@ -24,30 +24,23 @@ export class GoogleBlockTarget extends BlockTarget {
 
     public highlight(on: boolean, color: string): void {
         this.root.style.backgroundColor = on ? color : 'unset';
-        const inner = this.root.querySelector('.g');
-        if (!(inner instanceof HTMLElement)) {
-            return;
-        }
-
-        inner.style.backgroundColor = on ? color : 'unset';
     }
 }
 
-export class GoogleSiteSetting extends SiteSetting {
+export class DuckDuckGoSiteSetting extends SiteSetting {
     private mutationObserver: MutationObserver | null = null;
-    private blockTargetsCache: Set<HTMLElement> = new Set<HTMLElement>();
 
     public get name(): string {
-        return 'google';
+        return 'duckduckgo';
     }
 
     public match(): boolean {
-        return location.hostname.split('.').includes('google') &&
+        return location.hostname.split('.').includes('duckduckgo') &&
             !util.isMobile();
     }
 
     public createRootContainer(): HTMLElement {
-        const searchElement = document.querySelector('#search');
+        const searchElement = document.querySelector('#links');
         if (!searchElement) {
             throw new Error('couldn\'t find parent element');
         }
@@ -58,23 +51,15 @@ export class GoogleSiteSetting extends SiteSetting {
     }
 
     getTargets(): BlockTarget[] {
-        const elements = Array.from(document.getElementsByClassName('g'));
+        const elements = Array.from(document.querySelectorAll('#links article'));
         const blockTargets: BlockTarget[] = [];
 
         for (const element of elements) {
-            if (!(element instanceof HTMLElement &&
-                element.parentElement instanceof HTMLElement)) {
-                continue;
-            }
-            if (element.querySelector('g-card') || element.tagName === 'G-CARD') {
+            if (!(element instanceof HTMLElement && element.parentElement instanceof HTMLElement)) {
                 continue;
             }
 
-            element.style.marginBottom = '0px';
-
-            this.blockTargetsCache.add(element.parentElement);
-
-            blockTargets.push(new GoogleBlockTarget(element.parentElement));
+            blockTargets.push(new DuckDuckGoBlockTarget(element.parentElement));
         }
 
         return blockTargets;
@@ -86,24 +71,24 @@ export class GoogleSiteSetting extends SiteSetting {
             this.mutationObserver.disconnect();
             this.mutationObserver = null;
         }
-        
+
         this.mutationObserver = new MutationObserver((records: MutationRecord[]) => {
             const blockTargets: BlockTarget[] = [];
+            const ancestorElement = document.querySelector('#links');
 
             for (const record of records) {
                 for (const node of Array.from(record.addedNodes)) {
                     if (!(node instanceof HTMLElement)) continue;
-                    if (!node.classList.contains('g')) continue;
+                    if (!(node.tagName === 'ARTICLE')) continue;
+                    if (!(!ancestorElement || ancestorElement.contains(node))) continue;
                     if (!(node.parentElement instanceof HTMLElement)) continue;
 
-                    if (!this.blockTargetsCache.has(node.parentElement)) {
-                        this.blockTargetsCache.add(node.parentElement);
-                        blockTargets.push(new GoogleBlockTarget(node.parentElement));
-                    }
+                    blockTargets.push(new DuckDuckGoBlockTarget(node.parentElement));
                 }
             }
 
             if (blockTargets.length > 0) {
+                console.log(blockTargets);
                 onAdded(blockTargets);
             }
         });

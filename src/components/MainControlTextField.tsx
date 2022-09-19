@@ -32,5 +32,5 @@ export const MainControlTextField: React.FC<MainControlTextFieldProps> = (props:
                 }}
             >Apply</Button>
         </Stack>
-    </Stack>
-}
+    </Stack>;
+};

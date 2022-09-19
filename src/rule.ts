@@ -16,6 +16,10 @@ export class Rule {
      * match all
      */
     match(target: BlockTarget): boolean {
+        if (!target.url) {
+            return false;
+        }
+
         if (this.options.hostname && !Rule.matchHostname(this.options.hostname, target.url.hostname)) {
             return false;
         }

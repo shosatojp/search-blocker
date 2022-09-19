@@ -23,5 +23,5 @@ export const RuleChip: React.FC<RuleChipProps> = (props: RuleChipProps) => {
             <IconButton onClick={() => props.onDelete && props.onDelete()}><DeleteIcon fontSize="small" /></IconButton>}
         {props.onBlock &&
             <IconButton onClick={() => props.onBlock && props.onBlock()}><BlockIcon fontSize="small" /></IconButton>}
-    </span>
+    </span>;
 };

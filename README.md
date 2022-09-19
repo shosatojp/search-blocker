@@ -2,14 +2,12 @@
 
 ## Supported Sites
 
-- Google
+- [Google](https://www.google.com/)
   - all domains listed in https://www.google.com/supported_domains
-- Bing
-  - bing.com
-- Yahoo!
-  - yahoo.com
-- Yahoo! Japan
-  - yahoo.co.jp
+- [Bing](https://www.bing.com/)
+- [Yahoo!](https://search.yahoo.com/)
+- [Yahoo! Japan](https://search.yahoo.co.jp/)
+- [DuckDuckGo](https://duckduckgo.com/)
 
 ## Get Started
 

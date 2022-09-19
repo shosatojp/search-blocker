@@ -29,7 +29,8 @@ export const ResultControl: React.FC<ResultControlProps> = (props: ResultControl
         config.addRule(rule);
         setConfig(config);
     };
-    const candidates = Rule.getCandidate(props.blockTarget.url);
+    const url = props.blockTarget.url;
+    const candidates = url ? Rule.getCandidate(url) : [];
 
     return <>
         <Stack direction='row'>
@@ -45,9 +46,11 @@ export const ResultControl: React.FC<ResultControlProps> = (props: ResultControl
                 }
             </div>
             <div style={{ flexGrow: 1 }}></div>
-            {openDetail ?
-                <IconButton size="small" onClick={() => setOpenDetail(false)}><ExpandLessIcon /></IconButton> :
-                <IconButton size="small" onClick={() => setOpenDetail(true)}><ExpandMoreIcon /></IconButton>}
+            <div>
+                {openDetail ?
+                    <IconButton size="small" onClick={() => setOpenDetail(false)}><ExpandLessIcon /></IconButton> :
+                    <IconButton size="small" onClick={() => setOpenDetail(true)}><ExpandMoreIcon /></IconButton>}
+            </div>
         </Stack>
 
     </>;

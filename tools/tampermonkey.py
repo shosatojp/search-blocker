@@ -40,14 +40,15 @@ def generateMatchUrlGoogle():
     domains = res.text.strip().split("\n")
 
     for domain in domains:
-        yield f"https://www{domain}/search?*"
+        yield f"*://www{domain}/search?*"
 
 
 def generateTamperMonkeyMatchSection():
     matchUrls = [
-        "https://www.bing.com/search?*",
-        "https://search.yahoo.co.jp/*",
-        "https://search.yahoo.com/*",
+        "*://www.bing.com/search?*",
+        "*://search.yahoo.co.jp/*",
+        "*://search.yahoo.com/*",
+        "*://duckduckgo.com/*",
         *generateMatchUrlGoogle(),
     ]
 

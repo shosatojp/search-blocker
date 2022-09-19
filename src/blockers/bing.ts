@@ -27,7 +27,7 @@ export class BingBlockTarget extends BlockTarget {
 }
 
 export class BingSiteSetting extends SiteSetting {
-    public name(): string {
+    public get name(): string {
         return 'bing';
     }
 
@@ -46,19 +46,18 @@ export class BingSiteSetting extends SiteSetting {
         return container;
     }
 
-    *getTargets(): Generator<HTMLElement> {
+    getTargets(): BlockTarget[] {
         const elements = Array.from(document.querySelectorAll('ol#b_results > li.b_algo'));
+        const blockTargets: BlockTarget[] = [];
 
         for (const element of elements) {
             if (!(element instanceof HTMLElement)) {
                 continue;
             }
 
-            yield element;
+            blockTargets.push(new BingBlockTarget(element));
         }
-    }
 
-    public createBlockTarget(root: HTMLElement): BlockTarget {
-        return new BingBlockTarget(root);
+        return blockTargets;
     }
 }
