@@ -46,10 +46,10 @@ example.com$intitle('foobar')
 ## Development
 
 ```sh
-python tools/tampermonkey.py header > tampermonkey/header.js
-python tools/tampermonkey.py matches > chrome/matches.json
+python tools/tampermonkey.py header > platforms/tampermonkey/header.js
+python tools/tampermonkey.py matches > platforms/chrome/matches.json
 
 npm run build
 
-python tools/tampermonkey.py wrapper --path dist/search-blocker.user.js > tampermonkey/wrapper.user.js
+python tools/tampermonkey.py wrapper --path dist/search-blocker.user.js > platforms/tampermonkey/wrapper.user.js
 ```
