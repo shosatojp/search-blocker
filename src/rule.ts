@@ -100,7 +100,7 @@ export class Rule {
     // eslint-disable-next-line @typescript-eslint/ban-types
     private static createFunctions(target: BlockTarget): { [key: string]: Function } {
         const intitle = (text: string) => {
-            const title = target.getTitle();
+            const title = target.title;
             if (!title)
                 return false;
             return title.includes(text);

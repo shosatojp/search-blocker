@@ -1,6 +1,7 @@
 export abstract class BlockTarget {
     protected _root: HTMLElement;
     protected _url: URL | null = null;
+    protected _title: string | null = null;
 
     constructor(root: HTMLElement) {
         this._root = root;
@@ -10,6 +11,10 @@ export abstract class BlockTarget {
     public abstract getUrl(): URL | null;
     public abstract highlight(on: boolean, color: string): void;
     public abstract hide(hidden: boolean): void;
+
+    public get root(): HTMLElement {
+        return this._root;
+    }
 
     public get url(): URL | null {
         if (!this._url) {
@@ -21,8 +26,14 @@ export abstract class BlockTarget {
         return this._url;
     }
 
-    public get root(): HTMLElement {
-        return this._root;
+    public get title(): string | null {
+        if (!this._title) {
+            const title = this.getTitle();
+            if (title)
+                this._title = title;
+        }
+
+        return this._title;
     }
 }
 
