@@ -2,8 +2,12 @@ import { BlockTarget, SiteSetting } from './blocker';
 import * as util from '../util';
 
 export class GoogleBlockTarget extends BlockTarget {
+    inner: HTMLElement | null;
+
     constructor(root: HTMLElement) {
         super(root);
+
+        this.inner = root.querySelector('.g');
     }
 
     public getTitle(): string | null {
@@ -24,18 +28,15 @@ export class GoogleBlockTarget extends BlockTarget {
 
     public highlight(on: boolean, color: string): void {
         this.root.style.backgroundColor = on ? color : 'unset';
-        const inner = this.root.querySelector('.g');
-        if (!(inner instanceof HTMLElement)) {
-            return;
-        }
 
-        inner.style.backgroundColor = on ? color : 'unset';
+        if (this.inner)
+            this.inner.style.backgroundColor = on ? color : 'unset';
     }
 }
 
 export class GoogleSiteSetting extends SiteSetting {
     private mutationObserver: MutationObserver | null = null;
-    private blockTargetsCache: Set<HTMLElement> = new Set<HTMLElement>();
+    private blockTargetsCache: Map<HTMLElement, BlockTarget> = new Map<HTMLElement, BlockTarget>();
 
     public get name(): string {
         return 'google';
@@ -59,7 +60,11 @@ export class GoogleSiteSetting extends SiteSetting {
 
     getTargets(_elements?: Element[]): BlockTarget[] {
         const elements = _elements || Array.from(document.getElementsByClassName('g'));
-        const blockTargets: BlockTarget[] = [];
+
+        /* return if no change in number of target elements */
+        if (elements.length === this.blockTargetsCache.size) {
+            return Array.from(this.blockTargetsCache.values());
+        }
 
         for (const element of elements) {
             if (!(element instanceof HTMLElement &&
@@ -72,12 +77,12 @@ export class GoogleSiteSetting extends SiteSetting {
 
             element.style.marginBottom = '0px';
 
-            this.blockTargetsCache.add(element.parentElement);
-
-            blockTargets.push(new GoogleBlockTarget(element.parentElement));
+            if (!this.blockTargetsCache.has(element.parentElement))
+                this.blockTargetsCache.set(element.parentElement,
+                    new GoogleBlockTarget(element.parentElement));
         }
 
-        return blockTargets;
+        return Array.from(this.blockTargetsCache.values());
     }
 
     public observeMutate(onAdded: (blockTargets: BlockTarget[]) => void): void {
