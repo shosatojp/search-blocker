@@ -48,7 +48,7 @@ export class GoogleSiteSetting extends SiteSetting {
     }
 
     public createRootContainer(): HTMLElement {
-        const searchElement = document.querySelector('#search');
+        const searchElement = document.getElementById('search');
         if (!searchElement) {
             throw new Error('couldn\'t find parent element');
         }
@@ -92,16 +92,18 @@ export class GoogleSiteSetting extends SiteSetting {
             this.mutationObserver = null;
         }
 
+        const root = document.getElementById('search') || document.documentElement;
+
         this.mutationObserver = new MutationObserver((_records: MutationRecord[]) => {
             const prevNumTargets = this.blockTargetsCache.size;
-            const currTargetElements = document.getElementsByClassName('g');
+            const currTargetElements = root.getElementsByClassName('g');
             if (prevNumTargets !== currTargetElements.length) {
                 const blockTargets = this.getTargets(Array.from(currTargetElements));
                 onAdded(blockTargets);
             }
         });
 
-        this.mutationObserver.observe(document.documentElement, {
+        this.mutationObserver.observe(root, {
             childList: true,
             subtree: true,
         });

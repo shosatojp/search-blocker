@@ -43,7 +43,7 @@ export class GoogleMobileSiteSetting extends SiteSetting {
     }
 
     public createRootContainer(): HTMLElement {
-        const searchElement = document.querySelector('#topstuff');
+        const searchElement = document.getElementById('topstuff');
         if (!searchElement) {
             throw new Error('couldn\'t find parent element');
         }
@@ -91,7 +91,7 @@ export class GoogleMobileSiteSetting extends SiteSetting {
             }
         });
 
-        this.mutationObserver.observe(document.documentElement, {
+        this.mutationObserver.observe(document.getElementById('topstuff') || document.documentElement, {
             childList: true,
             subtree: true,
         });

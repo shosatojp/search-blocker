@@ -8,10 +8,7 @@ class DuckDuckGoBlockTarget extends BlockTarget {
 
     public getUrl(): URL | null {
         const url = (this.root.querySelector('h2 a') as HTMLAnchorElement)?.href ?? null;
-        if (!url)
-            return null;
-
-        return new URL(url);
+        return url === null ? null : new URL(url);
     }
 
     public hide(hidden: boolean): void {
@@ -25,6 +22,7 @@ class DuckDuckGoBlockTarget extends BlockTarget {
 
 export class DuckDuckGoSiteSetting extends SiteSetting {
     private mutationObserver: MutationObserver | null = null;
+    private blockTargetsCache: Map<HTMLElement, BlockTarget> = new Map<HTMLElement, BlockTarget>();
 
     public get name(): string {
         return 'duckduckgo';
@@ -46,19 +44,21 @@ export class DuckDuckGoSiteSetting extends SiteSetting {
         return container;
     }
 
-    getTargets(): BlockTarget[] {
-        const elements = Array.from(document.querySelectorAll('#links article'));
-        const blockTargets: BlockTarget[] = [];
+    getTargets(_elements?: Element[]): BlockTarget[] {
+        const elements = _elements || Array.from(document.getElementById('links')?.getElementsByTagName('article') || []);
 
         for (const element of elements) {
-            if (!(element instanceof HTMLElement && element.parentElement instanceof HTMLElement)) {
+            if (!(element instanceof HTMLElement &&
+                element.parentElement instanceof HTMLElement)) {
                 continue;
             }
 
-            blockTargets.push(new DuckDuckGoBlockTarget(element.parentElement));
+            if (!this.blockTargetsCache.has(element.parentElement))
+                this.blockTargetsCache.set(element.parentElement,
+                    new DuckDuckGoBlockTarget(element.parentElement));
         }
 
-        return blockTargets;
+        return Array.from(this.blockTargetsCache.values());
     }
 
     public observeMutate(onAdded: (blockTargets: BlockTarget[]) => void): void {
@@ -68,28 +68,20 @@ export class DuckDuckGoSiteSetting extends SiteSetting {
             this.mutationObserver = null;
         }
 
-        this.mutationObserver = new MutationObserver((records: MutationRecord[]) => {
-            const blockTargets: BlockTarget[] = [];
-            const ancestorElement = document.querySelector('#links');
+        const root = document.getElementById('links') || document.documentElement;
 
-            for (const record of records) {
-                for (const node of Array.from(record.addedNodes)) {
-                    if (!(node instanceof HTMLElement)) continue;
-                    if (!(node.tagName === 'ARTICLE')) continue;
-                    if (!(!ancestorElement || ancestorElement.contains(node))) continue;
-                    if (!(node.parentElement instanceof HTMLElement)) continue;
-
-                    blockTargets.push(new DuckDuckGoBlockTarget(node.parentElement));
-                }
-            }
-
-            if (blockTargets.length > 0) {
-                console.log(blockTargets);
+        this.mutationObserver = new MutationObserver((_records: MutationRecord[]) => {
+            const prevNumTargets = this.blockTargetsCache.size;
+            const currTargetElements = root === document.documentElement
+                ? document.getElementById('links')?.getElementsByTagName('article')
+                : document.getElementsByTagName('article');
+            if (currTargetElements && prevNumTargets !== currTargetElements.length) {
+                const blockTargets = this.getTargets(Array.from(currTargetElements));
                 onAdded(blockTargets);
             }
         });
 
-        this.mutationObserver.observe(document.documentElement, {
+        this.mutationObserver.observe(root, {
             childList: true,
             subtree: true,
         });
