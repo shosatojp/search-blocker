@@ -4,6 +4,7 @@
 
 - [Google](https://www.google.com/)
   - all domains listed in https://www.google.com/supported_domains
+  - desktop, mobile
 - [Bing](https://www.bing.com/)
 - [Yahoo!](https://search.yahoo.com/)
 - [Yahoo! Japan](https://search.yahoo.co.jp/)
