@@ -57,8 +57,8 @@ export class GoogleSiteSetting extends SiteSetting {
         return container;
     }
 
-    getTargets(): BlockTarget[] {
-        const elements = Array.from(document.getElementsByClassName('g'));
+    getTargets(_elements?: Element[]): BlockTarget[] {
+        const elements = _elements || Array.from(document.getElementsByClassName('g'));
         const blockTargets: BlockTarget[] = [];
 
         for (const element of elements) {
@@ -86,26 +86,15 @@ export class GoogleSiteSetting extends SiteSetting {
             this.mutationObserver.disconnect();
             this.mutationObserver = null;
         }
-        
-        this.mutationObserver = new MutationObserver((records: MutationRecord[]) => {
-            const blockTargets: BlockTarget[] = [];
 
-            for (const record of records) {
-                for (const node of Array.from(record.addedNodes)) {
-                    if (!(node instanceof HTMLElement)) continue;
-                    if (!node.classList.contains('g')) continue;
-                    if (!(node.parentElement instanceof HTMLElement)) continue;
-
-                    if (!this.blockTargetsCache.has(node.parentElement)) {
-                        this.blockTargetsCache.add(node.parentElement);
-                        blockTargets.push(new GoogleBlockTarget(node.parentElement));
-                    }
-                }
-            }
-
-            if (blockTargets.length > 0) {
+        this.mutationObserver = new MutationObserver((_records: MutationRecord[]) => {
+            const prevNumTargets = this.blockTargetsCache.size;
+            const currTargetElements = document.getElementsByClassName('g');
+            if (prevNumTargets !== currTargetElements.length) {
+                const blockTargets = this.getTargets(Array.from(currTargetElements));
                 onAdded(blockTargets);
             }
+            return;
         });
 
         this.mutationObserver.observe(document.documentElement, {
