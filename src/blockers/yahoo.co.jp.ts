@@ -1,6 +1,6 @@
 import { BlockTarget, SiteSetting } from './blocker';
 
-export class YahooCoJpBlockTarget extends BlockTarget {
+class YahooCoJpBlockTarget extends BlockTarget {
     public getTitle(): string | null {
         return this.root.querySelector('.sw-Card__title')?.textContent?.trim() ?? null;
     }

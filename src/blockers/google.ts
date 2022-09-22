@@ -1,7 +1,7 @@
 import { BlockTarget, SiteSetting } from './blocker';
 import * as util from '../util';
 
-export class GoogleBlockTarget extends BlockTarget {
+class GoogleBlockTarget extends BlockTarget {
     inner: HTMLElement | null;
 
     constructor(root: HTMLElement) {

@@ -1,7 +1,7 @@
 import { BlockTarget, SiteSetting } from './blocker';
 import * as util from '../util';
 
-export class DuckDuckGoBlockTarget extends BlockTarget {
+class DuckDuckGoBlockTarget extends BlockTarget {
     public getTitle(): string | null {
         return this.root.querySelector('h2')?.textContent?.trim() ?? null;
     }

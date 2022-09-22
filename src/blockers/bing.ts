@@ -1,6 +1,6 @@
 import { BlockTarget, SiteSetting } from './blocker';
 
-export class BingBlockTarget extends BlockTarget {
+class BingBlockTarget extends BlockTarget {
     public getTitle(): string | null {
         return this.root.querySelector('.b_title')?.textContent?.trim() ?? null;
     }
