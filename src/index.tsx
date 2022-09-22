@@ -12,7 +12,7 @@ import { YahooCoJpComSiteSetting } from './blockers/yahoo.co.jp';
 import { Config } from './config/config';
 import { FirefoxExtensionConfigLoader } from './config/firefox';
 import { DuckDuckGoSiteSetting } from './blockers/duckduckgo';
-import { GoogleMobileSiteSetting } from './blockers/google-mobile'
+import { GoogleMobileSiteSetting } from './blockers/google-mobile';
 
 console.log('Search Blocker v' + process.env.VERSION);
 
