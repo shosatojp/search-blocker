@@ -2,10 +2,6 @@ import { BlockTarget, SiteSetting } from './blocker';
 import * as util from '../util';
 
 export class DuckDuckGoBlockTarget extends BlockTarget {
-    constructor(root: HTMLElement) {
-        super(root);
-    }
-
     public getTitle(): string | null {
         return this.root.querySelector('h2')?.textContent?.trim() ?? null;
     }

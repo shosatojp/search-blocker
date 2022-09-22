@@ -16,7 +16,7 @@ TM_HEADER_TEMPLATE = """\
 // @grant        GM_getValue
 // @run-at       document-start
 // @noframes
-// ==/UserScript==
+// ==/UserScript==\
 """
 
 TM_WRAPPER_TEMPLATE = """\
@@ -32,7 +32,7 @@ TM_WRAPPER_TEMPLATE = """\
 // @grant        GM_getValue
 // @run-at       document-start
 // @noframes
-// ==/UserScript==
+// ==/UserScript==\
 """
 
 

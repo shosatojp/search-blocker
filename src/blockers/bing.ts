@@ -1,10 +1,6 @@
 import { BlockTarget, SiteSetting } from './blocker';
 
 export class BingBlockTarget extends BlockTarget {
-    constructor(root: HTMLElement) {
-        super(root);
-    }
-
     public getTitle(): string | null {
         return this.root.querySelector('.b_title')?.textContent?.trim() ?? null;
     }

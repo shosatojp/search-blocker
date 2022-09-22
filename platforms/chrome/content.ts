@@ -12,7 +12,6 @@ s.src = chrome.runtime.getURL('search-blocker.js');
 s.onload = () => s.remove();
 (document.head || document.documentElement).appendChild(s);
 
-
 /**
  * message
  */
@@ -30,7 +29,7 @@ new Messenger(process.env.REPOSITORY_URL as string, 'content.js', (message: Chro
                 chrome.storage.local.get([message.key], (result: ChromeStorageLocal) => resolve(result[message.key]));
                 break;
             default:
-                reject('unsupported type');
+                reject(new Error('unsupported type'));
                 break;
         }
     });

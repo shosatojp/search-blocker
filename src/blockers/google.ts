@@ -99,7 +99,6 @@ export class GoogleSiteSetting extends SiteSetting {
                 const blockTargets = this.getTargets(Array.from(currTargetElements));
                 onAdded(blockTargets);
             }
-            return;
         });
 
         this.mutationObserver.observe(document.documentElement, {

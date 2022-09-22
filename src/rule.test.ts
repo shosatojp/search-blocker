@@ -1,3 +1,4 @@
+/* eslint-disable dot-notation */
 import { Rule } from './rule';
 import { test, expect } from '@jest/globals';
 

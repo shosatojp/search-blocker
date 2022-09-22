@@ -4,7 +4,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import BlockIcon from '@mui/icons-material/Block';
 import IconButton from '@mui/material/IconButton';
 
-
 export interface RuleChipProps {
     rule: Rule
     onBlock?: () => void

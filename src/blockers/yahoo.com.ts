@@ -1,10 +1,6 @@
 import { BlockTarget, SiteSetting } from './blocker';
 
 export class YahooComBlockTarget extends BlockTarget {
-    constructor(root: HTMLElement) {
-        super(root);
-    }
-
     public getTitle(): string | null {
         return this.root.querySelector('h3.title')?.textContent?.trim() ?? null;
     }

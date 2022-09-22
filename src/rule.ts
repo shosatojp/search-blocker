@@ -51,7 +51,7 @@ export class Rule {
     }
 
     private static isEmpty(line: string) {
-        return line.trim().length == 0;
+        return line.trim().length === 0;
     }
 
     public static getCandidate(url: URL) {

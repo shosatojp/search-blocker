@@ -27,7 +27,7 @@ const commonOptions = {
         'process.env.GOOGLE_CLIENT_ID': JSON.stringify(GOOGLE_CLIENT_ID),
     },
     watch: mode === 'development' && {
-        onRebuild: (error, result) => {
+        onRebuild: (_error, _result) => {
             console.log('----------------------');
         },
     },
@@ -74,8 +74,8 @@ const tasks = {
         manifest.version = version;
         manifest.name = packageJson.name;
         manifest.description = packageJson.description;
-        for (const content_script of manifest.content_scripts) {
-            content_script.matches = matches;
+        for (const contentScript of manifest.content_scripts) {
+            contentScript.matches = matches;
         }
         await fsPromises.writeFile(path.join(outdir, 'chrome/search-blocker/manifest.json'),
             JSON.stringify(manifest), { encoding: 'utf-8' });

@@ -47,9 +47,9 @@ export const ResultControl: React.FC<ResultControlProps> = (props: ResultControl
             </div>
             <div style={{ flexGrow: 1 }}></div>
             <div>
-                {openDetail ?
-                    <IconButton size="small" onClick={() => setOpenDetail(false)}><ExpandLessIcon /></IconButton> :
-                    <IconButton size="small" onClick={() => setOpenDetail(true)}><ExpandMoreIcon /></IconButton>}
+                {openDetail
+                    ? <IconButton size="small" onClick={() => setOpenDetail(false)}><ExpandLessIcon /></IconButton>
+                    : <IconButton size="small" onClick={() => setOpenDetail(true)}><ExpandMoreIcon /></IconButton>}
             </div>
         </Stack>
 

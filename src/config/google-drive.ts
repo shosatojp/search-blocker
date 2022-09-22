@@ -22,7 +22,6 @@ async function loadScript(url: string) {
     });
 }
 
-
 async function getTokenResponseRaw(): Promise<TokenResponse> {
     await loadScript('https://accounts.google.com/gsi/client');
     // https://developers.google.com/identity/oauth2/web/reference/js-reference#google.accounts.oauth2.initTokenClient
@@ -58,9 +57,9 @@ async function getTokenResponse(): Promise<TokenResponse> {
     })();
 
     const tokenResponse: TokenResponse = await (async () => {
-        if (tokenResponseStored
-            && tokenResponseStored.expires_at
-            && tokenResponseStored.expires_at > new Date().getTime() / 1000) {
+        if (tokenResponseStored &&
+            tokenResponseStored.expires_at &&
+            tokenResponseStored.expires_at > new Date().getTime() / 1000) {
             return tokenResponseStored;
         } else {
             const tokenResponse = await getTokenResponseRaw();
@@ -188,7 +187,6 @@ export async function gdriveSync(name: string, content: string, localModifiedDat
             console.debug('do nothing');
             return { operation: 'nothing' };
         }
-
     } else {
         /* create file if not exists */
         console.debug('create file');

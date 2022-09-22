@@ -39,8 +39,8 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
     const matchedRules: Set<Rule> = new Set();
     const portals: React.ReactPortal[] = [];
 
-    const earlyBlockTargetElements: Map<HTMLElement, BlockTarget>
-        = new Map<HTMLElement, BlockTarget>(props.earlyBlockTargets.map(e => [e.root, e]));
+    const earlyBlockTargetElements: Map<HTMLElement, BlockTarget> =
+        new Map<HTMLElement, BlockTarget>(props.earlyBlockTargets.map(e => [e.root, e]));
 
     for (const e of props.siteSetting.getTargets()) {
         const blockTarget = earlyBlockTargetElements.get(e.root) || e;

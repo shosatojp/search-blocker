@@ -20,11 +20,10 @@ export class Messenger<T, R = unknown> {
     messageId: number;
     messagesPending: Map<number, PendingMessage<T>> = new Map();
 
-    constructor(application_tag: string, sender_tag: string,
+    constructor(applicationTag: string, senderTag: string,
         onMessage: (content: T) => Promise<R>) {
-
-        this.applicationTag = application_tag;
-        this.senderTag = sender_tag;
+        this.applicationTag = applicationTag;
+        this.senderTag = senderTag;
         this.messageId = 0;
 
         window.addEventListener('message', async (ev) => {
@@ -67,7 +66,7 @@ export class Messenger<T, R = unknown> {
             const message: Message<T> = {
                 id: mid,
                 tag: this.applicationTag,
-                content: content,
+                content,
                 reply: false,
                 sender: this.senderTag,
             };

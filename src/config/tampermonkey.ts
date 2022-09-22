@@ -1,7 +1,6 @@
 import { Config } from './config';
 import { ConfigLoader } from './configLoader';
 
-
 // https://www.tampermonkey.net/documentation.php
 declare function GM_setValue<T>(name: string, config: T): T;
 declare function GM_getValue<T>(name: string, defaultConfig: T): T;
