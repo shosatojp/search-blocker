@@ -14,7 +14,7 @@ import { Rule } from '../rule';
 import { BlockTarget, SiteSetting } from '../blockers/blocker';
 import { RuleChip } from './RuleChip';
 
-import { gdriveAuth, gdriveSync } from '../config/google-drive';
+import { gdriveAuth, GdriveScriptLoadError, gdriveSync } from '../config/google-drive';
 import { ConfigLoader } from '../config/configLoader';
 
 export interface MainControlProps {
@@ -82,6 +82,9 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
                     break;
             }
         } catch (error) {
+            if (error instanceof GdriveScriptLoadError) {
+                alert('failed to load script because of Content Security Policy');
+            }
             console.error(error);
         } finally {
             setUploading(false);
@@ -131,14 +134,16 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
                 text={config.dumpString()}
                 onChange={async (text: string) => await setConfig(Config.loadString(text))}
             />
-            <Stack direction='row'>
-                <LoadingButton
-                    startIcon={<SyncIcon />}
-                    onClick={handleSync}
-                    loading={uploading}
-                    variant='outlined'
-                >Google Drive Sync</LoadingButton>
-            </Stack>
+            {/* only available in google search because of CSP */}
+            {['google', 'google-mobile'].includes(props.siteSetting.name) &&
+                <Stack direction='row'>
+                    <LoadingButton
+                        startIcon={<SyncIcon />}
+                        onClick={handleSync}
+                        loading={uploading}
+                        variant='outlined'
+                    >Google Drive Sync</LoadingButton>
+                </Stack>}
         </Stack>
         {portals}
     </div>;

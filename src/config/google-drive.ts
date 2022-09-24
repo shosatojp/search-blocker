@@ -12,12 +12,21 @@ interface TokenResponse {
     expires_at?: number
 }
 
+export class GdriveScriptLoadError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'GdriveScriptLoadError';
+    }
+}
+
 async function loadScript(url: string) {
     return new Promise((resolve, reject) => {
         const e = document.createElement('script');
         e.src = url;
         e.onload = (ev) => resolve(ev);
-        e.onerror = (ev) => reject(ev);
+        e.onerror = (_ev) => {
+            reject(new GdriveScriptLoadError(`failed to load script: ${url}`));
+        };
         document.body.appendChild(e);
     });
 }
