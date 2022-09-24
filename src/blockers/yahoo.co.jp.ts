@@ -32,7 +32,7 @@ export class YahooCoJpComSiteSetting extends SiteSetting {
     }
 
     public createRootContainer(): HTMLElement {
-        const searchElement = document.querySelector('#contents .Contents__inner');
+        const searchElement = document.querySelector('#contents__wrap');
         if (!searchElement) {
             throw new Error('couldn\'t find parent element');
         }
@@ -43,7 +43,7 @@ export class YahooCoJpComSiteSetting extends SiteSetting {
     }
 
     getTargets(): BlockTarget[] {
-        const elements = Array.from(document.querySelectorAll('#contents .Contents__inner .Contents__innerGroupBody .sw-CardBase .sw-Card'));
+        const elements = Array.from(document.querySelectorAll('#contents__wrap .Contents__innerGroupBody .sw-CardBase .sw-Card'));
         const blockTargets: BlockTarget[] = [];
 
         for (const element of elements) {

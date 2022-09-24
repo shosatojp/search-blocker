@@ -32,7 +32,7 @@ export class YahooComSiteSetting extends SiteSetting {
     }
 
     public createRootContainer(): HTMLElement {
-        const searchElement = document.querySelector('#main');
+        const searchElement = document.getElementById('main');
         if (!searchElement) {
             throw new Error('couldn\'t find parent element');
         }

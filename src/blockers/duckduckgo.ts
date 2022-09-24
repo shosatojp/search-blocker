@@ -34,7 +34,7 @@ export class DuckDuckGoSiteSetting extends SiteSetting {
     }
 
     public createRootContainer(): HTMLElement {
-        const searchElement = document.querySelector('#links');
+        const searchElement = document.getElementById('links');
         if (!searchElement) {
             throw new Error('couldn\'t find parent element');
         }

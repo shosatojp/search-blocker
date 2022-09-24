@@ -32,7 +32,7 @@ export class BingSiteSetting extends SiteSetting {
     }
 
     public createRootContainer(): HTMLElement {
-        const searchElement = document.querySelector('#b_results');
+        const searchElement = document.getElementById('b_results');
         if (!searchElement) {
             throw new Error('couldn\'t find parent element');
         }
