@@ -71,11 +71,11 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
         try {
             setUploading(true);
             await gdriveAuth();
-            const result = await gdriveSync('SearchBlocker.txt', config.dumpString(),
+            const result = await gdriveSync('SearchBlocker.txt', config.text,
                 await props.configLoader.getModifiedDate());
             switch (result.operation) {
                 case 'download':
-                    setConfig(Config.loadString(result.content), result.remoteModifiedDate);
+                    setConfig(new Config(result.content), result.remoteModifiedDate);
                     break;
                 case 'upload':
                     props.configLoader.setModifiedDate(result.remoteModifiedDate);
@@ -131,8 +131,8 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
                 }
             </div>
             <MainControlTextField
-                text={config.dumpString()}
-                onChange={async (text: string) => await setConfig(Config.loadString(text))}
+                text={config.text}
+                onChange={async (text: string) => await setConfig(new Config(text))}
             />
             {/* only available in google search because of CSP */}
             {['google', 'google-mobile'].includes(props.siteSetting.name) &&

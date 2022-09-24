@@ -1,4 +1,4 @@
-import { Config } from './config';
+import { Config, CONFIG_KEY } from './config';
 import { ConfigLoader } from './configLoader';
 import { Messenger } from '../messenger';
 
@@ -24,11 +24,11 @@ export class ChromeExtensionConfigLoader extends ConfigLoader {
     public async load(_defaultConfig: Config): Promise<Config> {
         const ret = await this.messenger.post({
             type: 'load',
-            key: 'config',
-        }) as Config;
+            key: CONFIG_KEY,
+        }) as string;
         if (ret) {
             try {
-                return Config.loadObject(ret);
+                return new Config(ret);
             } catch (error) {
                 console.warn('fallbacked to default config', error);
                 return Config.default();
@@ -41,8 +41,8 @@ export class ChromeExtensionConfigLoader extends ConfigLoader {
     public async save(config: Config): Promise<void> {
         await this.messenger.post({
             type: 'save',
-            key: 'config',
-            content: config,
+            key: CONFIG_KEY,
+            content: config.text,
         });
     }
 

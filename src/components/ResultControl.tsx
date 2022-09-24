@@ -6,7 +6,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { RuleChip } from './RuleChip';
 import { useConfig, useSetConfig } from '../providers/ConfigProvider';
-import { Rule } from '../rule';
+import { HostNameRule, Rule } from '../rule';
 import { BlockTarget } from '../blockers/blocker';
 
 export interface ResultControlProps {
@@ -30,7 +30,7 @@ export const ResultControl: React.FC<ResultControlProps> = (props: ResultControl
         await setConfig(config);
     };
     const url = props.blockTarget.url;
-    const candidates = url ? Rule.getCandidate(url) : [];
+    const candidates = url ? HostNameRule.getCandidate(url) : [];
 
     return <>
         <Stack direction='row'>
