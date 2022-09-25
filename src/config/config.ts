@@ -168,7 +168,7 @@ export class Config {
     }
 
     private static loadString(text: string): Rule[] {
-        const output = configParser.parse(text);
+        const output = configParser.parseString(text);
 
         if (!output.matched) {
             throw new Error('config syntax error');
