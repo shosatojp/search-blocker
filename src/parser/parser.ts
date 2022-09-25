@@ -281,8 +281,8 @@ class NamedParser extends Parser {
 }
 
 class TypedParser extends Parser {
-    parser: Parser;
-    type: ParserType;
+    readonly parser: Parser;
+    readonly type: ParserType;
 
     constructor(parser: Parser, type: ParserType) {
         super();
@@ -361,7 +361,7 @@ export class NoConsumeParser extends Parser {
             return new ParserOutput({
                 ...output,
                 result: output.result.update({ str: '' }),
-                rest: input, /* no consume */
+                rest: input.consumed(0), /* no consume */
             });
         } else {
             return output;
@@ -502,11 +502,11 @@ export class OrParser extends Parser {
     public parse(input: ParserInput): ParserOutput {
         let longestLength = -1;
         let longestOutput: ParserOutput | null = null;
-        let rest: ParserInput = input;
+        const rests: ParserInput[] = [input];
 
         for (const parser of this.parsers) {
             const output = parser.parse(input);
-            rest = output.rest;
+            rests.push(output.rest);
             if (output.matched) {
                 if (output.result.str.length > longestLength) {
                     longestLength = output.result.str.length;
@@ -526,9 +526,14 @@ export class OrParser extends Parser {
                 }),
             });
         } else {
+            let longestRest = rests[0];
+            for (const rest of rests.slice(1)) {
+                if (rest.pos > longestRest.pos)
+                    longestRest = rest;
+            }
             return new ParserOutput({
                 matched: false,
-                rest: rest.consumed(0),
+                rest: longestRest.consumed(0),
                 result: new MatchResult({ type: 'or', str: '', children: [], data: null }),
             });
         }
@@ -559,8 +564,10 @@ export class RepeatParser extends Parser {
         const children = [];
         let count = 0;
         let rest = input;
+        let output: ParserOutput;
+
         while (true) {
-            const output = this.parser.parse(rest);
+            output = this.parser.parse(rest);
 
             if (!output.matched)
                 break;
@@ -571,7 +578,7 @@ export class RepeatParser extends Parser {
                 children.push(output.result);
 
             /* break if rest is empty */
-            if (rest.text.length === 0) {
+            if (output.rest.text.length === 0) {
                 break;
             }
 
@@ -585,19 +592,23 @@ export class RepeatParser extends Parser {
         }
 
         const matched =
-            ('type' in this.options && this.options.type === '?' && count <= 1) ||
-            ('type' in this.options && this.options.type === '*') ||
-            ('type' in this.options && this.options.type === '+' && count > 0) ||
-            ('min' in this.options && typeof this.options.min === 'number' &&
-                !('max' in this.options) &&
-                this.options.min <= count) ||
-            (!('min' in this.options) &&
-                'max' in this.options && typeof this.options.max === 'number' &&
-                count < this.options.max) ||
-            ('min' in this.options && typeof this.options.min === 'number' &&
-                'max' in this.options && typeof this.options.max === 'number' &&
-                this.options.min <= count && count < this.options.max)
-            ;
+            /* matched or completely not matched */
+            (output.matched || output.rest.pos === rest.pos) &&
+            /* check matched count */
+            (
+                ('type' in this.options && this.options.type === '?' && count <= 1) ||
+                ('type' in this.options && this.options.type === '*') ||
+                ('type' in this.options && this.options.type === '+' && count > 0) ||
+                ('min' in this.options && typeof this.options.min === 'number' &&
+                    !('max' in this.options) &&
+                    this.options.min <= count) ||
+                (!('min' in this.options) &&
+                    'max' in this.options && typeof this.options.max === 'number' &&
+                    count < this.options.max) ||
+                ('min' in this.options && typeof this.options.min === 'number' &&
+                    'max' in this.options && typeof this.options.max === 'number' &&
+                    this.options.min <= count && count < this.options.max)
+            );
 
         if (matched) {
             return new ParserOutput({
@@ -614,8 +625,8 @@ export class RepeatParser extends Parser {
         } else {
             return new ParserOutput({
                 matched: false,
-                rest: rest.consumed(0),
-                result: new MatchResult({ type: 'repeat', str: '', children: [], count, data: null }),
+                rest: output.rest.consumed(0),
+                result: new MatchResult({ type: 'repeat', str: '', children: [], count }),
             });
         }
     }
@@ -651,7 +662,7 @@ export class DelimitedParser extends Parser {
             if (!this.empty && children.length === 0) {
                 return new ParserOutput({
                     matched: false,
-                    rest: input.consumed(0),
+                    rest: output.rest.consumed(0),
                     result: new MatchResult({ type: 'delimited', str: '', children: [], data: null }),
                 });
             }
@@ -669,7 +680,7 @@ export class DelimitedParser extends Parser {
         } else {
             return new ParserOutput({
                 matched: false,
-                rest: input.consumed(0),
+                rest: output.rest.consumed(0),
                 result: new MatchResult({ type: 'delimited', str: '', children: [], data: null }),
             });
         }
