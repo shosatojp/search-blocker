@@ -6,6 +6,7 @@ import IconButton from '@mui/material/IconButton';
 
 export interface RuleChipProps {
     rule: Rule
+    disabled: boolean
     onBlock?: () => void
     onDelete?: () => void
 }
@@ -19,8 +20,8 @@ export const RuleChip: React.FC<RuleChipProps> = (props: RuleChipProps) => {
     }}>
         <span style={{ fontFamily: 'monospace', marginLeft: 10 }}>{props.rule.toString()}</span>
         {props.onDelete &&
-            <IconButton onClick={() => props.onDelete && props.onDelete()}><DeleteIcon fontSize="small" /></IconButton>}
+            <IconButton disabled={props.disabled} onClick={() => props.onDelete && props.onDelete()}><DeleteIcon fontSize="small" /></IconButton>}
         {props.onBlock &&
-            <IconButton onClick={() => props.onBlock && props.onBlock()}><BlockIcon fontSize="small" /></IconButton>}
+            <IconButton disabled={props.disabled} onClick={() => props.onBlock && props.onBlock()}><BlockIcon fontSize="small" /></IconButton>}
     </span>;
 };

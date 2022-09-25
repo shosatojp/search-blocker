@@ -10,9 +10,10 @@ import { HostNameRule, Rule } from '../rule';
 import { BlockTarget } from '../blockers/blocker';
 
 export interface ResultControlProps {
-    blockTarget: BlockTarget,
-    blocked: boolean,
-    matched: boolean,
+    blockTarget: BlockTarget
+    blocked: boolean
+    matched: boolean
+    disabled: boolean
 }
 
 export const ResultControl: React.FC<ResultControlProps> = (props: ResultControlProps) => {
@@ -41,6 +42,7 @@ export const ResultControl: React.FC<ResultControlProps> = (props: ResultControl
                             key={rule.toString()}
                             onBlock={async () => await blockHandler(rule)}
                             rule={rule}
+                            disabled={props.disabled}
                         />
                     )
                 }
@@ -48,8 +50,8 @@ export const ResultControl: React.FC<ResultControlProps> = (props: ResultControl
             <div style={{ flexGrow: 1 }}></div>
             <div>
                 {openDetail
-                    ? <IconButton size="small" onClick={() => setOpenDetail(false)}><ExpandLessIcon /></IconButton>
-                    : <IconButton size="small" onClick={() => setOpenDetail(true)}><ExpandMoreIcon /></IconButton>}
+                    ? <IconButton disabled={props.disabled} size="small" onClick={() => setOpenDetail(false)}><ExpandLessIcon /></IconButton>
+                    : <IconButton disabled={props.disabled} size="small" onClick={() => setOpenDetail(true)}><ExpandMoreIcon /></IconButton>}
             </div>
         </Stack>
 

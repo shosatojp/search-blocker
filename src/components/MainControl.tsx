@@ -49,6 +49,7 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
         const blocked = enabled && matched;
         const portal = ReactDOM.createPortal(
             <ResultControl
+                disabled={config.error}
                 blockTarget={blockTarget}
                 matched={matched}
                 blocked={blocked}
@@ -126,18 +127,21 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
                             key={rule.toString()}
                             rule={rule}
                             onDelete={async () => await handleDeleteRule(rule)}
+                            disabled={config.error}
                         />
                     )
                 }
             </div>
             <MainControlTextField
                 text={config.text}
+                error={config.error}
                 onChange={async (text: string) => await setConfig(new Config(text))}
             />
             {/* only available in google search because of CSP */}
             {['google', 'google-mobile'].includes(props.siteSetting.name) &&
                 <Stack direction='row'>
                     <LoadingButton
+                        disabled={config.error}
                         startIcon={<SyncIcon />}
                         onClick={handleSync}
                         loading={uploading}

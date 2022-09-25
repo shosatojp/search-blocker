@@ -23,7 +23,16 @@ export class FunctionRule extends Rule {
     }
 
     public toString(): string {
-        return `$${this.funcname}(${this.args.map(e => JSON.stringify(e)).join(', ')})`;
+        return `$${this.funcname}(${this.args.map(e => FunctionRule.stringify(e)).join(', ')})`;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private static stringify(arg: any): string {
+        if (arg instanceof RegExp) {
+            return arg.toString();
+        } else {
+            return JSON.stringify(arg);
+        }
     }
 
     private matchFunction(target: BlockTarget): boolean {
@@ -34,11 +43,17 @@ export class FunctionRule extends Rule {
 
     // eslint-disable-next-line @typescript-eslint/ban-types
     private static createFunctions(target: BlockTarget): { [key: string]: Function } {
-        const intitle = (text: string) => {
+        const intitle = (text: string | RegExp) => {
             const title = target.title;
-            if (!title)
+            if (!title) {
                 return false;
-            return title.includes(text);
+            } else if (typeof text === 'string') {
+                return title.includes(text);
+            } else if (text instanceof RegExp) {
+                return text.test(title);
+            } else {
+                return false;
+            }
         };
 
         return { intitle };

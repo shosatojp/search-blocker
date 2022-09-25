@@ -9,6 +9,10 @@ export const configParser = (() => {
     const charsPrintableNotNewline = p.charsExclude(p.charsPrintable, '\n');
     const charsNotSlash = p.charsExclude(charsPrintableNotNewline, '/');
     const whiteInline = p.white(p.charsExclude(p.charsWhite, '\n'));
+    const regexp = p.quoted('/', '\\', new Map([
+        ['\\', '\\\\'],
+        ['/', '/'],
+    ])).map(result => new RegExp(result.str));
 
     /* function rule */
     const doubleQuotedString = p.quoted('"', '\\', new Map([
@@ -25,7 +29,8 @@ export const configParser = (() => {
     const identifer = p.word();
     const value = p.or(
         p.or(singleQuotedString, doubleQuotedString),
-        num.map(r => Number(r.str))
+        num.map(r => Number(r.str)),
+        regexp
     );
     const spacing = p.white().supress();
     const arglist = p.delimited(value, p.combine(spacing, p.char(',').supress(), spacing));
@@ -33,7 +38,6 @@ export const configParser = (() => {
         .map(r => {
             const funcname = r.children[0].str;
             const args = r.children[1].data;
-            console.log(funcname, args);
             return [funcname, args];
         });
 
@@ -69,16 +73,10 @@ export const configParser = (() => {
             ));
 
     /* regexp rule */
-    const regexp = p.quoted('/', '\\', new Map([
-        ['\\', '\\\\'],
-        ['/', '/'],
-    ])).map(result => new RegExp(result.str))
-        .named('regexp');
-
     const regexRule =
         p.combine(regexp, lineEnd.noConsume())
             .map(result => {
-                const source = result.getName('regexp')?.data;
+                const source = (result.data as RegExp[])[0];
                 return source ? new RegExpRule(source) : null;
             })
             .flatten();
@@ -92,7 +90,7 @@ export const configParser = (() => {
 
     /* comment rule */
     const commentRule =
-        p.combine(whiteInline, p.char('#'), whiteInline, p.word(charsPrintableNotNewline), lineEnd.noConsume())
+        p.combine(whiteInline, p.char('#'), p.word(charsPrintableNotNewline), lineEnd.noConsume())
             .map(result => new CommentRule(result.str))
             .flatten()
             .supress();
@@ -109,32 +107,58 @@ export const configParser = (() => {
 })();
 
 export class Config {
-    private rules: Rule[];
+    private rules: Rule[] | null;
+    private _text: string;
 
     constructor(text: string) {
-        this.rules = Config.loadString(text);
+        this._text = text;
+        try {
+            this.rules = Config.loadString(text);
+        } catch (error) {
+            this.rules = null;
+        }
     }
 
     public get text(): string {
-        return Array.from(this.rules.values())
-            .map(e => e.toString())
-            .join('\n');
+        if (this.rules === null) {
+            return this._text;
+        } else {
+            return Array.from(this.rules.values())
+                .map(e => e.toString())
+                .join('\n');
+        }
+    }
+
+    public get error(): boolean {
+        return this.rules === null;
     }
 
     addRule(rule: Rule) {
-        this.rules.push(rule);
+        if (this.rules !== null) {
+            this.rules.push(rule);
+        } else {
+            console.warn('failed to add rule because of syntax error');
+        }
     }
 
     deleteRule(rule: Rule) {
-        const idx = this.rules.findIndex(e => e === rule);
-        if (idx >= 0)
-            this.rules.splice(idx, 1);
+        if (this.rules !== null) {
+            const idx = this.rules.findIndex(e => e === rule);
+            if (idx >= 0)
+                this.rules.splice(idx, 1);
+        } else {
+            console.warn('failed to delete rule because of syntax error');
+        }
     }
 
     /**
      * match any
      */
     match(target: BlockTarget): Rule | null {
+        if (this.rules === null) {
+            return null;
+        }
+
         for (const rule of this.rules) {
             if (rule.match(target)) {
                 return rule;
@@ -151,7 +175,6 @@ export class Config {
         }
 
         const rules: Rule[] = [];
-        console.log(output.result.data);
 
         for (const rule of (output.result.data)) {
             if (rule)
