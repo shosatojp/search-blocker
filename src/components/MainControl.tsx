@@ -25,6 +25,7 @@ export interface MainControlProps {
 }
 
 export const MainControl: React.FC<MainControlProps> = (props: MainControlProps) => {
+    console.log('MainControl');
     const { config } = useConfig();
     const { setConfig } = useSetConfig();
     const [enabled, setEnabled] = useState(true);
@@ -137,6 +138,10 @@ export const MainControl: React.FC<MainControlProps> = (props: MainControlProps)
                 error={config.error}
                 onChange={async (text: string) => await setConfig(new Config(text))}
             />
+            {config.error && <code>
+                <div>Syntax Error</div>
+                <pre>{config.parserOutput.display()}</pre>
+            </code>}
             {/* only available in google search because of CSP */}
             {['google', 'google-mobile'].includes(props.siteSetting.name) &&
                 <Stack direction='row'>

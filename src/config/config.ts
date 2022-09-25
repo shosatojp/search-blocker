@@ -106,17 +106,23 @@ export const configParser = (() => {
     return configParser;
 })();
 
+export class ConfigSyntaxError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'ConfigSyntaxError';
+    }
+}
+
 export class Config {
-    private rules: Rule[] | null;
+    private rules: Rule[] | null = null;
     private _text: string;
+    readonly parserOutput: p.ParserOutput;
 
     constructor(text: string) {
         this._text = text;
-        try {
-            this.rules = Config.loadString(text);
-        } catch (error) {
-            this.rules = null;
-        }
+        const [rules, output] = Config.loadString(text);
+        this.rules = rules;
+        this.parserOutput = output;
     }
 
     public get text(): string {
@@ -167,11 +173,11 @@ export class Config {
         return null;
     }
 
-    private static loadString(text: string): Rule[] {
+    private static loadString(text: string): [Rule[] | null, p.ParserOutput] {
         const output = configParser.parseString(text);
 
         if (!output.matched) {
-            throw new Error('config syntax error');
+            return [null, output];
         }
 
         const rules: Rule[] = [];
@@ -181,7 +187,7 @@ export class Config {
                 rules.push(rule);
         }
 
-        return rules;
+        return [rules, output];
     }
 
     public static default(): Config {

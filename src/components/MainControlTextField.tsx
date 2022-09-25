@@ -26,7 +26,6 @@ export const MainControlTextField: React.FC<MainControlTextFieldProps> = (props:
             }}
         />
         <Stack direction='row'>
-            {props.error && <div>Syntax Error</div>}
             <div style={{ flexGrow: 1 }}></div>
             <Button
                 disabled={configText.length === 0 || configText === props.text}
