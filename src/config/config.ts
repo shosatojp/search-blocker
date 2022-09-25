@@ -174,7 +174,9 @@ export class Config {
     }
 
     private static loadString(text: string): [Rule[] | null, p.ParserOutput] {
+        const timeStart = performance.now();
         const output = configParser.parseString(text);
+        console.debug('parse %d ms', performance.now() - timeStart);
 
         if (!output.matched) {
             return [null, output];
