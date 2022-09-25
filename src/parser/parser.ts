@@ -188,9 +188,19 @@ export type ParserOptions = {
 export type MapFunction<T> = (result: MatchResult<T>) => T;
 
 export abstract class Parser {
-    public abstract parse(input: ParserInput): ParserOutput;
+    public static stat: Map<string, number> = new Map();
+
+    /* real parse method */
+    public abstract _parse(input: ParserInput): ParserOutput;
+
+    /* wrapper */
+    public parse(input: ParserInput): ParserOutput {
+        Parser.stat.set(this.constructor.name, (Parser.stat.get(this.constructor.name) ?? 0) + 1);
+        return this._parse(input);
+    }
+
     public parseString(text: string): ParserOutput {
-        return this.parse(new ParserInput(text, 0));
+        return this._parse(new ParserInput(text, 0));
     }
 
     public map<T>(fn: MapFunction<T>): MapParser<T> {
@@ -240,7 +250,7 @@ class MapParser<T> extends Parser {
         this.fn = fn;
     }
 
-    public parse(input: ParserInput): ParserOutput {
+    public _parse(input: ParserInput): ParserOutput {
         const output = this.parser.parse(input);
         if (output.matched) {
             output.result.data = this.fn(output.result);
@@ -256,7 +266,7 @@ abstract class SimpleParser extends Parser {
         this.parser = parser;
     }
 
-    public parse(input: ParserInput): ParserOutput {
+    public _parse(input: ParserInput): ParserOutput {
         return this.parser.parse(input);
     }
 }
@@ -271,7 +281,7 @@ class NamedParser extends Parser {
         this.name = name;
     }
 
-    public parse(input: ParserInput): ParserOutput {
+    public _parse(input: ParserInput): ParserOutput {
         const output = this.parser.parse(input);
         if (output.matched) {
             output.result.name = this.name;
@@ -290,7 +300,7 @@ class TypedParser extends Parser {
         this.type = type;
     }
 
-    public parse(input: ParserInput): ParserOutput {
+    public _parse(input: ParserInput): ParserOutput {
         const output = this.parser.parse(input);
         if (output.matched) {
             output.result.type = this.type;
@@ -300,16 +310,16 @@ class TypedParser extends Parser {
 }
 
 export class AnyCharParser extends Parser {
-    chars: string;
+    chars: Set<string>;
 
     constructor(chars: string = charsPrintable) {
         super();
-        this.chars = chars;
+        this.chars = new Set(chars);
     }
 
-    public parse(input: ParserInput): ParserOutput {
+    public _parse(input: ParserInput): ParserOutput {
         const text = input.text;
-        if (text.length > 0 && this.chars.includes(text[0])) {
+        if (text.length > 0 && this.chars.has(text[0])) {
             const char = text[0];
             return new ParserOutput({
                 matched: true,
@@ -334,7 +344,7 @@ export class SupressParser extends Parser {
         this.parser = parser;
     }
 
-    public parse(input: ParserInput): ParserOutput {
+    public _parse(input: ParserInput): ParserOutput {
         const output = this.parser.parse(input);
         if (output.matched) {
             return new ParserOutput({
@@ -355,7 +365,7 @@ export class NoConsumeParser extends Parser {
         this.parser = parser;
     }
 
-    public parse(input: ParserInput): ParserOutput {
+    public _parse(input: ParserInput): ParserOutput {
         const output = this.parser.parse(input);
         if (output.matched) {
             return new ParserOutput({
@@ -378,7 +388,7 @@ export class FlattenParser extends Parser {
         this.parser = parser;
     }
 
-    public parse(input: ParserInput): ParserOutput {
+    public _parse(input: ParserInput): ParserOutput {
         const output = this.parser.parse(input);
         if (output.matched) {
             return new ParserOutput({
@@ -404,7 +414,7 @@ export class CharParser extends Parser {
         this.parser = new AnyCharParser();
     }
 
-    public parse(input: ParserInput): ParserOutput {
+    public _parse(input: ParserInput): ParserOutput {
         const output = this.parser.parse(input);
         if (output.matched && output.result.str === this.char) {
             return new ParserOutput({
@@ -423,7 +433,7 @@ export class CharParser extends Parser {
 export const char = (char: string) => new CharParser(char);
 
 export class EOFParser extends Parser {
-    public parse(input: ParserInput): ParserOutput {
+    public _parse(input: ParserInput): ParserOutput {
         if (input.text.length === 0) {
             return new ParserOutput({
                 matched: true,
@@ -455,7 +465,7 @@ export class CombineParser extends Parser {
         this.options = options;
     }
 
-    public parse(input: ParserInput): ParserOutput {
+    public _parse(input: ParserInput): ParserOutput {
         const children = [];
         let rest = input;
         for (const parser of this.parsers) {
@@ -499,7 +509,7 @@ export class OrParser extends Parser {
         this.parsers = parsers;
     }
 
-    public parse(input: ParserInput): ParserOutput {
+    public _parse(input: ParserInput): ParserOutput {
         let longestLength = -1;
         let longestOutput: ParserOutput | null = null;
         const rests: ParserInput[] = [input];
@@ -560,7 +570,7 @@ export class RepeatParser extends Parser {
         this.options = options || {};
     }
 
-    public parse(input: ParserInput): ParserOutput {
+    public _parse(input: ParserInput): ParserOutput {
         const children = [];
         let count = 0;
         let rest = input;
@@ -649,7 +659,7 @@ export class DelimitedParser extends Parser {
         ).optional();
     }
 
-    public parse(input: ParserInput): ParserOutput {
+    public _parse(input: ParserInput): ParserOutput {
         const output = this.parser.parse(input);
         if (output.matched) {
             const children = output.result.children.length > 0
@@ -722,16 +732,35 @@ export class OneOrMoreParser extends SimpleParser {
 }
 export const oneOrMore = (parser: Parser) => new OneOrMoreParser(parser);
 
-export class WordParser extends SimpleParser {
+export class WordParser extends Parser {
+    chars: Set<string>;
+
     constructor(chars: string = charsAlphaNum) {
-        const parser = new TypedParser(new RepeatParser(new AnyCharParser(chars), { type: '+', flatten: true }), 'anyWord');
-        super(parser.map(r => {
-            if (r.data instanceof Array) {
-                return r.data.join('');
-            } else {
-                return r.data;
+        super();
+        this.chars = new Set(chars);
+    }
+
+    public _parse(input: ParserInput): ParserOutput {
+        const text = input.text;
+
+        let i = 0;
+        for (const len = text.length; i < len; i++) {
+            const c = text[i];
+            if (!this.chars.has(c)) {
+                break;
             }
-        }));
+        }
+
+        return new ParserOutput({
+            matched: i > 0, /* not match zero length */
+            rest: input.consumed(i),
+            result: new MatchResult({
+                type: 'word',
+                str: text.slice(0, i),
+                children: [],
+                data: text.slice(0, i),
+            }),
+        });
     }
 }
 export const word = (chars: string = charsAlphaNum) => new WordParser(chars);
@@ -751,7 +780,7 @@ export class ForwardParser extends Parser {
         this.parser = parser;
     }
 
-    public parse(input: ParserInput): ParserOutput {
+    public _parse(input: ParserInput): ParserOutput {
         if (!this.parser) {
             throw new Error('parser is not set yet');
         }
@@ -773,7 +802,7 @@ export class QuotedParser extends Parser {
         this.escapeMap = escapeMap;
     }
 
-    public parse(input: ParserInput): ParserOutput {
+    public _parse(input: ParserInput): ParserOutput {
         const chars: string[] = [];
         const quoteStart = this.quote.parse(input);
         if (!quoteStart.matched)
