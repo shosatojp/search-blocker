@@ -12,7 +12,6 @@ export class TamperMonkeyConfigLoader extends ConfigLoader {
     }
 
     public async save(config: Config): Promise<void> {
-        console.log(config);
         GM_setValue(CONFIG_KEY, config.text);
     }
 

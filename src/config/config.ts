@@ -151,7 +151,6 @@ export class Config {
         }
 
         const rules: Rule[] = [];
-        console.log(output.result.data);
 
         for (const rule of (output.result.data)) {
             if (rule)
