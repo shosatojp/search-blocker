@@ -103,22 +103,79 @@ export class MatchResult<T = any> {
         return ret;
     }
 
-    extend(options: Partial<MatchResultOptions<T>>): MatchResult {
+    update(options: Partial<MatchResultOptions<T>>): MatchResult {
         return new MatchResult({ ...this, ...options });
     }
 }
 
-export type ParserInput = string;
+export class ParserInput {
+    private readonly _text: string;
+    private readonly _pos: number;
 
-export type ParserOutput = {
+    constructor(text: string, pos = 0) {
+        this._text = text;
+        this._pos = pos;
+    }
+
+    public get pos(): number {
+        return this._pos;
+    }
+
+    public get text(): string {
+        return this._text.slice(this._pos);
+    }
+
+    consumed(n: number): ParserInput {
+        return new ParserInput(this._text, this._pos + n);
+    }
+}
+
+export type ParserOutputOptions = {
     name?: string
-} & ({
-    matched: false
-} | {
-    matched: true
+    rest: ParserInput
     result: MatchResult
-    rest: string
-});
+    matched: boolean
+};
+
+export class ParserOutput {
+    readonly name?: string;
+    readonly rest: ParserInput;
+    readonly result: MatchResult;
+    readonly matched: boolean;
+
+    constructor(options: ParserOutputOptions) {
+        this.matched = options.matched;
+        this.result = options.result;
+        this.rest = options.rest;
+        this.name = options.name;
+    }
+
+    public display(): string {
+        return ParserOutput.display(this.rest.text, this.rest.pos);
+    }
+
+    public static display(text: string, pos: number): string {
+        let row = 0;
+        let col = 0;
+        let colStartPos = 0;
+        for (let i = 0; i < pos; i++) {
+            if (text[i] === '\n') {
+                row++;
+                col = 0;
+                colStartPos = i + 1;
+            } else {
+                col++;
+            }
+        }
+
+        const colEndPos = text.indexOf('\n', colStartPos);
+        const prefix = `line ${row}: `;
+        return (
+            prefix + text.slice(colStartPos, colEndPos === -1 ? text.length : colStartPos + colEndPos + 1) + '\n' +
+            ' '.repeat(prefix.length + col) + '^'
+        );
+    }
+}
 
 export type ParserOptions = {
     consume: boolean
@@ -128,6 +185,10 @@ export type MapFunction<T> = (result: MatchResult<T>) => T;
 
 export abstract class Parser {
     public abstract parse(input: ParserInput): ParserOutput;
+    public parseString(text: string): ParserOutput {
+        return this.parse(new ParserInput(text, 0));
+    }
+
     public map<T>(fn: MapFunction<T>): MapParser<T> {
         return new MapParser(this, fn);
     }
@@ -181,7 +242,7 @@ class MapParser<T> extends Parser {
             output.result.data = this.fn(output.result);
             return output;
         } else {
-            return { matched: false };
+            return new ParserOutput({ matched: false, rest: input.consumed(0), result: output.result });
         }
     }
 }
@@ -213,8 +274,7 @@ class NamedParser extends Parser {
         if (output.matched) {
             output.result.name = this.name;
         }
-        output.name = this.name;
-        return output;
+        return new ParserOutput({ ...output, name: this.name });
     }
 }
 
@@ -246,16 +306,20 @@ export class AnyCharParser extends Parser {
     }
 
     public parse(input: ParserInput): ParserOutput {
-        if (input.length > 0 && this.chars.includes(input[0])) {
-            const char = input[0];
-            const rest = input.slice(1);
-            return {
+        const text = input.text;
+        if (text.length > 0 && this.chars.includes(text[0])) {
+            const char = text[0];
+            return new ParserOutput({
                 matched: true,
                 result: new MatchResult({ type: 'anyChar', str: char, children: [], data: char }),
-                rest,
-            };
+                rest: input.consumed(1),
+            });
         } else {
-            return { matched: false };
+            return new ParserOutput({
+                matched: false,
+                result: new MatchResult({ type: 'anyChar', str: '', children: [], data: null }),
+                rest: input.consumed(0),
+            });
         }
     }
 }
@@ -271,10 +335,10 @@ export class SupressParser extends Parser {
     public parse(input: ParserInput): ParserOutput {
         const output = this.parser.parse(input);
         if (output.matched) {
-            return {
+            return new ParserOutput({
                 ...output,
-                result: output.result.extend({ supress: true }),
-            };
+                result: output.result.update({ supress: true }),
+            });
         } else {
             return output;
         }
@@ -292,11 +356,11 @@ export class NoConsumeParser extends Parser {
     public parse(input: ParserInput): ParserOutput {
         const output = this.parser.parse(input);
         if (output.matched) {
-            return {
+            return new ParserOutput({
                 ...output,
-                result: output.result.extend({ str: '' }),
+                result: output.result.update({ str: '' }),
                 rest: input, /* no consume */
-            };
+            });
         } else {
             return output;
         }
@@ -315,10 +379,10 @@ export class FlattenParser extends Parser {
     public parse(input: ParserInput): ParserOutput {
         const output = this.parser.parse(input);
         if (output.matched) {
-            return {
+            return new ParserOutput({
                 ...output,
-                result: output.result.extend({ children: [] }),
-            };
+                result: output.result.update({ children: [] }),
+            });
         } else {
             return output;
         }
@@ -341,12 +405,16 @@ export class CharParser extends Parser {
     public parse(input: ParserInput): ParserOutput {
         const output = this.parser.parse(input);
         if (output.matched && output.result.str === this.char) {
-            return {
+            return new ParserOutput({
                 ...output,
-                result: output.result.extend({ type: 'char' }),
-            };
+                result: output.result.update({ type: 'char' }),
+            });
         } else {
-            return { matched: false };
+            return new ParserOutput({
+                matched: false,
+                rest: input.consumed(0),
+                result: output.result.update({ type: 'char' }),
+            });
         }
     }
 }
@@ -354,14 +422,18 @@ export const char = (char: string) => new CharParser(char);
 
 export class EOFParser extends Parser {
     public parse(input: ParserInput): ParserOutput {
-        if (input.length === 0) {
-            return {
+        if (input.text.length === 0) {
+            return new ParserOutput({
                 matched: true,
                 result: new MatchResult({ type: 'eof', str: '', children: [], data: null }),
-                rest: '',
-            };
+                rest: input.consumed(0),
+            });
         } else {
-            return { matched: false };
+            return new ParserOutput({
+                matched: false,
+                rest: input.consumed(0),
+                result: new MatchResult({ type: 'eof', str: '', children: [], data: null }),
+            });
         }
     }
 }
@@ -392,10 +464,18 @@ export class CombineParser extends Parser {
                     children.push(output.result);
                 continue;
             } else {
-                return { matched: false };
+                return new ParserOutput({
+                    matched: false,
+                    rest: rest.consumed(0),
+                    result: new MatchResult({
+                        type: 'combine',
+                        str: children.map(e => e.str).join(''),
+                        children,
+                    }),
+                });
             }
         }
-        return {
+        return new ParserOutput({
             matched: true,
             rest,
             result: new MatchResult({
@@ -404,7 +484,7 @@ export class CombineParser extends Parser {
                 children: this.options?.concat ? [] : children,
                 data: children.map(e => e.data),
             }),
-        };
+        });
     }
 }
 export const combine = (...parsers: Parser[]) => new CombineParser(parsers);
@@ -432,7 +512,7 @@ export class OrParser extends Parser {
         }
 
         if (longestOutput) {
-            return {
+            return new ParserOutput({
                 ...longestOutput,
                 result: new MatchResult({
                     type: 'or',
@@ -440,9 +520,13 @@ export class OrParser extends Parser {
                     children: [longestOutput.result],
                     data: longestOutput.result.data,
                 }),
-            };
+            });
         } else {
-            return { matched: false };
+            return new ParserOutput({
+                matched: false,
+                rest: input.consumed(0),
+                result: new MatchResult({ type: 'or', str: '', children: [], data: null }),
+            });
         }
     }
 }
@@ -483,7 +567,7 @@ export class RepeatParser extends Parser {
                 children.push(output.result);
 
             /* break if rest is empty */
-            if (rest.length === 0) {
+            if (rest.text.length === 0) {
                 break;
             }
 
@@ -512,7 +596,7 @@ export class RepeatParser extends Parser {
             ;
 
         if (matched) {
-            return {
+            return new ParserOutput({
                 matched: true,
                 result: new MatchResult({
                     type: 'repeat',
@@ -522,9 +606,13 @@ export class RepeatParser extends Parser {
                     data: children.map(e => e.data),
                 }),
                 rest,
-            };
+            });
         } else {
-            return { matched: false };
+            return new ParserOutput({
+                matched: false,
+                rest: input.consumed(0),
+                result: new MatchResult({ type: 'repeat', str: '', children: [], count, data: null }),
+            });
         }
     }
 }
@@ -557,10 +645,14 @@ export class DelimitedParser extends Parser {
                 : [];
 
             if (!this.empty && children.length === 0) {
-                return { matched: false };
+                return new ParserOutput({
+                    matched: false,
+                    rest: input.consumed(0),
+                    result: new MatchResult({ type: 'delimited', str: '', children: [], data: null }),
+                });
             }
 
-            return {
+            return new ParserOutput({
                 matched: true,
                 result: new MatchResult({
                     type: 'delimited',
@@ -569,9 +661,13 @@ export class DelimitedParser extends Parser {
                     data: children.map(r => r.data),
                 }),
                 rest: output.rest,
-            };
+            });
         } else {
-            return { matched: false };
+            return new ParserOutput({
+                matched: false,
+                rest: input.consumed(0),
+                result: new MatchResult({ type: 'delimited', str: '', children: [], data: null }),
+            });
         }
     }
 }
@@ -640,7 +736,7 @@ export class ForwardParser extends Parser {
         this.parser = parser;
     }
 
-    public parse(input: string): ParserOutput {
+    public parse(input: ParserInput): ParserOutput {
         if (!this.parser) {
             throw new Error('parser is not set yet');
         }
@@ -662,18 +758,23 @@ export class QuotedParser extends Parser {
         this.escapeMap = escapeMap;
     }
 
-    public parse(input: string): ParserOutput {
+    public parse(input: ParserInput): ParserOutput {
         const chars: string[] = [];
         const quoteStart = this.quote.parse(input);
         if (!quoteStart.matched)
-            return { matched: false };
+            return new ParserOutput({
+                matched: false,
+                rest: input.consumed(0),
+                result: new MatchResult({ type: 'quoted', str: '', children: [] }),
+            });
 
-        for (let i = 0, c = quoteStart.rest[0], rest = quoteStart.rest;
-            i < quoteStart.rest.length;
-            i++, c = quoteStart.rest[i], rest = quoteStart.rest.slice(i)) {
+        for (let i = 0; i < quoteStart.rest.text.length; i++) {
+            const rest = input.consumed(1 + i);
+            const c = rest.text[0];
+
             const esc = this.escape.parse(rest);
             if (esc.matched) {
-                const escaped = this.escapeMap.get(rest[1]);
+                const escaped = this.escapeMap.get(esc.rest.text[0]);
                 if (escaped) {
                     chars.push(escaped); /* escaped char */
                     i++; /* skip escaped char */
@@ -684,7 +785,7 @@ export class QuotedParser extends Parser {
             const quoteEnd = this.quote.parse(rest);
             if (quoteEnd.matched) {
                 const str = chars.join('');
-                return {
+                return new ParserOutput({
                     matched: true,
                     rest: quoteEnd.rest,
                     result: new MatchResult({
@@ -693,13 +794,17 @@ export class QuotedParser extends Parser {
                         str,
                         data: str,
                     }),
-                };
+                });
             }
 
             chars.push(c);
         }
 
-        return { matched: false };
+        return new ParserOutput({
+            matched: false,
+            rest: input.consumed(chars.length),
+            result: new MatchResult({ type: 'quoted', str: '', children: [] }),
+        });
     }
 }
 export const quoted = (quote: string, escape: string, escapeMap: Map<string, string>) =>

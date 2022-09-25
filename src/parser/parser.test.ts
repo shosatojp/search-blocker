@@ -2,74 +2,74 @@ import { test, expect } from '@jest/globals';
 import * as p from './parser';
 
 test('anyChar', () => {
-    expect(new p.AnyCharParser().parse('ab').matched).toBe(true);
-    expect(new p.AnyCharParser().parse('a').matched).toBe(true);
-    expect(new p.AnyCharParser().parse('').matched).toBe(false);
+    expect(new p.AnyCharParser().parseString('ab').matched).toBe(true);
+    expect(new p.AnyCharParser().parseString('a').matched).toBe(true);
+    expect(new p.AnyCharParser().parseString('').matched).toBe(false);
 });
 
 test('char', () => {
-    expect(p.char('a').parse('a').matched).toBe(true);
-    expect(p.char('a').parse('b').matched).toBe(false);
-    expect(p.char('a').parse('').matched).toBe(false);
+    expect(p.char('a').parseString('a').matched).toBe(true);
+    expect(p.char('a').parseString('b').matched).toBe(false);
+    expect(p.char('a').parseString('').matched).toBe(false);
 });
 
 test('eof', () => {
-    expect(p.eof().parse('').matched).toBe(true);
-    expect(p.eof().parse('a').matched).toBe(false);
+    expect(p.eof().parseString('').matched).toBe(true);
+    expect(p.eof().parseString('a').matched).toBe(false);
 });
 
 test('combine', () => {
-    expect(p.combine(p.char('a')).parse('a').matched).toBe(true);
-    expect(p.combine(p.char('a'), p.eof()).parse('a').matched).toBe(true);
-    expect(p.combine(p.char('a'), p.char('b')).parse('ab').matched).toBe(true);
-    expect(p.combine(p.char('a'), p.char('c')).parse('ab').matched).toBe(false);
-    expect(p.combine(p.char('c'), p.char('a')).parse('ab').matched).toBe(false);
+    expect(p.combine(p.char('a')).parseString('a').matched).toBe(true);
+    expect(p.combine(p.char('a'), p.eof()).parseString('a').matched).toBe(true);
+    expect(p.combine(p.char('a'), p.char('b')).parseString('ab').matched).toBe(true);
+    expect(p.combine(p.char('a'), p.char('c')).parseString('ab').matched).toBe(false);
+    expect(p.combine(p.char('c'), p.char('a')).parseString('ab').matched).toBe(false);
 });
 
 test('literal', () => {
-    expect(p.literal('a').parse('a').matched).toBe(true);
-    expect(p.literal('ab').parse('ab').matched).toBe(true);
-    expect(p.literal('aa').parse('ab').matched).toBe(false);
+    expect(p.literal('a').parseString('a').matched).toBe(true);
+    expect(p.literal('ab').parseString('ab').matched).toBe(true);
+    expect(p.literal('aa').parseString('ab').matched).toBe(false);
 });
 
 test('or', () => {
-    expect(p.or(p.char('a'), p.char('b')).parse('a').matched).toBe(true);
-    expect(p.or(p.char('a'), p.char('b')).parse('b').matched).toBe(true);
-    expect(p.or(p.char('a'), p.char('b')).parse('c').matched).toBe(false);
+    expect(p.or(p.char('a'), p.char('b')).parseString('a').matched).toBe(true);
+    expect(p.or(p.char('a'), p.char('b')).parseString('b').matched).toBe(true);
+    expect(p.or(p.char('a'), p.char('b')).parseString('c').matched).toBe(false);
 });
 
 test('optional', () => {
-    expect(p.optional(p.char('a')).parse('a').matched).toBe(true);
-    expect(p.optional(p.char('a')).parse('b').matched).toBe(true);
-    expect(p.optional(p.char('a')).parse('').matched).toBe(true);
+    expect(p.optional(p.char('a')).parseString('a').matched).toBe(true);
+    expect(p.optional(p.char('a')).parseString('b').matched).toBe(true);
+    expect(p.optional(p.char('a')).parseString('').matched).toBe(true);
 });
 
 test('oneOrMore', () => {
-    expect(p.oneOrMore(p.char('a')).parse('').matched).toBe(false);
-    expect(p.oneOrMore(p.char('a')).parse('a').matched).toBe(true);
-    expect(p.oneOrMore(p.char('a')).parse('aa').matched).toBe(true);
+    expect(p.oneOrMore(p.char('a')).parseString('').matched).toBe(false);
+    expect(p.oneOrMore(p.char('a')).parseString('a').matched).toBe(true);
+    expect(p.oneOrMore(p.char('a')).parseString('aa').matched).toBe(true);
 });
 
 test('zeroOrMore', () => {
-    expect(p.zeroOrMore(p.char('a')).parse('').matched).toBe(true);
-    expect(p.zeroOrMore(p.char('a')).parse('a').matched).toBe(true);
-    expect(p.zeroOrMore(p.char('a')).parse('aa').matched).toBe(true);
+    expect(p.zeroOrMore(p.char('a')).parseString('').matched).toBe(true);
+    expect(p.zeroOrMore(p.char('a')).parseString('a').matched).toBe(true);
+    expect(p.zeroOrMore(p.char('a')).parseString('aa').matched).toBe(true);
 });
 
 test('white', () => {
-    expect(p.combine(p.white(), p.eof()).parse('').matched).toBe(true);
-    expect(p.combine(p.white(), p.eof()).parse(' ').matched).toBe(true);
-    expect(p.combine(p.white(), p.eof()).parse('  ').matched).toBe(true);
-    expect(p.combine(p.white(), p.eof()).parse('a').matched).toBe(false);
+    expect(p.combine(p.white(), p.eof()).parseString('').matched).toBe(true);
+    expect(p.combine(p.white(), p.eof()).parseString(' ').matched).toBe(true);
+    expect(p.combine(p.white(), p.eof()).parseString('  ').matched).toBe(true);
+    expect(p.combine(p.white(), p.eof()).parseString('a').matched).toBe(false);
 });
 
 test('word', () => {
-    expect(p.word().parse('aaa').matched).toBe(true);
+    expect(p.word().parseString('aaa').matched).toBe(true);
     expect((() => {
-        const output = p.word().parse('aaa bbb');
+        const output = p.word().parseString('aaa bbb');
         return output.matched && output.result.str === 'aaa';
     })()).toBe(true);
-    expect(p.word().parse('').matched).toBe(false);
+    expect(p.word().parseString('').matched).toBe(false);
 });
 
 test('mail', () => {
@@ -93,12 +93,12 @@ test('mail', () => {
             p.white(),
             p.eof()
         );
-        expect(mailFromParser.parse(`example<${mailAddr}>`).matched).toBe(true);
-        expect(mailFromParser.parse(` example <${mailAddr}> `).matched).toBe(true);
-        expect(mailFromParser.parse(`${mailAddr}`).matched).toBe(true);
-        expect(mailFromParser.parse(` example ${mailAddr}> `).matched).toBe(false);
+        expect(mailFromParser.parseString(`example<${mailAddr}>`).matched).toBe(true);
+        expect(mailFromParser.parseString(` example <${mailAddr}> `).matched).toBe(true);
+        expect(mailFromParser.parseString(`${mailAddr}`).matched).toBe(true);
+        expect(mailFromParser.parseString(` example ${mailAddr}> `).matched).toBe(false);
         expect((() => {
-            const output = mailFromParser.parse(`example <${mailAddr}>`);
+            const output = mailFromParser.parseString(`example <${mailAddr}>`);
             return output.matched && output.result.getName('emailaddr')?.str === mailAddr;
         })()).toBe(true);
     }
@@ -109,21 +109,21 @@ test('mail', () => {
             p.white(),
             p.eof()
         );
-        expect(mailFromParser.parse(`example<${mailAddr}>`).matched).toBe(true);
-        expect(mailFromParser.parse(` example <${mailAddr}> `).matched).toBe(true);
-        expect(mailFromParser.parse(`${mailAddr}`).matched).toBe(true);
-        expect(mailFromParser.parse(` example ${mailAddr}> `).matched).toBe(false);
+        expect(mailFromParser.parseString(`example<${mailAddr}>`).matched).toBe(true);
+        expect(mailFromParser.parseString(` example <${mailAddr}> `).matched).toBe(true);
+        expect(mailFromParser.parseString(`${mailAddr}`).matched).toBe(true);
+        expect(mailFromParser.parseString(` example ${mailAddr}> `).matched).toBe(false);
         expect((() => {
-            const output = mailFromParser.parse(`example <${mailAddr}>`);
+            const output = mailFromParser.parseString(`example <${mailAddr}>`);
             return output.matched && output.result.getName('emailaddr')?.str === mailAddr;
         })()).toBe(true);
     }
 });
 
 test('noConsume', () => {
-    expect(p.char('a').noConsume().parse('a').matched).toBe(true);
-    expect(p.char('a').noConsume().parse('a').matched).toBe(true);
-    expect(p.combine(p.char('a').noConsume(), p.char('a')).parse('a').matched).toBe(true);
+    expect(p.char('a').noConsume().parseString('a').matched).toBe(true);
+    expect(p.char('a').noConsume().parseString('a').matched).toBe(true);
+    expect(p.combine(p.char('a').noConsume(), p.char('a')).parseString('a').matched).toBe(true);
 });
 
 test('calc', () => {
@@ -136,12 +136,12 @@ test('calc', () => {
         p.or(
             p.char('*').map(() => (a: number, b: number) => a * b),
             p.char('/').map(() => (a: number, b: number) => a / b)
-        ).map(r => r.children[0].data).flatten();
+        ).flatten();
     const OpAddSub =
         p.or(
             p.char('+').map(() => (a: number, b: number) => a + b),
             p.char('-').map(() => (a: number, b: number) => a - b)
-        ).map(r => r.children[0].data).flatten();
+        ).flatten();
     const space = p.word(p.charsWhite).optional().supress();
 
     const Expr = p.forward();
@@ -178,7 +178,7 @@ test('calc', () => {
             .flatten();
 
     const input = '(1 +2 ) * 3+  4 -5 *67';
-    const output = Calc.parse(input);
+    const output = Calc.parseString(input);
     if (output.matched) {
         // console.dir(output, { depth: null });
         // console.log('%s = %d', input, output.result.data);
@@ -187,4 +187,36 @@ test('calc', () => {
 
     // eslint-disable-next-line no-eval
     expect(output.matched && output.result.data).toBe(eval(input));
+});
+
+test('quoted', () => {
+    const doubleQuoted = p.quoted('"', '\\', new Map([
+        ['\\', '\\'],
+        ['"', '"'],
+        ['\n', '\n'],
+    ]));
+    expect(doubleQuoted.parseString('"hoge"').matched).toBe(true);
+    expect(doubleQuoted.parseString('"ho\\"ge"').matched).toBe(true);
+    expect(doubleQuoted.parseString('"hoge').matched).toBe(false);
+    expect(doubleQuoted.parseString('hoge"').matched).toBe(false);
+    expect(doubleQuoted.parseString('hoge').matched).toBe(false);
+});
+
+test('error pos', () => {
+    expect(p.char('a').parseString('a').rest.pos).toBe(1);
+    expect(p.char('a').parseString('b').rest.pos).toBe(0);
+    expect(p.combine(p.char('a'), p.char('b')).parseString('').rest.pos).toBe(0);
+    expect(p.combine(p.char('a'), p.char('b')).parseString('a').rest.pos).toBe(1);
+    expect(p.combine(p.char('a'), p.char('b')).parseString('az').rest.pos).toBe(1);
+    expect(p.combine(p.char('a'), p.char('b')).parseString('ab').rest.pos).toBe(2);
+    expect(p.combine(p.char('a'), p.char('b'), p.char('c')).parseString('abz').rest.pos).toBe(2);
+    expect(p.or(p.char('a'), p.char('b')).parseString('c').rest.pos).toBe(0);
+    expect(p.combine(p.char('a'), p.or(p.char('b'), p.char('c'))).parseString('az').rest.pos).toBe(1);
+});
+
+test('error display', () => {
+    expect(p.ParserOutput.display('ab', 0)).toBe('line 0: ab\n        ^');
+    expect(p.ParserOutput.display('ab', 1)).toBe('line 0: ab\n         ^');
+    expect(p.ParserOutput.display('ab\ncd', 3)).toBe('line 1: cd\n        ^');
+    expect(p.ParserOutput.display('ab\ncd', 4)).toBe('line 1: cd\n         ^');
 });
