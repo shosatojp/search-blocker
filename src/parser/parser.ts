@@ -125,6 +125,10 @@ export class ParserInput {
         return this._text.slice(this._pos);
     }
 
+    public get source(): string {
+        return this._text;
+    }
+
     consumed(n: number): ParserInput {
         return new ParserInput(this._text, this._pos + n);
     }
@@ -151,7 +155,7 @@ export class ParserOutput {
     }
 
     public display(): string {
-        return ParserOutput.display(this.rest.text, this.rest.pos);
+        return ParserOutput.display(this.rest.source, this.rest.pos);
     }
 
     public static display(text: string, pos: number): string {
@@ -171,7 +175,7 @@ export class ParserOutput {
         const colEndPos = text.indexOf('\n', colStartPos);
         const prefix = `line ${row}: `;
         return (
-            prefix + text.slice(colStartPos, colEndPos === -1 ? text.length : colStartPos + colEndPos + 1) + '\n' +
+            prefix + text.slice(colStartPos, colEndPos === -1 ? text.length : colEndPos) + '\n' +
             ' '.repeat(prefix.length + col) + '^'
         );
     }
@@ -240,10 +244,8 @@ class MapParser<T> extends Parser {
         const output = this.parser.parse(input);
         if (output.matched) {
             output.result.data = this.fn(output.result);
-            return output;
-        } else {
-            return new ParserOutput({ matched: false, rest: input.consumed(0), result: output.result });
         }
+        return output;
     }
 }
 
@@ -458,8 +460,8 @@ export class CombineParser extends Parser {
         let rest = input;
         for (const parser of this.parsers) {
             const output = parser.parse(rest);
+            rest = output.rest;
             if (output.matched) {
-                rest = output.rest;
                 if (!output.result.supress)
                     children.push(output.result);
                 continue;
@@ -477,7 +479,7 @@ export class CombineParser extends Parser {
         }
         return new ParserOutput({
             matched: true,
-            rest,
+            rest: rest.consumed(0),
             result: new MatchResult({
                 type: 'combine',
                 str: children.map(e => e.str).join(''),
@@ -500,9 +502,11 @@ export class OrParser extends Parser {
     public parse(input: ParserInput): ParserOutput {
         let longestLength = -1;
         let longestOutput: ParserOutput | null = null;
+        let rest: ParserInput = input;
 
         for (const parser of this.parsers) {
             const output = parser.parse(input);
+            rest = output.rest;
             if (output.matched) {
                 if (output.result.str.length > longestLength) {
                     longestLength = output.result.str.length;
@@ -524,7 +528,7 @@ export class OrParser extends Parser {
         } else {
             return new ParserOutput({
                 matched: false,
-                rest: input.consumed(0),
+                rest: rest.consumed(0),
                 result: new MatchResult({ type: 'or', str: '', children: [], data: null }),
             });
         }
@@ -605,12 +609,12 @@ export class RepeatParser extends Parser {
                     count,
                     data: children.map(e => e.data),
                 }),
-                rest,
+                rest: rest.consumed(0),
             });
         } else {
             return new ParserOutput({
                 matched: false,
-                rest: input.consumed(0),
+                rest: rest.consumed(0),
                 result: new MatchResult({ type: 'repeat', str: '', children: [], count, data: null }),
             });
         }
@@ -660,7 +664,7 @@ export class DelimitedParser extends Parser {
                     children,
                     data: children.map(r => r.data),
                 }),
-                rest: output.rest,
+                rest: output.rest.consumed(0),
             });
         } else {
             return new ParserOutput({
@@ -787,7 +791,7 @@ export class QuotedParser extends Parser {
                 const str = chars.join('');
                 return new ParserOutput({
                     matched: true,
-                    rest: quoteEnd.rest,
+                    rest: quoteEnd.rest.consumed(0),
                     result: new MatchResult({
                         type: 'quoted',
                         children: [],
