@@ -48,7 +48,8 @@ export class GoogleSiteSetting extends SiteSetting {
     }
 
     public createRootContainer(): HTMLElement {
-        const searchElement = document.getElementById('search');
+        /* use parent of #search not to observe MainControl changes */
+        const searchElement = document.getElementById('search')?.parentElement;
         if (!searchElement) {
             throw new Error('couldn\'t find parent element');
         }
@@ -59,7 +60,10 @@ export class GoogleSiteSetting extends SiteSetting {
     }
 
     getTargets(_elements?: Element[]): BlockTarget[] {
-        const elements = _elements || Array.from(document.getElementsByClassName('g'));
+        const elements = _elements ||
+            Array.from(
+                (document.getElementById('search') || document.documentElement)
+                    .getElementsByClassName('g'));
 
         /* return if no change in number of target elements */
         if (elements.length === this.blockTargetsCache.size) {
@@ -98,6 +102,7 @@ export class GoogleSiteSetting extends SiteSetting {
             const prevNumTargets = this.blockTargetsCache.size;
             const currTargetElements = root.getElementsByClassName('g');
             if (prevNumTargets !== currTargetElements.length) {
+                this.blockTargetsCache.clear();
                 const blockTargets = this.getTargets(Array.from(currTargetElements));
                 onAdded(blockTargets);
             }
