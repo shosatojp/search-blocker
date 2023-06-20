@@ -96,7 +96,7 @@ export class GoogleSiteSetting extends SiteSetting {
             this.mutationObserver = null;
         }
 
-        const root = document.getElementById('search') || document.documentElement;
+        const root = document.getElementById('rcnt') || document.documentElement;
 
         this.mutationObserver = new MutationObserver((_records: MutationRecord[]) => {
             const prevNumTargets = this.blockTargetsCache.size;

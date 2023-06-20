@@ -14,7 +14,6 @@
 // @match	*://www.google.ae/search?*
 // @match	*://www.google.com.af/search?*
 // @match	*://www.google.com.ag/search?*
-// @match	*://www.google.com.ai/search?*
 // @match	*://www.google.al/search?*
 // @match	*://www.google.am/search?*
 // @match	*://www.google.co.ao/search?*
@@ -121,7 +120,6 @@
 // @match	*://www.google.ml/search?*
 // @match	*://www.google.com.mm/search?*
 // @match	*://www.google.mn/search?*
-// @match	*://www.google.ms/search?*
 // @match	*://www.google.com.mt/search?*
 // @match	*://www.google.mu/search?*
 // @match	*://www.google.mv/search?*
@@ -189,7 +187,6 @@
 // @match	*://www.google.co.uz/search?*
 // @match	*://www.google.com.vc/search?*
 // @match	*://www.google.co.ve/search?*
-// @match	*://www.google.vg/search?*
 // @match	*://www.google.co.vi/search?*
 // @match	*://www.google.com.vn/search?*
 // @match	*://www.google.vu/search?*
